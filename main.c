@@ -4,32 +4,38 @@
 #include "cbuf.h"
 
 typedef enum {
-	NO_ERROR=0,
-	INVALID_COMMAND,
-	INVALID_DATA,
-	INVALID_XDIGIT,
-	P_EXPECTED,
+	NO_ERROR=0,         //!< no error
+	INVALID_COMMAND,    //!< unknown command
+	INVALID_DATA,       //!< invalid data
+	INVALID_XDIGIT,     //!< non hex character
+	P_EXPECTED,         //!< 'P' expected (i2c)
 } error_code_t;
 
 typedef enum {
-	CMD_INIT,
-	GET_COMMAND,
-	COMMENT_EOL,
-	PARSE_I2C,
-	PARSE_READ,
-	PARSE_WRITE,
-	WAIT_EOL,
-	EXEC_COMMAND
+	CMD_INIT,       //!< clear cmd buffer
+	GET_COMMAND,    //!< get command ( 'S', 'R', 'W', '#', '\r', '\n' )
+	COMMENT_EOL,    //!< skip all chars, wait '\r' or '\n', change state to CMD_INIT
+	PARSE_I2C,      //!< parse I2C commands ( S<aa><data>[S<aa><data>]P )
+	PARSE_READ,     //!< parse read register command
+	PARSE_WRITE,    //!< parse write register command
+	WAIT_EOL,       //!< skip all chars, wait '\r' or '\n', change state to EXEC_COMMAND
+	EXEC_COMMAND    //!< start exec, change state to CMD_INIT
 } state_cmd_t;
 
 typedef enum {
-	GET_ADDRESS,
-	GET_REGISTER,
-	PARSE_I2C_READ,
-	PARSE_I2C_WRITE,
-	WAIT_RESTART_OR_STOP
+	GET_ADDRESS,            //!< get address (both register and i2c machine)
+	GET_REGISTER,           //!< get register (register machine)
+	PARSE_I2C_READ,         //!< parse i2c read, change state to WAIT_RESTART_OR_STOP
+	PARSE_I2C_WRITE,        //!< parse i2c write
+	WAIT_RESTART_OR_STOP    //!< wait next i2c frame or stop
 } state_i2creg_t;
 
+
+/*!
+ * Convert hex to int8 (0 — 15)
+ * \param[in] c 0 — 9, A — F
+ * \return -1 if fail
+ */
 int8_t xtoi(uint8_t c)
 {
 	if((c >= '0')&&(c <= '9'))
@@ -46,30 +52,41 @@ int8_t xtoi(uint8_t c)
 	}
 }
 
+/*!
+ * Get one byte state machine
+ * \param[in] c char
+ * \param[out] *data received byte
+ * \param[out] *error_code error reporting
+ * \return true when receive complete
+ */
 static inline bool get_cmd_byte(uint8_t c, uint8_t *data, error_code_t *error_code)
 {
 	static uint8_t cout = 1;
 	int8_t tmp = xtoi(c);
 	if(tmp >= 0 && cout == 1)
 	{
-		// get first half
+		// get first nibble
 		*data = tmp << 4;
 		cout = 2;
-		return false;
 	}
 	else if(tmp >= 0 && cout == 2)
 	{
-		// get second half
+		// get second nibble
 		*data |= tmp;
 		cout = 1;
 		return true;
+	}
+	else if(c == ' ' && cout == 1)
+	{
+	    // skip spaces
 	}
 	else
 	{
 		cout = 1;
 		*error_code = INVALID_XDIGIT;
-		return false;
 	}
+	
+	return false;
 }
 
 int main()
@@ -183,17 +200,21 @@ int main()
 					cbf_put(&cmd_buf, data);
 					cout = 1;
 				}
-				else if(c == 'S')
+				else if(c == 'S' && cout == 1)
 				{
 					// reSTART?
 					cbf_put(&cmd_buf, c);
 					state_i2creg = GET_ADDRESS;
 				}
-				else if(c == 'P')
+				else if(c == 'P' && cout == 1)
 				{
 					// STOP?
 					cbf_put(&cmd_buf, c);
 					state_cmd = WAIT_EOL;
+				}
+				else if(c == ' ' && cout == 1)
+				{
+					// skip spaces
 				}
 				else
 				{
