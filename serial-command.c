@@ -73,7 +73,6 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
             cbf_put(tx_buf, VERSION_STRING[i]);
         }
     } else if (c == 'C') {
-        c = cbf_get(cmd_buf);
         uint16_t freq;
 
         if (!cbf_isempty(cmd_buf)) {

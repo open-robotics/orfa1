@@ -113,6 +113,17 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
                     cbf_put(cmd_buf, 'S');
                     break;
 
+                case 'C':
+                    cbf_put(cmd_buf, c);
+                    state_cmd = PARSE_CONFIG;
+                    break;
+
+                case 'V':
+                case 'X':
+                    cbf_put(cmd_buf, c);
+                    state_cmd = WAIT_EOL;
+                    break;
+
                 case '\r':
                 case '\n':
                     break;
@@ -133,6 +144,17 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
             if(c == '\r' || c == '\n')
             {
                 state_cmd = CMD_INIT;
+            }
+            break;
+
+        case PARSE_CONFIG:
+            if(get_cmd_byte(c, &data, error_code))
+            {
+                cbf_put(cmd_buf, data);
+                if(cout++ > 1)
+                {
+                    state_cmd = WAIT_EOL;
+                }
             }
             break;
 
