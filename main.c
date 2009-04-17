@@ -46,38 +46,32 @@
 #include "errors.h"
 #include "cbuf.h"
 #include "serial-parser.h"
-
+#include "serial-command.h"
 
 int main()
 {
     uint8_t c;
 
     //! command buffer
-    cbf_t cmd_buf;
-    
+    cbf_t cmd_buf, tx_buf;
+
     //! error state
     error_code_t error_code=NO_ERROR;
-    
+
+    cbf_init(&cmd_buf);
+    cbf_init(&tx_buf);
 
     for(;;)
     {
         c = getchar();
 
-		if(parse_cmd(c, &cmd_buf, &error_code))
-		{
-            while(!cbf_isempty(&cmd_buf))
+        if(parse_cmd(c, &cmd_buf, &error_code))
+        {
+            exec_cmd(&cmd_buf, &tx_buf);
+            while(!cbf_isempty(&tx_buf))
             {
-                c = cbf_get(&cmd_buf);
-                if(c == '\n')
-                    printf("\\n ");
-                else if(c == '\r')
-                    printf("\\r ");
-                else if(c < '0')
-                    printf("\\x%02X ", c);
-                else
-                    printf("%c ", c);
+                putchar(cbf_get(&tx_buf));
             }
-            printf("\n");
         }
 
         if(error_code != NO_ERROR)
