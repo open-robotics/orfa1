@@ -36,6 +36,14 @@ typedef enum {
 } i2c_rdwr_t;
 
 /*!
+ * Localhost req processors
+ */
+typedef bool (*i2c_localhost_start)(uint8_t address, i2c_rdwr_t flag);
+typedef void (*i2c_localhost_stop)(void);
+typedef bool (*i2c_localhost_txc)(uint8_t c);
+typedef bool (*i2c_localhost_rxc)(uint8_t *c, bool ack);
+
+/*!
  * Initialise the I2C hardware.
  */
 void i2c_init(void);
@@ -58,6 +66,11 @@ void i2c_config(uint16_t freq);
  * \return the I2C master frequency in kHz.
  */
 uint16_t i2c_get_freq(void);
+
+/*!
+ * Set localhost i2c handlers
+ */
+void i2c_set_handlers(i2c_localhost_start start, i2c_localhost_stop stop, i2c_localhost_txc txc, i2c_localhost_rxc rxc);
 
 /*!
  * Configure the localhost address
