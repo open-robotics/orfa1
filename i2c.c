@@ -210,6 +210,17 @@ uint16_t i2c_get_freq()
     #endif
 }
 
+void i2c_set_localhost(uint8_t address)
+{
+    printf("# i2c_set_localhost(0x%02x)\n", address);
+    localhost_addr = address & 0xfe;
+}
+
+uint8_t i2c_get_localhost(void)
+{
+    return localhost_addr;
+}
+
 bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
 {
     current_addr = address & 0xfe;

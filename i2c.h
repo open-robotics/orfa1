@@ -60,6 +60,16 @@ void i2c_config(uint16_t freq);
 uint16_t i2c_get_freq(void);
 
 /*!
+ * Configure the localhost address
+ */
+void i2c_set_localhost(uint8_t address);
+
+/*!
+ * Configure the localhost address
+ */
+uint8_t i2c_get_localhost(void);
+
+/*!
  * Put a Start Condition on the bus.
  *
  * \param address the I2C slave address (left aligned).

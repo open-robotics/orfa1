@@ -101,11 +101,9 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
 
             if (!cbf_isempty(cmd_buf)) {
                 addr = cbf_get(cmd_buf) & (~0x01);
-                //i2c_set_localhost(addr);
-                printf("# I2C set localhost route address: 0x%02X\n", addr);
+                i2c_set_localhost(addr);
             }
-
-            //addr = i2c_get_localhost(addr);
+            addr = i2c_get_localhost();
 
             cbf_put(tx_buf, 'L');
             cbf_put(tx_buf, itox((addr >>  4) & 0x0f));
