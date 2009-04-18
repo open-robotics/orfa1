@@ -25,7 +25,7 @@
 //#include <avr/pgmspace.h>
 #include <ctype.h>
 
-//#include "i2c.h"
+#include "i2c.h"
 #include "cbuf.h"
 #include "serial-command.h"
 
@@ -82,11 +82,10 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
             if (!cbf_isempty(cmd_buf)) {
                 freq = (cbf_get(cmd_buf) << 8) | cbf_get(cmd_buf);
                 if ((freq > 0) && (freq <= 800)) {
-                    //i2c_config(freq);
-                    printf("# I2C config freq: %i\n", freq);
+                    i2c_config(freq);
                 }
             }
-            //freq = i2c_get_freq();
+            freq = i2c_get_freq();
 
             cbf_put(tx_buf, 'C');
             cbf_put(tx_buf, itox((freq >> 12) & 0x0f));
@@ -121,22 +120,20 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
                 c = cbf_get(cmd_buf);
                 if ((c & 0x01) == 0x01) {
                     // Read
-                    /*if (!i2c_master_start(c, i2c_rd)) {
+                    if (!i2c_master_start(c, i2c_rd)) {
                         i2c_master_stop();
-                        return parse_error(tx_buf, 'N', PSTR("Nack on rd address"));
-                    }*/
-                    printf("# I2C read address: 0x%02X\n", c);
-
-                    cbf_put(tx_buf, 'A');
+                        printf("Nack on rd address");
+                        return false;
+                    }
+                    cbf_put(tx_buf, 'R');
 
                     nbytes = cbf_get(cmd_buf);
                     while (nbytes > 0) {
-                        /*if (!i2c_master_rx(&c, 1, nbytes > 1)) {
+                        if (!i2c_master_rxc(&c, nbytes > 1)) {
                             i2c_master_stop();
-                            return parse_error(tx_buf, 'N', PSTR("Nack on rd byte"));
-                        }*/
-                        c = 0xff;
-                        printf("# I2C read byte %i: 0x%02X\n", nbytes, c);
+                            printf("Nack on rd byte");
+                            return false;
+                        }
 
                         cbf_put(tx_buf, itox(c >> 4));
                         cbf_put(tx_buf, itox(c & 0x0f));
@@ -145,26 +142,25 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
                     c = cbf_get(cmd_buf);
                 } else {
                     // Write
-                    /*if (!i2c_master_start(c, i2c_wr)) {
+                    if (!i2c_master_start(c, i2c_wr)) {
                         i2c_master_stop();
-                        return parse_error(tx_buf, 'N', PSTR("Nack on wr address"));
-                    }*/
-                    printf("# I2C write address: 0x%02X\n", c);
-
-                    cbf_put(tx_buf, 'A');
+                        printf("Nack on wd address");
+                        return false;
+                    }
+                    cbf_put(tx_buf, 'W');
 
                     c = cbf_get(cmd_buf);
                     while (c != 'S' && c != 'P') {
                         nbytes = c;
                         while (nbytes > 0) {
                             c = cbf_get(cmd_buf);
-                            printf("# I2C write byte: 0x%02X\n", c);
-                            //if (i2c_master_tx(&c, 1)) {
+                            if (i2c_master_txc(c)) {
                                 cbf_put(tx_buf, 'A');
-                            /*} else {
+                            } else {
                                 i2c_master_stop();
-                                return parse_error(tx_buf, 'N', PSTR("Nack on wr byte"));
-                            }*/
+                                printf("Nack on wd byte");
+                                return false;
+                            }
                             nbytes--;
                         }
                         c = cbf_get(cmd_buf);
@@ -173,26 +169,23 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
             } while (c == 'S');
 
             if (c != 'P') {
-                //i2c_master_stop();
-                //return parse_error(tx_buf, 'F', PSTR("P expected"));
+                i2c_master_stop();
                 printf("# I2C ERROR: P expected\n");
                 return false;
             }
 
-            //i2c_master_stop();
+            i2c_master_stop();
             cbf_put(tx_buf, 'P');
         }
         break;
 
         case 'X': {
-            //i2c_bus_clear();
-            printf("# I2C clear\n");
+            i2c_bus_clear();
             cbf_put(tx_buf, 'X');
         }
         break;
 
         default: {
-            //return parse_error(tx_buf, 'F', PSTR("C or S expected after I"));
             printf("# I2C Internal error\n");
             return false;
         }
