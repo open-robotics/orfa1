@@ -23,10 +23,10 @@
  *****************************************************************************/
 
 //#include <avr/pgmspace.h>
-#include <ctype.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "i2c.h"
-#include "cbuf.h"
 #include "serial-command.h"
 
 /*!
@@ -57,7 +57,7 @@ static char itox(uint8_t c)
  * \param[out] tx_buf buffer contining the messages sent to the user.
  * \return true on success, false on error.
  */
-bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
+bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 {
     uint8_t c;
     uint8_t nbytes;
@@ -97,7 +97,7 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
         break;
 
         case 'L': {
-            uint8_t addr=0xAA;
+            uint8_t addr=0xaa;
 
             if (!cbf_isempty(cmd_buf)) {
                 addr = cbf_get(cmd_buf) & (~0x01);
@@ -120,7 +120,8 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
                     // Read
                     if (!i2c_master_start(c, i2c_rd)) {
                         i2c_master_stop();
-                        printf("Nack on rd address");
+                        debug("# ERROR: Nack on rd address\n");
+                        *error_code = NACK_ADDRESS;
                         return false;
                     }
                     cbf_put(tx_buf, 'R');
@@ -129,7 +130,8 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
                     while (nbytes > 0) {
                         if (!i2c_master_rxc(&c, nbytes > 1)) {
                             i2c_master_stop();
-                            printf("Nack on rd byte");
+                            debug("# ERROR: Nack on rd byte\n");
+                            *error_code = NACK_BYTE;
                             return false;
                         }
 
@@ -142,7 +144,8 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
                     // Write
                     if (!i2c_master_start(c, i2c_wr)) {
                         i2c_master_stop();
-                        printf("Nack on wd address");
+                        debug("# ERROR: Nack on wr address\n");
+                        *error_code = NACK_ADDRESS;
                         return false;
                     }
                     cbf_put(tx_buf, 'W');
@@ -156,7 +159,8 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
                                 cbf_put(tx_buf, 'A');
                             } else {
                                 i2c_master_stop();
-                                printf("Nack on wd byte");
+                                debug("# ERROR: Nack on wr byte\n");
+                                *error_code = NACK_BYTE;
                                 return false;
                             }
                             nbytes--;
@@ -168,7 +172,8 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
 
             if (c != 'P') {
                 i2c_master_stop();
-                printf("# I2C ERROR: P expected\n");
+                debug("# ERROR: P expected\n");
+                *error_code = P_EXPECTED;
                 return false;
             }
 
@@ -184,7 +189,7 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf)
         break;
 
         default: {
-            printf("# I2C Internal error\n");
+            debug("# exec_cmd() internal error\n");
             return false;
         }
         break;

@@ -67,10 +67,12 @@ int main()
 
         if(parse_cmd(c, &cmd_buf, &error_code))
         {
-            exec_cmd(&cmd_buf, &tx_buf);
-            while(!cbf_isempty(&tx_buf))
+            if(exec_cmd(&cmd_buf, &tx_buf, &error_code))
             {
-                putchar(cbf_get(&tx_buf));
+                while(!cbf_isempty(&tx_buf))
+                {
+                    putchar(cbf_get(&tx_buf));
+                }
             }
         }
 
@@ -78,6 +80,7 @@ int main()
         {
             printf("ERROR: %i\n", error_code);
 
+            cbf_init(&tx_buf);
             error_code = NO_ERROR;
         }
     } // for

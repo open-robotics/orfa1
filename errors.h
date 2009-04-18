@@ -9,6 +9,8 @@ typedef enum {
     INVALID_XDIGIT,     //!< non hex character
     INVALID_DATA,       //!< invalid data
     P_EXPECTED,         //!< 'P' expected (i2c)
+    NACK_ADDRESS,       //!< NAck adress
+    NACK_BYTE,          //!< NAck byte
 } error_code_t;
 
 #endif // ERRORS_H

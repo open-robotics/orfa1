@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "i2c.h"
+#include "debug.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -183,9 +184,8 @@ void i2c_init()
 {
     #ifdef AVR_IO
     avr_i2c_init();
-    #else
-    printf("# i2c_init()\n");
     #endif
+    debug("# i2c_init()\n");
 
     localhost_addr = LOCALHOST_ADDR;
 }
@@ -200,17 +200,16 @@ void i2c_config(uint16_t freq)
 {
     #ifdef AVR_IO
     avr_i2c_config(freq);
-    #else
-    printf("# i2c_config(%i)\n", freq);
     #endif
+    debug("# i2c_config(%i)\n", freq);
 }
 
 uint16_t i2c_get_freq()
 {
+    debug("# i2c_get_freq()\n");
     #ifdef AVR_IO
     return avr_i2c_get_freq();
     #else
-    printf("# i2c_get_freq()\n");
     return TWI_FREQ;
     #endif
 }
@@ -225,7 +224,7 @@ void i2c_set_handlers(i2c_localhost_start start, i2c_localhost_stop stop, i2c_lo
 
 void i2c_set_localhost(uint8_t address)
 {
-    printf("# i2c_set_localhost(0x%02x)\n", address);
+    debug("# i2c_set_localhost(0x%02x)\n", address);
     localhost_addr = address & 0xfe;
 }
 
@@ -243,7 +242,7 @@ bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
 
     if(current_addr == localhost_addr)
     {
-        printf("# i2c_master_start(0x%02x, %i) -> localhost\n", address, flag);
+        debug("# i2c_master_start(0x%02x, %i) -> localhost\n", address, flag);
         if(local_start != NULL)
         {
             error = local_start(address, flag);
@@ -257,9 +256,8 @@ bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
     {
         #ifdef AVR_IO
         error = avr_i2c_master_start(address, flag);
-        #else
-        printf("# i2c_master_start(0x%02x, %i) -> real\n", address, flag);
         #endif
+        debug("# i2c_master_start(0x%02x, %i) -> real\n", address, flag);
     }
 
     return !error;
@@ -285,13 +283,12 @@ bool i2c_master_txc(uint8_t c)
     {
         #ifdef AVR_IO
         error = avr_i2c_master_txc(c);
-        #else
-        printf("# i2c_master_txc(0x%02x) -> real\n", c);
         #endif
+        debug("# i2c_master_txc(0x%02x) -> real\n", c);
     }
     else if(is_started)
     {
-        printf("# i2c_master_txc(0x%02x) -> localhost\n", c);
+        debug("# i2c_master_txc(0x%02x) -> localhost\n", c);
         if(local_txc != NULL)
         {
             error = local_txc(c);
@@ -303,7 +300,7 @@ bool i2c_master_txc(uint8_t c)
     }
     else
     {
-        printf("# ERROR: i2c_master_txc(0x%02x) not STARTED\n", c);
+        debug("# ERROR: i2c_master_txc(0x%02x) not STARTED\n", c);
         error = true;
     }
 
@@ -320,12 +317,12 @@ bool i2c_master_rxc(uint8_t *c, bool ack)
         error = avr_i2c_master_rxc(c, ack);
         #else
         *c = 0xff;
-        printf("# i2c_master_rxc(0x%02x, %i) -> real\n", *c, ack);
         #endif
+        debug("# i2c_master_rxc(0x%02x, %i) -> real\n", *c, ack);
     }
     else if(is_started)
     {
-        printf("# i2c_master_rxc(0x%02x, %i) -> localhost\n", *c, ack);
+        debug("# i2c_master_rxc(0x%02x, %i) -> localhost\n", *c, ack);
         if(local_rxc != NULL)
         {
             error = local_rxc(c, ack);
@@ -337,7 +334,7 @@ bool i2c_master_rxc(uint8_t *c, bool ack)
     }
     else
     {
-        printf("# ERROR: i2c_master_rxc(0x%02x, %i) not STARTED\n", *c, ack);
+        debug("# ERROR: i2c_master_rxc(0x%02x, %i) not STARTED\n", *c, ack);
         error = true;
     }
 

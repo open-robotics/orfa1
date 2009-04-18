@@ -21,26 +21,17 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+#ifndef DEBUG_H
+#define DEBUG_H
 
-#ifndef COMMAND_H
-#define COMMAND_H
-
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "cbuf.h"
-#include "debug.h"
-#include "errors.h"
+#ifndef NDEBUG
+#define debug(fmt, args...) printf(fmt, ## args)
+#else
+#define debug(fmt, args...)
+#endif
 
-#define VERSION_STRING  "1.6"
-
-/*!
- * Executed a parsed command.
- *
- * \param cmd_buf[in] circular buffer that will be filled with the commands.
- * \param tx_buf[out] circular buffer that will contain the error message.
- * \return true on success, false on failure.
- */
-bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code);
-
-#endif  // COMMAND_H
+#endif // !defined DEBUG_H
