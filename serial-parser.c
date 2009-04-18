@@ -118,6 +118,11 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
                     state_cmd = PARSE_CONFIG;
                     break;
 
+                case 'L':
+                    cbf_put(cmd_buf, c);
+                    state_cmd = PARSE_LOCAL;
+                    break;
+
                 case 'V':
                 case 'X':
                     cbf_put(cmd_buf, c);
@@ -155,6 +160,14 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
                 {
                     state_cmd = WAIT_EOL;
                 }
+            }
+            break;
+
+        case PARSE_LOCAL:
+            if(get_cmd_byte(c, &data, error_code))
+            {
+                cbf_put(cmd_buf, data);
+                state_cmd = WAIT_EOL;
             }
             break;
 

@@ -12,6 +12,7 @@ typedef enum {
     GET_COMMAND,    //!< get command ( 'S', 'R', 'W', '#', '\r', '\n' )
     COMMENT_EOL,    //!< skip all chars, wait '\r' or '\n', change state to CMD_INIT
     PARSE_CONFIG,   //!< parse config command ( C<f1><f2> )
+    PARSE_LOCAL,    //!< parse set local addr command  ( L<aa> )
     PARSE_I2C,      //!< parse I2C commands ( S<aa><data>[S<aa><data>]P )
     PARSE_READ,     //!< parse read register command ( R<aa><rr>[<ll>] )
     PARSE_WRITE,    //!< parse write register command ( W<aa><rr><data> )
