@@ -47,6 +47,7 @@
 #include "cbuf.h"
 #include "serial-parser.h"
 #include "serial-command.h"
+#include "i2c-command.h"
 
 int main()
 {
@@ -60,6 +61,9 @@ int main()
 
     cbf_init(&cmd_buf);
     cbf_init(&tx_buf);
+
+    i2c_init();
+    i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 
     for(;;)
     {

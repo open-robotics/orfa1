@@ -22,8 +22,8 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef SERIAL_COMMAND_H
+#define SERIAL_COMMAND_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -43,4 +43,4 @@
  */
 bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code);
 
-#endif  // COMMAND_H
+#endif  // SERIAL_COMMAND_H

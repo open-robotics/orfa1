@@ -235,7 +235,7 @@ uint8_t i2c_get_localhost(void)
 
 bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
 {
-    bool error=false;
+    bool status=false;
 
     current_addr = address & 0xfe;
     is_started = true;
@@ -245,22 +245,24 @@ bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
         debug("# i2c_master_start(0x%02x, %i) -> localhost\n", address, flag);
         if(local_start != NULL)
         {
-            error = local_start(address, flag);
+            status = local_start(address, flag);
         }
         else
         {
-            error = true;
+            status = false;
         }
     }
     else
     {
         #ifdef AVR_IO
-        error = avr_i2c_master_start(address, flag);
+        status = avr_i2c_master_start(address, flag);
+        #else
+        status = true;
         #endif
         debug("# i2c_master_start(0x%02x, %i) -> real\n", address, flag);
     }
 
-    return !error;
+    return status;
 }
 
 void i2c_master_stop()
@@ -269,6 +271,7 @@ void i2c_master_stop()
     #ifdef AVR_IO
     avr_i2c_master_stop();
     #endif
+    debug("# i2c_master_stop()\n");
     if(local_stop != NULL)
     {
         local_stop();
@@ -277,12 +280,14 @@ void i2c_master_stop()
 
 bool i2c_master_txc(uint8_t c)
 {
-    bool error=false;
+    bool status=false;
 
     if(current_addr != localhost_addr)
     {
         #ifdef AVR_IO
-        error = avr_i2c_master_txc(c);
+        status = avr_i2c_master_txc(c);
+        #else
+        status = true;
         #endif
         debug("# i2c_master_txc(0x%02x) -> real\n", c);
     }
@@ -291,31 +296,27 @@ bool i2c_master_txc(uint8_t c)
         debug("# i2c_master_txc(0x%02x) -> localhost\n", c);
         if(local_txc != NULL)
         {
-            error = local_txc(c);
-        }
-        else
-        {
-            error = true;
+            status = local_txc(c);
         }
     }
     else
     {
         debug("# ERROR: i2c_master_txc(0x%02x) not STARTED\n", c);
-        error = true;
     }
 
-    return !error;
+    return status;
 }
 
 bool i2c_master_rxc(uint8_t *c, bool ack)
 {
-    bool error=false;
+    bool status=false;
 
     if(current_addr != localhost_addr)
     {
         #ifdef AVR_IO
-        error = avr_i2c_master_rxc(c, ack);
+        status = avr_i2c_master_rxc(c, ack);
         #else
+        status = true;
         *c = 0xff;
         #endif
         debug("# i2c_master_rxc(0x%02x, %i) -> real\n", *c, ack);
@@ -325,18 +326,13 @@ bool i2c_master_rxc(uint8_t *c, bool ack)
         debug("# i2c_master_rxc(0x%02x, %i) -> localhost\n", *c, ack);
         if(local_rxc != NULL)
         {
-            error = local_rxc(c, ack);
-        }
-        else
-        {
-            error = true;
+            status = local_rxc(c, ack);
         }
     }
     else
     {
         debug("# ERROR: i2c_master_rxc(0x%02x, %i) not STARTED\n", *c, ack);
-        error = true;
     }
 
-    return !error;
+    return status;
 }

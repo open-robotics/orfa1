@@ -29,9 +29,9 @@
 #include <stdbool.h>
 
 #ifndef NDEBUG
-#define debug(fmt, args...) printf(fmt, ## args)
+#define debug(...) printf(__VA_ARGS__)
 #else
-#define debug(fmt, args...)
+#define debug(...)
 #endif
 
 #endif // !defined DEBUG_H
