@@ -7,6 +7,7 @@
 #include "i2c.h"
 #include "debug.h"
 #include "errors.h"
+#include "i2c-registers.h"
 
 bool cmd_start(uint8_t address, i2c_rdwr_t flag);
 void cmd_stop(void);
