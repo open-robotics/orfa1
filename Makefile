@@ -1,17 +1,26 @@
+#DEV = 'pc'
+
 #CC = avr-gcc
 CFLAGS += -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef #-Werror
 CFLAGS += -funsigned-char -funsigned-bitfields -ffunction-sections -fpack-struct -fshort-enums #-finline-limit=20
 CFLAGS += -ffreestanding -Os -g #-gdwarf-2
-#CFLAGS += -DHAVE_CONFIG_H
-CFLAGS += -DOR_M32_D # Open Robotics OR-M32-D
 #CFLAGS += -DF_CPU=$(F_CPU) -mmcu=$(MCU)
 CFLAGS += -I.
 #LDFLAGS = -mmcu=$(MCU)
 LDFLAGS += -Wl,--relax -Wl,--gc-sections
-#OBJCOPY = avr-objcopy
-#OBJDUMP = avr-objdump
-#SIZE = avr-size
+OBJCOPY = avr-objcopy
+OBJDUMP = avr-objdump
+SIZE = size
 
+ifeq ($(DEV),avr)
+    MCU = atmega32
+    F_CPU = 7372800UL
+    CC = avr-gcc
+    SIZE = avr-size
+    CFLAGS += -DF_CPU=$(F_CPU) -mmcu=$(MCU) -gdwarf-2
+    CFLAGS += -DAVR_IO
+    LDFLAGS = -mmcu=$(MCU)
+endif
 
 
 target = i2c-gate
@@ -28,10 +37,13 @@ tag = tags
 ver = $(shell sed -ne '/define *VERSION_STRING /{s/.*"\(.*\)".*/\1/p; q;}' serial-command.h)
 dst = i2c-gate-v${ver}
 
-
-all: $(elf) 
-	#$(lss) $(hex)
-	#$(SIZE) $(elf)
+ifeq ($(DEV),avr)
+all: $(elf) $(lss) $(hex)
+	$(SIZE) $(elf)
+else
+all: $(elf)
+	$(SIZE) $(elf)
+endif
 
 $(elf): $(obj) $(src) $(hdr) $(lufalib)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(lufalib) -Wl,-Map,$(map) -o $(elf)

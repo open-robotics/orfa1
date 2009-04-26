@@ -54,7 +54,8 @@
  *
  * \param freq I2C master frequency in kHz.
  */
-static inline uint8_t i2c_get_twps(uint16_t freq) __attribute__((const))
+static inline uint8_t i2c_get_twps(uint16_t freq) __attribute__((const));
+static inline uint8_t i2c_get_twps(uint16_t freq)
 {
     uint8_t ps;
     uint16_t val = F_CPU / (0xffUL * 2000UL);
@@ -73,7 +74,8 @@ static inline uint8_t i2c_get_twps(uint16_t freq) __attribute__((const))
  * \param freq I2C master frequency in kHz.
  * \param twps the selected prescaler bits.
  */
-static inline uint8_t i2c_get_twbr(uint16_t freq, uint8_t twps) __attribute__((const))
+static inline uint8_t i2c_get_twbr(uint16_t freq, uint8_t twps) __attribute__((const));
+static inline uint8_t i2c_get_twbr(uint16_t freq, uint8_t twps)
 {
     return (((F_CPU / 2000) / freq) - 8) / (1 << (twps *2));
 }

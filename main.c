@@ -45,6 +45,7 @@
 
 #include "errors.h"
 #include "cbuf.h"
+#include "usart.h"
 #include "serial-parser.h"
 #include "serial-command.h"
 #include "i2c-command.h"
@@ -64,6 +65,11 @@ int main()
 
     i2c_init();
     i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
+    
+    #ifdef AVR_IO
+    usart_init(B115200);
+    stdin = stdout = stderr = &usart_fdev;
+    #endif // AVR_IO
 
     for(;;)
     {

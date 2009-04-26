@@ -1,3 +1,9 @@
+#ifdef AVR_IO
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+
+#endif // AVR_IO
 
 #include "gpio.h"
 
@@ -7,7 +13,7 @@ uint8_t gpio_state[PORT_D4 + 1];
 
 void gpio_set(uint8_t pin, uint8_t val)
 {
-    debug("# >> gpio_set(%i, 0x%02x);\n", pin, val);
+    debug("# >> gpio_set(%i, 0x%02x)\n", pin, val);
 
     gpio_state[pin] = val;
 
@@ -132,13 +138,13 @@ uint8_t gpio_get(uint8_t pin)
     }
     #endif // AVR_IO
 
-    debug("# >> gpio_get(%i); -> %i\n", pin, ret);
+    debug("# >> gpio_get(%i) -> %i\n", pin, ret);
     return ret;
 }
 
 void gpio_set_type(uint8_t pin, uint8_t val)
 {
-    debug("# >> gpio_set_type(%i, %i);\n", pin, val);
+    debug("# >> gpio_set_type(%i, %i)\n", pin, val);
 
     pin -= DDR_A0;
     gpio_type[pin] = val;
@@ -203,7 +209,7 @@ uint8_t gpio_get_type(uint8_t pin)
 {
     uint8_t ret = gpio_type[pin - DDR_A0];
 
-    debug("# >> gpio_get_type(%i); -> %i\n", pin, ret);
+    debug("# >> gpio_get_type(%i) -> %i\n", pin, ret);
     return ret;
 }
 
