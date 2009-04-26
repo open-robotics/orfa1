@@ -32,7 +32,7 @@
 #include "debug.h"
 #include "errors.h"
 
-#define VERSION_STRING  "1.6"
+#define VERSION_STRING  "1.0"
 
 /*!
  * Executed a parsed command.

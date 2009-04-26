@@ -25,7 +25,7 @@ lss = $(target).lss
 map = $(target).map
 tag = tags
 
-ver = $(shell sed -ne '/define *VERSION_STRING /{s/.*"\(.*\)".*/\1/p; q;}' command.h)
+ver = $(shell sed -ne '/define *VERSION_STRING /{s/.*"\(.*\)".*/\1/p; q;}' serial-command.h)
 dst = i2c-gate-v${ver}
 
 
