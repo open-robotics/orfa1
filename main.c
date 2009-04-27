@@ -63,13 +63,13 @@ int main()
     cbf_init(&cmd_buf);
     cbf_init(&tx_buf);
 
+	#ifdef AVR_IO
+	usart_init(B115200);
+	stdin = stdout = stderr = &usart_fdev;
+	#endif // AVR_IO
+
     i2c_init();
     i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
-    
-    #ifdef AVR_IO
-    usart_init(B115200);
-    stdin = stdout = stderr = &usart_fdev;
-    #endif // AVR_IO
 
     for(;;)
     {

@@ -95,38 +95,38 @@ uint8_t gpio_get(uint8_t pin)
             case PORT_A5:
             case PORT_A6:
             case PORT_A7:
-                port = &PORTA;
+                port = &PINA;
                 break;
 
             case PORT_C7:
-                port = &PORTC;
+                port = &PINC;
                 pin = 7;
                 break;
             case PORT_C6:
-                port = &PORTC;
+                port = &PINC;
                 pin = 6;
                 break;
             case PORT_C5:
-                port = &PORTC;
+                port = &PINC;
                 pin = 5;
                 break;
             case PORT_C4:
-                port = &PORTC;
+                port = &PINC;
                 pin = 4;
                 break;
 
             case PORT_B2:
             case PORT_B3:
-                port = &PORTB;
+                port = &PINB;
                 pin = pin - PORT_B2;
                 break;
 
             case PORT_D5:
-                port = &PORTD;
+                port = &PIND;
                 pin = 5;
                 break;
             case PORT_D4:
-                port = &PORTD;
+                port = &PIND;
                 pin = 4;
                 break;
         }
