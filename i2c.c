@@ -125,10 +125,12 @@ static inline bool avr_i2c_master_start(uint8_t address, i2c_rdwr_t flag)
 
         twsr = TWSR & TW_STATUS_MASK;
         if (flag == i2c_rd) {
-            error = twsr != TW_MR_SLA_ACK;
+            error = (twsr != TW_MR_SLA_ACK);
         } else {
-            error = twsr != TW_MT_SLA_ACK;
+            error = (twsr != TW_MT_SLA_ACK);
         }
+
+        debug("# >> twsr(0x%02x) == TW_MR_SLA_ACK(0x%02x) or TW_MT_SLA_ACK(0x%02x)?\n", twsr, TW_MR_SLA_ACK, TW_MT_SLA_ACK);
     }
 
     debug("# > avr_i2c_master_start(0x%02x, %i) -> %i\n", address, flag, !error);
