@@ -1,15 +1,61 @@
+#include "gpio.h"
+
 #ifdef AVR_IO
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#endif // AVR_IO
+const uint8_t *rports[PORT_D4 + 1] = {
+    // PORT_A0 — PORT_A7
+    &PORTA, &PORTA, &PORTA, &PORTA, &PORTA, &PORTA, &PORTA,
+    // PORT_C7 — PORT_C4
+    &PORTC, &PORTC, &PORTC, &PORTC,
+    // PORT_B2 — PORT_B3
+    &PORTB, &PORTB,
+    // PORT_D5 — PORT_D4
+    &PORTD, &PORTD,
+};
 
-#include "gpio.h"
+const uint8_t *rpins[PORT_D4 + 1] = {
+    // PORT_A0 — PORT_A7
+    &PINA, &PINA, &PINA, &PINA, &PINA, &PINA, &PINA,
+    // PORT_C7 — PORT_C4
+    &PINC, &PINC, &PINC, &PINC,
+    // PORT_B2 — PORT_B3
+    &PINB, &PINB,
+    // PORT_D5 — PORT_D4
+    &PIND, &PIND,
+};
+
+const uint8_t *rddrs[PORT_D4 + 1] = {
+    // DDR_A0 — DDR_A7
+    &DDRA, &DDRA, &DDRA, &DDRA, &DDRA, &DDRA, &DDRA,
+    // DDR_C7 — DDR_C4
+    &DDRC, &DDRC, &DDRC, &DDRC,
+    // DDR_B2 — DDR_B3
+    &DDRB, &DDRB,
+    // DDR_D5 — DDR_D4
+    &DDRD, &DDRD,
+};
+
+const uint8_t pins[PORT_D4 + 1] = {
+    // PORT_A0 — PORT_A7
+    _BV(PA0), _BV(PA1), _BV(PA2), _BV(PA3), _BV(PA4), _BV(PA5), _BV(PA6), _BV(PA7),
+    // PORT_C7 — PORT_C4
+    _BV(PC7), _BV(PC6), _BV(PC5), _BV(PC4),
+    // PORT_B2 — PORT_B3
+    _BV(PB2), _BV(PB3),
+    // PORT_D5 — PORT_D4
+    _BV(PD5), _BV(PD4),
+};
+
+#endif // AVR_IO
 
 uint8_t gpio_type[PORT_D4 + 1];
 uint8_t gpio_state[PORT_D4 + 1];
 
+uint8_t * reg;
+uint8_t pinn;
 
 void gpio_set(uint8_t pin, uint8_t val)
 {
@@ -18,125 +64,34 @@ void gpio_set(uint8_t pin, uint8_t val)
     gpio_state[pin] = val;
 
     #ifdef AVR_IO
-    if(gpio_type[pin] == 0 || gpio_type[pin] == 1)
+    if(gpio_type[pin] == TYPE_IN || gpio_type[pin] == TYPE_OUT)
     {
-        uint8_t *port;
-
-        switch(pin)
-        {
-            case PORT_A0:
-            case PORT_A1:
-            case PORT_A2:
-            case PORT_A3:
-            case PORT_A4:
-            case PORT_A5:
-            case PORT_A6:
-            case PORT_A7:
-                port = &PORTA;
-                break;
-
-            case PORT_C7:
-                port = &PORTC;
-                pin = 7;
-                break;
-            case PORT_C6:
-                port = &PORTC;
-                pin = 6;
-                break;
-            case PORT_C5:
-                port = &PORTC;
-                pin = 5;
-                break;
-            case PORT_C4:
-                port = &PORTC;
-                pin = 4;
-                break;
-
-            case PORT_B2:
-            case PORT_B3:
-                port = &PORTB;
-                pin = pin - PORT_B2;
-                break;
-
-            case PORT_D5:
-                port = &PORTD;
-                pin = 5;
-                break;
-            case PORT_D4:
-                port = &PORTD;
-                pin = 4;
-                break;
-        }
-
+        reg = rports[pin];
+        pinn = pins[pin];
         if(val)
-            *port |= (1<<pin);
+            *reg |= pinn;
         else
-            *port &= ~(1<<pin);
+            *reg &= ~pinn;
     }
     #endif // AVR_IO
 }
 
 uint8_t gpio_get(uint8_t pin)
 {
-    uint8_t ret = gpio_state[pin];
+    uint8_t ret;
 
     #ifdef AVR_IO
-    if(gpio_type[pin] == 0 || gpio_type[pin] == 1)
+    if(gpio_type[pin] == TYPE_IN || gpio_type[pin] == TYPE_OUT)
     {
-        uint8_t *port;
-
-        switch(pin)
-        {
-            case PORT_A0:
-            case PORT_A1:
-            case PORT_A2:
-            case PORT_A3:
-            case PORT_A4:
-            case PORT_A5:
-            case PORT_A6:
-            case PORT_A7:
-                port = &PINA;
-                break;
-
-            case PORT_C7:
-                port = &PINC;
-                pin = 7;
-                break;
-            case PORT_C6:
-                port = &PINC;
-                pin = 6;
-                break;
-            case PORT_C5:
-                port = &PINC;
-                pin = 5;
-                break;
-            case PORT_C4:
-                port = &PINC;
-                pin = 4;
-                break;
-
-            case PORT_B2:
-            case PORT_B3:
-                port = &PINB;
-                pin = pin - PORT_B2;
-                break;
-
-            case PORT_D5:
-                port = &PIND;
-                pin = 5;
-                break;
-            case PORT_D4:
-                port = &PIND;
-                pin = 4;
-                break;
-        }
-
-        if(*port & (1<<pin))
-            ret = true;
-        else
-            ret = false;
+        reg = rports[pin];
+        pinn = pins[pin];
+        ret = (*reg & pinn) && true;
     }
+    else
     #endif // AVR_IO
+    {
+        ret = gpio_state[pin];
+    }
 
     debug("# >> gpio_get(%i) -> %i\n", pin, ret);
     return ret;
@@ -144,64 +99,43 @@ uint8_t gpio_get(uint8_t pin)
 
 void gpio_set_type(uint8_t pin, uint8_t val)
 {
+    bool ddr;
+
     debug("# >> gpio_set_type(%i, %i)\n", pin, val);
 
     pin -= DDR_A0;
-    gpio_type[pin] = val;
 
-    #ifdef AVR_IO
-    uint8_t *port;
-
-    switch(pin)
+    switch(val)
     {
-        case PORT_A0:
-        case PORT_A1:
-        case PORT_A2:
-        case PORT_A3:
-        case PORT_A4:
-        case PORT_A5:
-        case PORT_A6:
-        case PORT_A7:
-            port = &DDRA;
+        case TYPE_IN:
+        case TYPE_OUT:
+            ddr = val;
             break;
 
-        case PORT_C7:
-            port = &DDRC;
-            pin = 7;
-            break;
-        case PORT_C6:
-            port = &DDRC;
-            pin = 6;
-            break;
-        case PORT_C5:
-            port = &DDRC;
-            pin = 5;
-            break;
-        case PORT_C4:
-            port = &DDRC;
-            pin = 4;
+        case TYPE_SERVO:
+            ddr = TYPE_OUT;
             break;
 
-        case PORT_B2:
-        case PORT_B3:
-            port = &DDRB;
-            pin = pin - PORT_B2;
+        case TYPE_ADC:
+            ddr = TYPE_IN;
+            if(PORT_A0 <= pin && pin <= PORT_A7)
+                val = TYPE_IN;
             break;
 
-        case PORT_D5:
-            port = &DDRD;
-            pin = 5;
-            break;
-        case PORT_D4:
-            port = &DDRD;
-            pin = 4;
+        default:
+            ddr = TYPE_IN;
             break;
     }
 
-    if(val)
-        *port |= (1<<pin);
+    gpio_type[pin] = val;
+
+    #ifdef AVR_IO
+    reg = rports[pin];
+    pinn = pins[pin];
+    if(ddr)
+        *reg |= pinn;
     else
-        *port &= ~(1<<pin);
+        *reg &= ~pinn;
     #endif // AVR_IO
 }
 

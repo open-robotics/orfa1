@@ -29,6 +29,7 @@ ports = {'A': {'name': range(0, 7+1), 'register': range(0x00, 0x07+1), },
     'D': {'name': range(5, 4-1, -1), 'register': range(0x0e, 0x0f+1), },
     }
 
+cog.outl()
 for k, v in ports.items():
     vals = []
     for i in range(len(v['name'])):
@@ -41,6 +42,7 @@ for k, v in ports.items():
         #cog.outl(ident2 + "PIN_%s%s  = 0x%02x," % (p, n, vl + 0x80, ))
         cog.outl()
 ]]]*/
+
 // PORT/DDR/PIN A
     PORT_A0 = 0x00,
     DDR_A0  = 0x20,
@@ -92,6 +94,31 @@ for k, v in ports.items():
 
     PORT_D4 = 0x0f,
     DDR_D4  = 0x2f,
+
+//[[[end]]]
+
+/* [[[cog
+motor = [
+    (1, 0x10, 0x11, ),
+    (2, 0x12, 0x13, ),
+]
+
+cog.outl()
+for it in motor:
+    cog.outl(ident1 + "// MOTOR %i" % it[0])
+    cog.outl(ident2 + "MOTOR_DIR%i = 0x%02x," % (it[0], it[1]))
+    cog.outl(ident2 + "MOTOR_PWM%i = 0x%02x," % (it[0], it[2]))
+    cog.outl()
+
+]]] */
+
+// MOTOR 1
+    MOTOR_DIR1 = 0x10,
+    MOTOR_PWM1 = 0x11,
+
+// MOTOR 2
+    MOTOR_DIR2 = 0x12,
+    MOTOR_PWM2 = 0x13,
 
 //[[[end]]]
 };

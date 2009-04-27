@@ -1,12 +1,11 @@
-#DEV = 'pc'
+DEV = 'pc'
+DEBUG = 1 
 
 #CC = avr-gcc
 CFLAGS += -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef #-Werror
-CFLAGS += -funsigned-char -funsigned-bitfields -ffunction-sections -fpack-struct -fshort-enums #-finline-limit=20
-CFLAGS += -ffreestanding -Os -g #-gdwarf-2
-#CFLAGS += -DF_CPU=$(F_CPU) -mmcu=$(MCU)
+CFLAGS += -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums #-finline-limit=20
+CFLAGS += -ffreestanding -Os -g
 CFLAGS += -I.
-#LDFLAGS = -mmcu=$(MCU)
 LDFLAGS += -Wl,--relax -Wl,--gc-sections
 OBJCOPY = avr-objcopy
 OBJDUMP = avr-objdump
@@ -23,6 +22,9 @@ ifeq ($(DEV),avr)
     LDFLAGS = -mmcu=$(MCU)
 endif
 
+ifeq ($(DEBUG),0)
+	CFLAGS += -DNDEBUG
+endif
 
 target = i2c-gate
 src = $(wildcard *.c)

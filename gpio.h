@@ -8,6 +8,13 @@
 #include "errors.h"
 #include "i2c-registers.h"
 
+enum {
+    TYPE_IN = 0,
+    TYPE_OUT,
+    TYPE_SERVO,
+    TYPE_ADC,
+};
+
 extern uint8_t gpio_type[PORT_D4 + 1];
 extern uint8_t gpio_state[PORT_D4 + 1];
 
