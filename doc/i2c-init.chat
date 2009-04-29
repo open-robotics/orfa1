@@ -1,0 +1,8 @@
+# I2C init chat script
+# see `man chat`
+ABORT 'ERROR'
+'' 'V\n'
+'V1.0\n' 'LAA\n'
+'LAA\n' 'C0064\n'
+'C0064\n' 'X\n'
+'X\n' ''

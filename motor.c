@@ -1,3 +1,7 @@
+/*! Motor control functions
+ */
+// vim:set ts=4 sw=4 et:
+
 #include "motor.h"
 
 #ifdef AVR_IO
@@ -30,8 +34,10 @@ static uint8_t pinn;
 void motor_init()
 {
     debug("# motor_init()\n");
+#ifdef AVR_IO
     DDRB |= DDRB_MASK;
     DDRD |= DDRD_MASK;
+#endif // AVR_IO
 }
 
 void motor_set(uint8_t pin, uint8_t val)
