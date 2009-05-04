@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "errors.h"
+#include "common.h"
 #include "cbuf.h"
 
 typedef enum {

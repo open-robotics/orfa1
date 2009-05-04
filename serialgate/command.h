@@ -22,17 +22,14 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#ifndef SERIAL_COMMAND_H
-#define SERIAL_COMMAND_H
+#ifndef COMMAND_H
+#define COMMAND_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "cbuf.h"
-#include "debug.h"
-#include "errors.h"
-
-#define VERSION_STRING  "1.0"
+#include "common.h"
 
 /*!
  * Executed a parsed command.
@@ -43,4 +40,4 @@
  */
 bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code);
 
-#endif  // SERIAL_COMMAND_H
+#endif  // COMMAND_H

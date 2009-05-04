@@ -27,7 +27,11 @@
 #include <stdbool.h>
 
 #include "i2c.h"
-#include "serial-command.h"
+#include "command.h"
+
+#ifndef INTERFACE_VERSION_STRING
+#define INTERFACE_VERSION_STRING  "1.0"
+#endif
 
 /*!
  * Convert a 4-bit integer value to its ASCII representation.
@@ -70,8 +74,8 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
     switch(c){
         case 'V': {
             cbf_put(tx_buf, c);
-            for (uint8_t i = 0; i < sizeof(VERSION_STRING) - 1; i++) {
-                cbf_put(tx_buf, VERSION_STRING[i]);
+            for (uint8_t i = 0; i < sizeof(INTERFACE_VERSION_STRING) - 1; i++) {
+                cbf_put(tx_buf, INTERFACE_VERSION_STRING[i]);
             }
         }
         break;

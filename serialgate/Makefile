@@ -1,66 +1,50 @@
-DEV = 'pc'
-DEBUG = 1 
+DEBUG = 1
+MCU = atmega32
+F_CPU = 7372800UL
+BAUD = 115200
 
-#CC = avr-gcc
-CFLAGS += -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef #-Werror
-CFLAGS += -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums #-finline-limit=20
-CFLAGS += -ffreestanding -Os -g
-CFLAGS += -I.
-LDFLAGS += -Wl,--relax -Wl,--gc-sections
-OBJCOPY = avr-objcopy
-OBJDUMP = avr-objdump
-SIZE = size
+MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
+CROSS_COMPILE_GCC = avr-
+CROSS_COMPILE_BIN = avr-
 
-ifeq ($(DEV),avr)
-    MCU = atmega32
-	#MCU = atmega16
-    F_CPU = 7372800UL
-    CC = avr-gcc
-    SIZE = avr-size
-    CFLAGS += -DF_CPU=$(F_CPU) -mmcu=$(MCU) -gdwarf-2
-    CFLAGS += -DAVR_IO
-    LDFLAGS = -mmcu=$(MCU)
-endif
+DEFINES = -DBAUD=B$(BAUD)
 
 ifeq ($(DEBUG),0)
-	CFLAGS += -DNDEBUG
+	DEBUG_ = -DNDEBUG
+else
+	DEBUG_ = -DDEBUG=$(DEBUG)
+endif
+ifeq ($(DEBUG),2)
+    MCU_FLAGS =
+    CROSS_COMPILE_GCC =
+    CROSS_COMPILE_BIN =
 endif
 
-target = i2c-gate
-src = $(wildcard *.c)
+AS = $(CROSS_COMPILE_BIN)as
+CC = $(CROSS_COMPILE_GCC)gcc
+CPLUSPLUS = $(CROSS_COMPILE_GCC)g++
+LD = $(CROSS_COMPILE_BIN)ld
+AR = $(CROSS_COMPILE_BIN)ar
+OBJCOPY = $(CROSS_COMPILE_BIN)objcopy
+OBJDUMP = $(CROSS_COMPILE_BIN)objdump
+
+CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
+-funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
+-fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(MCU_FLAGS) $(DEBUG_) $(DEFINES)
+LDFLAGS = -Wl,--relax -Wl,--gc-sections
+
+target = serialgate.a
+src = $(filter-out test.c, $(wildcard *.c))
 hdr = $(wildcard *.h)
-obj = $(src:.c=.o)
-elf = $(target).elf
-sre = $(target).srec
-hex = $(target).hex
-lss = $(target).lss
-map = $(target).map
-gdbinit = $(target).gdb
+obj = $(patsubst %.c,%.o,$(src))
 tag = tags
 
-ver = $(shell sed -ne '/define *VERSION_STRING /{s/.*"\(.*\)".*/\1/p; q;}' serial-command.h)
-dst = i2c-gate-v${ver}
+all: $(target)
 
-ifeq ($(DEV),avr)
-all: $(elf) $(lss) $(hex)
-	$(SIZE) $(elf)
-else
-all: $(elf)
-	$(SIZE) $(elf)
-endif
+$(target): $(target)($(obj))
 
-$(elf): $(obj) $(src) $(hdr) $(lufalib)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(lufalib) -Wl,-Map,$(map) -o $(elf)
-
-%.sre: %.elf
-	$(OBJCOPY) -j .text -j .data -O srec $< $@
-
-%.lss: %.elf
-	$(OBJDUMP) -D $< > $@
-
-%.hex: %.elf
-	$(OBJCOPY) -O ihex $< $@
-
+test: $(target) test.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $(target) test.c -o $@
 
 .PHONY: tags
 tags:
@@ -68,40 +52,4 @@ tags:
 
 .PHONY: clean
 clean:
-	$(RM) $(elf) $(obj) $(sre) $(lss) $(map) $(hex) $(tag) $(gdbinit)
-	$(RM) -rf "${dst}".zip "${dst}"
-
-.PHONY: dist
-dist: $(elf) $(hex)
-	#svn export . "$(dst)"
-	hg archive "$(dst)"
-	cp $^ "$(dst)"
-	$(RM) -rf "$(dst)"/contrib "$(dst)"/test $(lss)
-	zip -r "$(dst)".zip "$(dst)"
-	$(RM) -rf "$(dst)"
-	
-# programming
-.PHONY: program
-program: $(hex)
-	avrdude -p $(MCU) -P usb -c dragon_isp -U flash:w:$<
-
-# debugging-related targets
-.PHONY: ddd
-ddd: gdbinit
-	ddd --debugger "avr-gdb -x $(gdbinit)"
-
-.PHONY: gdbserver
-gdbserver: gdbinit
-	simulavr --device $(MCU) --gdbserver
-
-gdbinit: $(gdbinit)
-
-$(gdbinit): $(hex)
-	@echo "file $(elf)" > $(gdbinit)	
-	@echo "target remote localhost:1212" >> $(gdbinit)
-	@echo "load"        >> $(gdbinit)
-	@echo "break main"  >> $(gdbinit)
-	@echo "continue"    >> $(gdbinit)
-	@echo
-	@echo "Use 'avr-gdb -x $(gdbinit)'"
-
+	$(RM) $(target) $(obj) test test.o $(tag)

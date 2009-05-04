@@ -1,5 +1,16 @@
-#ifndef ERRORS_H
-#define ERRORS_H
+#ifndef COMMON_H
+#define COMMON_H
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#ifndef NDEBUG
+#include <stdio.h>
+#define debug(...) printf(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
+
 
 //! error codes
 typedef enum {
@@ -13,4 +24,4 @@ typedef enum {
     NACK_BYTE,          //!< NAck byte
 } error_code_t;
 
-#endif // ERRORS_H
+#endif // COMMON_H

@@ -1,5 +1,5 @@
 //! serial parser
-#include "serial-parser.h"
+#include "parser.h"
 
 /*!
  * Convert hex to int8 (0 — 15)
