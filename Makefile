@@ -1,30 +1,38 @@
-DEV = 'pc'
-DEBUG = 1 
+DEBUG = 1
+MCU = atmega32
+F_CPU = 7372800UL
+BAUD = 115200
 
-#CC = avr-gcc
-CFLAGS += -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef #-Werror
-CFLAGS += -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections -fpack-struct -fshort-enums #-finline-limit=20
-CFLAGS += -ffreestanding -Os -g
-CFLAGS += -I.
-LDFLAGS += -Wl,--relax -Wl,--gc-sections
-OBJCOPY = avr-objcopy
-OBJDUMP = avr-objdump
-SIZE = size
+MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
+CROSS_COMPILE_GCC = avr-
+CROSS_COMPILE_BIN = avr-
 
-ifeq ($(DEV),avr)
-    MCU = atmega32
-	#MCU = atmega16
-    F_CPU = 7372800UL
-    CC = avr-gcc
-    SIZE = avr-size
-    CFLAGS += -DF_CPU=$(F_CPU) -mmcu=$(MCU) -gdwarf-2
-    CFLAGS += -DAVR_IO
-    LDFLAGS = -mmcu=$(MCU)
-endif
+DEFINES = -DBAUD=B$(BAUD)
 
 ifeq ($(DEBUG),0)
-	CFLAGS += -DNDEBUG
+	DEBUG_ = -DNDEBUG
+else
+	DEBUG_ = -DDEBUG=$(DEBUG)
 endif
+ifeq ($(DEBUG),2)
+    MCU_FLAGS =
+    CROSS_COMPILE_GCC =
+    CROSS_COMPILE_BIN =
+endif
+
+AS = $(CROSS_COMPILE_BIN)as
+CC = $(CROSS_COMPILE_GCC)gcc
+CPLUSPLUS = $(CROSS_COMPILE_GCC)g++
+LD = $(CROSS_COMPILE_BIN)ld
+AR = $(CROSS_COMPILE_BIN)ar
+OBJCOPY = $(CROSS_COMPILE_BIN)objcopy
+OBJDUMP = $(CROSS_COMPILE_BIN)objdump
+SIZE = $(CROSS_COMPILE_BIN)size
+
+CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
+-funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
+-fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(MCU_FLAGS) $(DEBUG_) $(DEFINES)
+LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
 target = i2c-gate
 src = $(wildcard *.c)
@@ -38,19 +46,20 @@ map = $(target).map
 gdbinit = $(target).gdb
 tag = tags
 
-ver = $(shell sed -ne '/define *VERSION_STRING /{s/.*"\(.*\)".*/\1/p; q;}' serial-command.h)
-dst = i2c-gate-v${ver}
+serialgatelib = serialgate/libserialgate.a
+registerslib = registers/libregisters.a
 
-ifeq ($(DEV),avr)
-all: $(elf) $(lss) $(hex)
-	$(SIZE) $(elf)
-else
 all: $(elf)
 	$(SIZE) $(elf)
-endif
 
-$(elf): $(obj) $(src) $(hdr) $(lufalib)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(lufalib) -Wl,-Map,$(map) -o $(elf)
+$(elf): $(obj) $(src) $(hdr) $(serialgatelib) $(registerslib)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(serialgatelib) $(registerslib) -Wl,-Map,$(map) -o $(elf)
+
+$(serialgatelib):
+	$(MAKE) -C serialgate MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG) BAUD=$(BAUD)
+
+$(registerslib):
+	$(MAKE) -C registers MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG) BAUD=$(BAUD)
 
 %.sre: %.elf
 	$(OBJCOPY) -j .text -j .data -O srec $< $@
@@ -69,16 +78,8 @@ tags:
 .PHONY: clean
 clean:
 	$(RM) $(elf) $(obj) $(sre) $(lss) $(map) $(hex) $(tag) $(gdbinit)
-	$(RM) -rf "${dst}".zip "${dst}"
-
-.PHONY: dist
-dist: $(elf) $(hex)
-	#svn export . "$(dst)"
-	hg archive "$(dst)"
-	cp $^ "$(dst)"
-	$(RM) -rf "$(dst)"/contrib "$(dst)"/test $(lss)
-	zip -r "$(dst)".zip "$(dst)"
-	$(RM) -rf "$(dst)"
+	$(MAKE) -C serialgate clean
+	$(MAKE) -C registers clean
 	
 # programming
 .PHONY: program
