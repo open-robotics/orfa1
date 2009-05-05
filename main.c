@@ -5,15 +5,23 @@
 #include "serialgate/i2c.h"
 #include "serialgate/common.h"
 #include "serialgate/serialgate.h"
+#include "registers/driver.h"
+#include "registers/ports_driver.h"
+#include "registers/spi_driver.h"
 
-typedef enum {
+#define BUF_LEN 65
+
+static enum {
     GET_REGISTER,
     GET_DATA,
-} state_i2c_t;
+} state_i2c = GET_REGISTER;
 
-static state_i2c_t state_i2c = GET_REGISTER;
 static uint8_t register_addr = 0x00;
-
+static uint8_t buf[BUF_LEN];
+static uint8_t data_len = 0;
+static bool is_restart = false;
+static bool is_read = false;
+static GATE_RESULT result = GR_OK;
 
 /*! Handle I2C Start event
  * \param[in] address device address
@@ -23,7 +31,22 @@ static uint8_t register_addr = 0x00;
 bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 {
     debug("# > cmd_start(0x%02x, %i)\n", address, flag);
+
+    if(is_restart && !is_read)
+    {
+        result = gate_register_write(register_addr, buf, data_len);
+    }
+
     state_i2c = GET_REGISTER;
+    is_read = (address & 0xfe) ? true : false;
+    is_restart = true;
+    data_len = 0;
+
+    if(is_read)
+    {
+        data_len = BUF_LEN - 1;
+        result = gate_register_read(register_addr, buf, &data_len);
+    }
 
     return true;
 }
@@ -33,6 +56,12 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 void cmd_stop(void)
 {
     debug("# > cmd_stop()\n");
+
+    is_restart = false;
+    if(!is_read)
+    {
+        result = gate_register_write(register_addr, buf, data_len);
+    }
 }
 
 /*! Handle I2C master write (slave receiver)
@@ -50,6 +79,8 @@ bool cmd_txc(uint8_t c)
 
         case GET_DATA:
             {
+            if((++data_len) < BUF_LEN)
+                buf[data_len] = c;
             }
             break;
     };
@@ -66,15 +97,35 @@ bool cmd_txc(uint8_t c)
 bool cmd_rxc(uint8_t *c, bool ack)
 {
     debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
+
+    if(register_addr == 0x00)
+    {
+        // error register
+        *c = result;
+        return true;
+    }
+
+    if(data_len > 0)
+    {
+        *c = buf[data_len];
+        --data_len;
+    }
+    if(data_len == 0 && ack)
+    {
+        return false; // Nack on end
+    }
+
     return true;
 }
 
 
 int main()
 {
+    init_ports_driver();
+    init_spi_driver();
     i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 
     serialgate_mainloop();
-    
+
     return 0;
 }

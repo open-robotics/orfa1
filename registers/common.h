@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef GR_COMMON_H
+#define GR_COMMON_H
 
 #define NUM_ELEMENTS(array) (sizeof(array) / sizeof(*(array)))
 
@@ -10,7 +10,7 @@
 
 /**@{*/
 
-/** 
+/**
  * Код результата выполнения функций
  **/
 
