@@ -26,57 +26,57 @@
 #include <stdbool.h>
 
 void cbf_init(cbf_t *cbf) {
-    cbf->pread = cbf->pwrite = cbf->data;
+	cbf->pread = cbf->pwrite = cbf->data;
 }
 
 
 void cbf_put(cbf_t *cbf, uint8_t data)
 {
-    if (!cbf_isfull(cbf)) {
-        *cbf->pwrite++ = data;
-        if (cbf->pwrite >= cbf->data + CBF_SIZE) {
-            cbf->pwrite = cbf->data;
-        }
-    }
+	if (!cbf_isfull(cbf)) {
+		*cbf->pwrite++ = data;
+		if (cbf->pwrite >= cbf->data + CBF_SIZE) {
+			cbf->pwrite = cbf->data;
+		}
+	}
 }
 
 
 uint8_t cbf_get(cbf_t *cbf)
 {
-    uint8_t ret = 0;
-    if (!cbf_isempty(cbf)) {
-        ret = *cbf->pread++;
-        if (cbf->pread >= cbf->data + CBF_SIZE) {
-            cbf->pread = cbf->data;
-        }
-    }
-    return ret;
+	uint8_t ret = 0;
+	if (!cbf_isempty(cbf)) {
+		ret = *cbf->pread++;
+		if (cbf->pread >= cbf->data + CBF_SIZE) {
+			cbf->pread = cbf->data;
+		}
+	}
+	return ret;
 }
 
 uint8_t cbf_peek(const cbf_t *cbf)
 {
-    return cbf_isempty(cbf) ? 0 : *cbf->pread;
+	return cbf_isempty(cbf) ? 0 : *cbf->pread;
 }
 
 
 int cbf_find(const cbf_t *cbf, uint8_t c)
 {
-    int count = 0;
-    const uint8_t *pread = cbf->pread;
+	int count = 0;
+	const uint8_t *pread = cbf->pread;
 
-    while (true) {
-        if (pread == cbf->pwrite) {
-            return -1;
-        }
+	while (true) {
+		if (pread == cbf->pwrite) {
+			return -1;
+		}
 
-        if (*pread == c) {
-            return count;
-        }
-        count++;
+		if (*pread == c) {
+			return count;
+		}
+		count++;
 
-        pread++;
-        if (pread >= cbf->data + CBF_SIZE) {
-            pread = cbf->data;
-        }
-    }
+		pread++;
+		if (pread >= cbf->data + CBF_SIZE) {
+			pread = cbf->data;
+		}
+	}
 }

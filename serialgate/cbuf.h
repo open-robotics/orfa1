@@ -31,12 +31,12 @@
 #endif // defined HAVE_CONFIG_H
 
 #ifndef CBF_SIZE
-#define CBF_SIZE        128
+#define CBF_SIZE		128
 #endif // !defined CBF_SIZE
 
 typedef struct {
-    uint8_t *pread, *pwrite;
-    uint8_t data[CBF_SIZE];
+	uint8_t *pread, *pwrite;
+	uint8_t data[CBF_SIZE];
 } cbf_t;
 
 /**
@@ -54,7 +54,7 @@ void cbf_init(cbf_t *cbf);
  * \return true if the buffer is empty, false otherwise
  *****************************************************************************/
 static inline bool cbf_isempty(const cbf_t *cbf) {
-    return cbf->pread == cbf->pwrite;
+	return cbf->pread == cbf->pwrite;
 }
 
 
@@ -65,8 +65,8 @@ static inline bool cbf_isempty(const cbf_t *cbf) {
  * \return true if the buffer is full, false otherwise
  *****************************************************************************/
 static inline bool cbf_isfull(const cbf_t *cbf) {
-    return (cbf->pwrite == cbf->pread - 1 ||
-        (cbf->pread == cbf->data && cbf->pwrite == cbf->data + CBF_SIZE - 1));
+	return (cbf->pwrite == cbf->pread - 1 ||
+		(cbf->pread == cbf->data && cbf->pwrite == cbf->data + CBF_SIZE - 1));
 }
 
 
@@ -102,8 +102,8 @@ uint8_t cbf_peek(const cbf_t *cbf);
  * \param cbf pointer to the cbf_t structure
  * \param c the character to find
  * \return the position of the character:
- *         0 means the first character,
- *        -1 means the character is not in the circular buffer.
+ *		 0 means the first character,
+ *		-1 means the character is not in the circular buffer.
  *****************************************************************************/
 int cbf_find(const cbf_t *cbf, uint8_t c);
 

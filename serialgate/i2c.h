@@ -31,8 +31,8 @@
  * I2C read or write status flags
  */
 typedef enum {
-    i2c_wr,     //!< the following operation is a write operation.
-    i2c_rd,     //!< the following operation is a read operation.
+	i2c_wr,	 //!< the following operation is a write operation.
+	i2c_rd,	 //!< the following operation is a read operation.
 } i2c_rdwr_t;
 
 /*!
@@ -111,7 +111,7 @@ bool i2c_master_txc(uint8_t c);
  * \param buf the buffer that store the read bytes.
  * \param buf_len the number of bytes in the buffer.
  * \param ack if true, send an ack (transmission contines) after the last byte
- *            otherwise send a nack (transmission ends).
+ *			otherwise send a nack (transmission ends).
  * \return true on success, false on error.
  */
 bool i2c_master_rxc(uint8_t *c, bool ack);
