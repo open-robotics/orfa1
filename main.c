@@ -32,17 +32,17 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 {
     debug("# > cmd_start(0x%02x, %i)\n", address, flag);
 
-    if(is_restart && !is_read)
+    if(is_restart && !is_read && register_addr != 0x00)
     {
         result = gate_register_write(register_addr, buf, data_len);
     }
 
     state_i2c = GET_REGISTER;
-    is_read = (address & 0xfe) ? true : false;
+    is_read = (address & 0x01) ? true : false;
     is_restart = true;
     data_len = 0;
 
-    if(is_read)
+    if(is_read && register_addr != 0x00)
     {
         data_len = BUF_LEN - 1;
         result = gate_register_read(register_addr, buf, &data_len);
@@ -102,6 +102,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
     {
         // error register
         *c = result;
+		result = GR_OK; // clear
         return true;
     }
 
@@ -118,11 +119,39 @@ bool cmd_rxc(uint8_t *c, bool ack)
     return true;
 }
 
+#if 1
+#include "registers/driver.h"
+static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+{
+    debug("# driver_read(0x%02X, *data, 0x%02X)\n", reg, *data_len);
+}
+
+static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t* data_len)
+{
+    debug("# driver_write(0x%02X, *data, 0x%02X)\n", reg, *data_len);
+}
+
+static GATE_RESULT driver_init(void)
+{
+    debug("# driver_init()\n");
+}
+
+static uint8_t registers[] = {0x01, 0x02};
+static GATE_DRIVER driver = {
+    .read = driver_read,
+    .write = driver_write,
+    .init = driver_init,
+    .registers = registers,
+    .num_registers = NUM_ELEMENTS(registers),
+};
+#endif
 
 int main()
 {
-    init_ports_driver();
-    init_spi_driver();
+//    init_ports_driver();
+//    init_spi_driver();
+gate_driver_register(&driver);
+
     i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 
     serialgate_mainloop();

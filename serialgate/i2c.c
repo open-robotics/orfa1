@@ -254,15 +254,18 @@ bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
 
 void i2c_master_stop()
 {
-    #ifdef AVR_IO
-    avr_i2c_master_stop();
-    #endif
-    if(local_stop != NULL)
+    if(current_addr == localhost_addr && local_stop != NULL)
     {
         local_stop();
     }
+    #ifdef AVR_IO
+	else
+	{
+    	avr_i2c_master_stop();
+	}
+    #endif
 }
-
+ 
 bool i2c_master_txc(uint8_t c)
 {
     bool status=false;
