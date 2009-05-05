@@ -25,16 +25,16 @@ static GATE_RESULT result = GR_OK;
 
 /*! Handle I2C Start event
  * \param[in] address device address
- * \param[in] flar Write/Read flag
+ * \param[in] flag Write/Read flag
  * \return true if success (always)
  */
 bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 {
 	debug("# > cmd_start(0x%02x, %i)\n", address, flag);
 
-	if(is_restart && !is_read && register_addr != 0x00)
+	if(is_restart && !is_read && data_len > 0 && register_addr != 0x00)
 	{
-		result = gate_register_write(register_addr, buf, data_len);
+		result = gate_register_write(register_addr, buf+1, data_len);
 	}
 
 	state_i2c = GET_REGISTER;
@@ -58,9 +58,9 @@ void cmd_stop(void)
 	debug("# > cmd_stop()\n");
 
 	is_restart = false;
-	if(!is_read)
+	if(!is_read && register_addr != 0x00)
 	{
-		result = gate_register_write(register_addr, buf, data_len);
+		result = gate_register_write(register_addr, buf+1, data_len);
 	}
 }
 
@@ -108,12 +108,12 @@ bool cmd_rxc(uint8_t *c, bool ack)
 
 	if(data_len > 0)
 	{
-		*c = buf[data_len];
+		*c = buf[data_len-1];
 		--data_len;
 	}
-	if(data_len == 0 && ack)
+	if((data_len > 0) ^ ack)
 	{
-		return false; // Nack on end
+		return false; // Nack
 	}
 
 	return true;
@@ -124,11 +124,22 @@ bool cmd_rxc(uint8_t *c, bool ack)
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	debug("# driver_read(0x%02X, *data, 0x%02X)\n", reg, *data_len);
+	data[0] = 0x00;
+	data[1] = 0x01;
+	data[2] = 0x02;
+	data[3] = 0x03;
+	data[4] = 0x04;
+	*data_len = 5;
 }
 
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	debug("# driver_write(0x%02X, *data, 0x%02X)\n", reg, *data_len);
+	debug("# driver_write(0x%02X, *data, 0x%02X)\n# > data->", reg, data_len);
+	for(uint8_t i=0; i < data_len; i++)
+	{
+		debug(" 0x%02X", data[i]);
+	}
+	debug("\n");
 }
 
 static GATE_RESULT driver_init(void)
