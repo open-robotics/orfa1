@@ -80,7 +80,11 @@ clean:
 	$(RM) $(elf) $(obj) $(sre) $(lss) $(map) $(hex) $(tag) $(gdbinit)
 	$(MAKE) -C serialgate clean
 	$(MAKE) -C registers clean
-	
+
+.PHONY: docs
+docs:
+	doxygen
+
 # programming
 .PHONY: program
 program: $(hex)
@@ -98,7 +102,7 @@ gdbserver: gdbinit
 gdbinit: $(gdbinit)
 
 $(gdbinit): $(hex)
-	@echo "file $(elf)" > $(gdbinit)	
+	@echo "file $(elf)" > $(gdbinit)
 	@echo "target remote localhost:1212" >> $(gdbinit)
 	@echo "load"        >> $(gdbinit)
 	@echo "break main"  >> $(gdbinit)

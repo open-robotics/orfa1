@@ -9,3 +9,5 @@
 .*\.a
 tags$
 .*\.sre
+doxygen.log$
+doc\/doxygen
