@@ -38,8 +38,8 @@ GATE_RESULT gate_port_config(uint8_t number, uint8_t mask, uint8_t value)
 	}
 	uint8_t port_value = *(port->DDR);
 	mask = mask & ~(port->default_busy_mask | port->busy_mask);
-	port_value &= (value | mask);
-	port_value |= (value & ~mask);
+	port_value &= ~mask;
+	port_value |= (value & mask);
 	*(port->DDR) = port_value;
 	return GR_OK;
 }
@@ -52,8 +52,8 @@ GATE_RESULT gate_port_write(uint8_t number, uint8_t mask, uint8_t value)
 	}
 	uint8_t port_value = *(port->PORT);
 	mask = mask & ~(port->default_busy_mask | port->busy_mask);
-	port_value &= (value | mask);
-	port_value |= (value & ~mask);
+	port_value &= ~mask;
+	port_value |= (value & mask);
 	*(port->PORT) = port_value;
 	return GR_OK;
 }
