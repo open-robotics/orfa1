@@ -10,6 +10,7 @@ GATE_PORT* find_port(uint8_t number)
 		if (cur->number == number) {
 			return cur;
 		}
+		cur = cur->next;
 	}
 	return 0;
 }

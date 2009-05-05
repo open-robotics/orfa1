@@ -119,7 +119,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
 	return true;
 }
 
-#if 1
+#ifndef NDEBUG
 #include "registers/driver.h"
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
@@ -155,13 +155,16 @@ static GATE_DRIVER driver = {
 	.registers = registers,
 	.num_registers = NUM_ELEMENTS(registers),
 };
-#endif
+#endif // NDEBUG
 
 int main()
 {
-//	init_ports_driver();
-//	init_spi_driver();
-gate_driver_register(&driver);
+	init_ports_driver();
+	init_spi_driver();
+
+	#ifndef NDEBUG
+	gate_driver_register(&driver);
+	#endif
 
 	i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 
