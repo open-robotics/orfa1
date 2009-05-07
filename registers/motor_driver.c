@@ -1,7 +1,8 @@
 #include "common.h"
 #include "driver.h"
 #include <avr/io.h>
-
+#include <stdint.h>
+#include <stdbool.h>
 
 static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
