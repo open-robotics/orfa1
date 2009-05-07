@@ -8,6 +8,7 @@
 #include "registers/driver.h"
 #include "registers/ports_driver.h"
 #include "registers/spi_driver.h"
+#include "registers/motor_driver.h"
 
 #define BUF_LEN 65
 
@@ -161,6 +162,7 @@ int main()
 {
 	init_ports_driver();
 	init_spi_driver();
+	init_motor_driver();
 
 	#ifndef NDEBUG
 	gate_driver_register(&driver);
