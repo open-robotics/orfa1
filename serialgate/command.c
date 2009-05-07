@@ -199,7 +199,7 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 		break;
 	}
 
-	cbf_put(tx_buf, '\r');
+	//cbf_put(tx_buf, '\r'); // not needed: serial_fdev translate '\n' to '\r\n'
 	cbf_put(tx_buf, '\n');
 
 	return true;
