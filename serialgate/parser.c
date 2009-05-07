@@ -71,6 +71,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 	static uint8_t data=0;
 	static uint8_t addr=0;
 	static uint8_t reg_len=1;
+	static error_code_t error_c=NO_ERROR;
 
 	// machine states
 	static state_cmd_t state_cmd=CMD_INIT;
@@ -86,6 +87,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 		cbf_init(cmd_buf);
 		state_cmd = GET_COMMAND;
 		state_i2creg = GET_ADDRESS;
+		error_c = *error_code;
 	}
 
 	// ---------------------------------------------------------------
@@ -135,25 +137,26 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case '#':
 					// is comment?
-					state_cmd = COMMENT_EOL;
+					state_cmd = COMMENT_OR_ERROR_EOL;
 					break;
 
 				default:
-					*error_code = INVALID_COMMAND;
+					error_c = INVALID_COMMAND;
 					break;
 			}
 			break;
 
-		case COMMENT_EOL:
+		case COMMENT_OR_ERROR_EOL:
 			// skip line
 			if(c == '\r' || c == '\n')
 			{
+				*error_code = error_c;
 				state_cmd = CMD_INIT;
 			}
 			break;
 
 		case PARSE_CONFIG:
-			if(get_cmd_byte(c, &data, error_code))
+			if(get_cmd_byte(c, &data, &error_c))
 			{
 				cbf_put(cmd_buf, data);
 				if(cout++ > 1)
@@ -164,7 +167,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			break;
 
 		case PARSE_LOCAL:
-			if(get_cmd_byte(c, &data, error_code))
+			if(get_cmd_byte(c, &data, &error_c))
 			{
 				cbf_put(cmd_buf, data);
 				state_cmd = WAIT_EOL;
@@ -175,7 +178,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			switch(state_i2creg)
 			{
 				case GET_ADDRESS:
-					if(get_cmd_byte(c, &data, error_code))
+					if(get_cmd_byte(c, &data, &error_c))
 					{
 						cbf_put(cmd_buf, data);
 						state_i2creg = (data & 0x01) ? PARSE_I2C_READ : PARSE_I2C_WRITE;
@@ -183,7 +186,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 
 				case PARSE_I2C_READ:
-					if(get_cmd_byte(c, &data, error_code))
+					if(get_cmd_byte(c, &data, &error_c))
 					{
 						cbf_put(cmd_buf, data);
 						state_i2creg = WAIT_RESTART_OR_STOP;
@@ -256,7 +259,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					}
 					else
 					{
-						*error_code = INVALID_DATA;
+						error_c = INVALID_DATA;
 					}
 					break;
 
@@ -267,7 +270,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			switch(state_i2creg)
 			{
 				case GET_ADDRESS:
-					if(get_cmd_byte(c, &data, error_code))
+					if(get_cmd_byte(c, &data, &error_c))
 					{
 						addr = data & (~0x01);
 						cbf_put(cmd_buf, addr);
@@ -276,7 +279,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 
 				case GET_REGISTER:
-					if(get_cmd_byte(c, &data, error_code))
+					if(get_cmd_byte(c, &data, &error_c))
 					{
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, data);
@@ -323,7 +326,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			switch(state_i2creg)
 			{
 				case GET_ADDRESS:
-					if(get_cmd_byte(c, &data, error_code))
+					if(get_cmd_byte(c, &data, &error_c))
 					{
 						addr = data & (~0x01);
 						cbf_put(cmd_buf, addr);
@@ -332,7 +335,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 
 				case GET_REGISTER:
-					if(get_cmd_byte(c, &data, error_code))
+					if(get_cmd_byte(c, &data, &error_c))
 					{
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, data);
@@ -380,7 +383,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					}
 					else
 					{
-						*error_code = INVALID_DATA;
+						error_c = INVALID_DATA;
 					}
 					break;
 
@@ -405,6 +408,11 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 	}
 
 	// ---------------------------------------------------------------
+
+	if(error_c != NO_ERROR)
+	{
+		state_cmd = COMMENT_OR_ERROR_EOL;
+	}
 
 	if(*error_code != NO_ERROR)
 	{

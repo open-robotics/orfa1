@@ -46,8 +46,7 @@ void serialgate_mainloop(void)
 
 		if(error_code != NO_ERROR)
 		{
-			puts("ERROR");
-
+			print_error(error_code);
 			cbf_init(&tx_buf);
 			error_code = NO_ERROR;
 		}

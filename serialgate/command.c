@@ -25,6 +25,7 @@
 //#include <avr/pgmspace.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "i2c.h"
 #include "command.h"
@@ -33,11 +34,11 @@
 #define INTERFACE_VERSION_STRING  "1.0"
 #endif
 
-/*!
+/**
  * Convert a 4-bit integer value to its ASCII representation.
  *
- * \param c the value to convert.
- * \return the converted value or 'X' on error.
+ * @param c the value to convert.
+ * @return the converted value or 'X' on error.
  */
 static char itox(uint8_t c)
 {
@@ -53,8 +54,20 @@ static char itox(uint8_t c)
 	return ret;
 }
 
+void print_error(error_code_t error_code)
+{
+	putchar('E');
+	putchar('R');
+	putchar('R');
+	putchar('O');
+	putchar('R');
+	putchar(' ');
+	putchar(itox(error_code >> 4));
+	putchar(itox(error_code & 0x0f));
+	putchar('\n');
+}
 
-/*!
+/*
  * Execute a cmd_buf sequence.
  *
  * \param[in]  cmd_buf buffer conraining the output command string.

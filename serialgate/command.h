@@ -31,12 +31,17 @@
 #include "cbuf.h"
 #include "common.h"
 
-/*!
+/**
+ * Error reporting
+ */
+void print_error(error_code_t error_code);
+
+/**
  * Executed a parsed command.
  *
- * \param cmd_buf[in] circular buffer that will be filled with the commands.
- * \param tx_buf[out] circular buffer that will contain the error message.
- * \return true on success, false on failure.
+ * @param cmd_buf[in] circular buffer that will be filled with the commands.
+ * @param tx_buf[out] circular buffer that will contain the error message.
+ * @return true on success, false on failure.
  */
 bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code);
 
