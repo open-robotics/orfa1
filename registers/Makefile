@@ -1,13 +1,12 @@
 DEBUG = 1
 MCU = atmega32
 F_CPU = 7372800UL
-BAUD = 115200
 
-MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
+MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 CROSS_COMPILE_GCC = avr-
 CROSS_COMPILE_BIN = avr-
 
-DEFINES = -DBAUD=B$(BAUD)
+DEFINES =
 
 ifeq ($(DEBUG),0)
 	DEBUG_ = -DNDEBUG
@@ -43,8 +42,8 @@ all: $(target)
 
 $(target): $(target)($(obj))
 
-test: $(target) test.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(target) test.c -o $@
+test: $(target)
+	$(CC) $(CFLAGS) $(LDFLAGS) test.c $(target) -o $@
 
 .PHONY: tags
 tags:

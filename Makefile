@@ -59,7 +59,7 @@ $(serialgatelib):
 	$(MAKE) -C serialgate MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG) BAUD=$(BAUD)
 
 $(registerslib):
-	$(MAKE) -C registers MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG) BAUD=$(BAUD)
+	$(MAKE) -C registers MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG)
 
 %.sre: %.elf
 	$(OBJCOPY) -j .text -j .data -O srec $< $@

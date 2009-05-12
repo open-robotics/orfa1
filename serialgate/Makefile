@@ -44,7 +44,7 @@ all: $(target)
 $(target): $(target)($(obj))
 
 test: $(target) test.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(target) test.c -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) test.c $(target) -o $@
 
 .PHONY: tags
 tags:
