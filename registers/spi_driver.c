@@ -52,6 +52,7 @@ static uint8_t registers[] = {
 };
 
 static GATE_DRIVER driver = {
+	.uid = 0x1000, // spi id
 	.read = spi_driver_read,
 	.write = spi_driver_write,
 	.registers = registers,

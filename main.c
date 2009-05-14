@@ -1,3 +1,26 @@
+/*
+ *  ORFA -- Open Robotics Firmware Architecture
+ *
+ *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in
+ *  all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *****************************************************************************/
 
 #include <stdint.h>
 #include <stdio.h>
@@ -24,16 +47,16 @@ static bool is_restart = false;
 static bool is_read = false;
 static GATE_RESULT result = GR_OK;
 
-/*! Handle I2C Start event
- * \param[in] address device address
- * \param[in] flag Write/Read flag
- * \return true if success (always)
+/** Handle I2C Start event
+ * @param[in] address device address
+ * @param[in] flag Write/Read flag
+ * @return true if success (always)
  */
 bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 {
 	debug("# > cmd_start(0x%02x, %i)\n", address, flag);
 
-	if(is_restart && !is_read && data_len > 0 && register_addr != 0x00)
+	if(is_restart && !is_read && data_len > 0)
 	{
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
@@ -43,7 +66,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	is_restart = true;
 	data_len = 0;
 
-	if(is_read && register_addr != 0x00)
+	if(is_read)
 	{
 		data_len = BUF_LEN - 1;
 		result = gate_register_read(register_addr, buf, &data_len);
@@ -52,22 +75,22 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	return true;
 }
 
-/*! Handle I2C Stop event
+/** Handle I2C Stop event
  */
 void cmd_stop(void)
 {
 	debug("# > cmd_stop()\n");
 
 	is_restart = false;
-	if(!is_read && register_addr != 0x00)
+	if(!is_read)
 	{
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
 }
 
-/*! Handle I2C master write (slave receiver)
- * \param[in] c writed byte
- * \return true if success
+/** Handle I2C master write (slave receiver)
+ * @param[in] c writed byte
+ * @return true if success
  */
 bool cmd_txc(uint8_t c)
 {
@@ -90,10 +113,10 @@ bool cmd_txc(uint8_t c)
 	return true;
 }
 
-/*! Handle I2C master read (slave transmitter)
- * \param[out] *c byte for read
- * \param[in] ack ack/nack
- * \return true if success
+/** Handle I2C master read (slave transmitter)
+ * @param[out] *c byte for read
+ * @param[in] ack ack/nack
+ * @return true if success
  */
 bool cmd_rxc(uint8_t *c, bool ack)
 {
@@ -120,53 +143,12 @@ bool cmd_rxc(uint8_t *c, bool ack)
 	return true;
 }
 
-#ifndef NDEBUG
-#include "registers/driver.h"
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
-{
-	debug("# driver_read(0x%02X, *data, 0x%02X)\n", reg, *data_len);
-	data[0] = 0x00;
-	data[1] = 0x01;
-	data[2] = 0x02;
-	data[3] = 0x03;
-	data[4] = 0x04;
-	*data_len = 5;
-}
-
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
-{
-	debug("# driver_write(0x%02X, *data, 0x%02X)\n# > data->", reg, data_len);
-	for(uint8_t i=0; i < data_len; i++)
-	{
-		debug(" 0x%02X", data[i]);
-	}
-	debug("\n");
-}
-
-static GATE_RESULT driver_init(void)
-{
-	debug("# driver_init()\n");
-}
-
-static uint8_t registers[] = {0x01, 0x02};
-static GATE_DRIVER driver = {
-	.read = driver_read,
-	.write = driver_write,
-	.init = driver_init,
-	.registers = registers,
-	.num_registers = NUM_ELEMENTS(registers),
-};
-#endif // NDEBUG
-
 int main()
 {
+	gate_init_introspection();
 	init_ports_driver();
 	init_spi_driver();
 	init_motor_driver();
-
-	#ifndef NDEBUG
-	gate_driver_register(&driver);
-	#endif
 
 	i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 

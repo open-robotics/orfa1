@@ -96,6 +96,7 @@ typedef GATE_RESULT (*GATE_INIT)(void);
 typedef struct GATE_DRIVER_ {
 	uint8_t* registers; /**< Массив с номерами регистров, обслуживаемых драйвером */
 	uint8_t  num_registers; /**< Количество регистров */
+	uint16_t uid; /**< Идентификатор драйвера (для интроспекции) */
 	struct GATE_DRIVER_* next; /*<< Указатель на следующий драйвер в списке */
 	GATE_READ read; /**< Функция чтения */
 	GATE_WRITE write; /**< Функция записи */
@@ -153,5 +154,10 @@ GATE_RESULT gate_register_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 uint8_t gate_allocate_register(void);
 
 /**@}*/
+
+/**
+ * Инициализация драйвера интроспекции
+ */
+void gate_init_introspection(void);
 
 #endif

@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "driver.h"
+#include "common.h"
 #include <stdint.h>
 
 #define RESERVED_REGISTERS 2
@@ -98,5 +99,34 @@ uint8_t gate_allocate_register(void)
 		return 0;
 	}
 	return free_register++;
+}
+
+// introspection driver -------------------------------------------------------
+
+static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+
+static uint8_t iregisters[] = {0x00};
+static GATE_DRIVER idriver = {
+	.uid = 0x0000, // introspection id
+	.read = idriver_read,
+	.write = idriver_write,
+	.registers = iregisters,
+	.num_registers = NUM_ELEMENTS(iregisters),
+};
+
+static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+{
+	return GR_OK;
+}
+
+static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+{
+	return GR_OK;
+}
+
+void gate_init_introspection(void)
+{
+	gate_driver_register(&idriver);
 }
 
