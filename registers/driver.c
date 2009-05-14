@@ -25,6 +25,9 @@
 #include "driver.h"
 #include <stdint.h>
 
+#define RESERVED_REGISTERS 2
+
+static uint8_t free_register = RESERVED_REGISTERS;
 static GATE_DRIVER* drivers;
 
 static GATE_DRIVER* find_driver(uint8_t reg)
@@ -87,5 +90,13 @@ GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 		drivers = driver;
 	}
 	return res;
+}
+
+uint8_t gate_allocate_register(void)
+{
+	if (!free_register) {
+		return 0;
+	}
+	return free_register++;
 }
 
