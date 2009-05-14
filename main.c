@@ -122,14 +122,6 @@ bool cmd_rxc(uint8_t *c, bool ack)
 {
 	debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
 
-	if(register_addr == 0x00)
-	{
-		// error register
-		*c = result;
-		result = GR_OK; // clear
-		return true;
-	}
-
 	if(data_len > 0)
 	{
 		*c = buf[data_len-1];

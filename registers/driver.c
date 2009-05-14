@@ -115,13 +115,61 @@ static GATE_DRIVER idriver = {
 	.num_registers = NUM_ELEMENTS(iregisters),
 };
 
+static uint8_t idriver_num = 0;
+static uint8_t idriver_len = 0;
+
 static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
+	if (!*data_len) {
+		return GR_OK;
+	}
+	
+	if (idriver_num > idriver_len) {
+		idriver_num = 0;
+	}
+
+	if (idriver_num == 0) {
+		*data_len = 1;
+		*data = idriver_len;
+		return GR_OK;
+	}
+
+	*data_len = 4;
+	GATE_DRIVER* driver = drivers;
+	for (uint8_t cur=1; cur < idriver_num && driver; cur++) {
+		driver = driver->next;
+	}
+	if (driver) {
+		data[0] = (uint8_t) driver->uid >> 8;
+		data[1] = (uint8_t) driver->uid;
+		data[2] = driver->registers[0];
+		data[3] = driver->num_registers;
+	}
+
 	return GR_OK;
 }
 
 static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
+	if (data_len != 1) {
+		return GR_INVALID_ARG;
+	}
+
+	if (*data == 0) {
+		GATE_DRIVER* driver = drivers;
+		idriver_len = 0;
+		while (driver) {
+			++idriver_len;
+			driver = driver->next;
+		}
+	}
+
+	if (*data > idriver_len) {
+		return GR_INVALID_ARG;
+	}
+
+	idriver_num = *data;
+
 	return GR_OK;
 }
 
