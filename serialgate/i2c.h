@@ -1,7 +1,9 @@
 /*
- *  userial -- a USB to I2C converter
+ *  ORFA -- Open Robotics Firmware Architecture
+ *  Based on userial -- a USB to I2C converter
  *
  *  Copyright (c) 2008-2009, Thomas Pircher <tehpeh@gmx.net>
+ *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +23,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+
 #ifndef I2C_H
 #define I2C_H
 
