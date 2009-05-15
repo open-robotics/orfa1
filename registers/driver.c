@@ -141,9 +141,8 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	*data_len = 6;
 	GATE_DRIVER* driver = drivers;
 	uint8_t i=idriver_num;
-	while (i) {
+	while (--i) {
 		driver = driver->next;
-		i--;
 	}
 	
 	if (driver) {
