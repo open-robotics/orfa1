@@ -76,11 +76,13 @@ GATE_RESULT gate_register_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 {
 	uint8_t i = driver->num_registers;
+	uint8_t* cur = driver->registers;
 	while (i) {
-		if (find_driver(driver->registers[i])) {
+		if (find_driver(*cur)) {
 			return GR_DUPLICATE_REGISTER;
 		}
 		i--;
+		cur++;
 	}
 	GATE_RESULT res = GR_OK;
 	if (driver->init) {
