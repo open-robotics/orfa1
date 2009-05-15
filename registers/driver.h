@@ -97,6 +97,8 @@ typedef struct GATE_DRIVER_ {
 	uint8_t* registers; /**< Массив с номерами регистров, обслуживаемых драйвером */
 	uint8_t  num_registers; /**< Количество регистров */
 	uint16_t uid; /**< Идентификатор драйвера (для интроспекции) */
+	uint8_t major_version;
+	uint8_t minor_version;
 	struct GATE_DRIVER_* next; /*<< Указатель на следующий драйвер в списке */
 	GATE_READ read; /**< Функция чтения */
 	GATE_WRITE write; /**< Функция записи */

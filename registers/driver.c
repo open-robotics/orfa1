@@ -111,6 +111,8 @@ static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 static uint8_t iregisters[] = {0x00};
 static GATE_DRIVER idriver = {
 	.uid = 0x0000, // introspection id
+	.major_version = 1,
+	.minor_version = 0,
 	.read = idriver_read,
 	.write = idriver_write,
 	.registers = iregisters,
@@ -136,16 +138,22 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 		return GR_OK;
 	}
 
-	*data_len = 4;
+	*data_len = 6;
 	GATE_DRIVER* driver = drivers;
-	for (uint8_t cur=1; cur < idriver_num && driver; cur++) {
+	uint8_t i=idriver_num;
+	while (i) {
 		driver = driver->next;
+		i--;
 	}
+	
 	if (driver) {
-		data[0] = (uint8_t) driver->uid >> 8;
-		data[1] = (uint8_t) driver->uid;
-		data[2] = driver->registers[0];
-		data[3] = driver->num_registers;
+		uint16_t uid = driver->uid;
+		data[0] = (uint8_t) (uid >> 8);
+		data[1] = (uint8_t) uid;
+		data[2] = driver->major_version;
+		data[3] = driver->minor_version;
+		data[4] = driver->registers[0];
+		data[5] = driver->num_registers;
 	}
 
 	return GR_OK;

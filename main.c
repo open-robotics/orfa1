@@ -43,6 +43,7 @@ static enum {
 static uint8_t register_addr = 0x00;
 static uint8_t buf[BUF_LEN];
 static uint8_t data_len = 0;
+static uint8_t* read_ptr;
 static bool is_restart = false;
 static bool is_read = false;
 static GATE_RESULT result = GR_OK;
@@ -69,6 +70,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	if(is_read)
 	{
 		data_len = BUF_LEN - 1;
+		read_ptr = buf;
 		result = gate_register_read(register_addr, buf, &data_len);
 	}
 
@@ -124,14 +126,14 @@ bool cmd_rxc(uint8_t *c, bool ack)
 
 	if(data_len > 0)
 	{
-		*c = buf[data_len-1];
+		*c = *read_ptr++;
 		--data_len;
 	}
+
 	if((data_len > 0) ^ ack)
 	{
 		return false; // Nack
 	}
-
 	return true;
 }
 
