@@ -22,8 +22,8 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#include "registers/common.h"
-#include "registers/driver.h"
+#include "core/common.h"
+#include "core/driver.h"
 #include <avr/io.h>
 #include <stdint.h>
 #include <stdbool.h>

@@ -25,7 +25,7 @@
 #ifndef PORTS_DRIVER_H
 #define PORTS_DRIVER_H
 
-#include "registers/common.h"
+#include "core/common.h"
 
 GATE_RESULT init_ports_driver(void);
 

@@ -28,7 +28,7 @@
 #include "serialgate/i2c.h"
 #include "serialgate/common.h"
 #include "serialgate/serialgate.h"
-#include "registers/driver.h"
+#include "core/driver.h"
 #include "drivers/ports_driver.h"
 #include "drivers/spi_driver.h"
 #include "drivers/motor_driver.h"

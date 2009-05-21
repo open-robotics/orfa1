@@ -41,7 +41,7 @@ CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
 -fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(MCU_FLAGS) $(DEBUG_) $(DEFINES)
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
-target = i2c-gate
+target = orfa
 src = $(wildcard *.c) $(drv_src)
 hdr = $(wildcard *.h) $(drv_hdr)
 obj = $(src:.c=.o)
@@ -54,19 +54,19 @@ gdbinit = $(target).gdb
 tag = tags
 
 serialgatelib = serialgate/libserialgate.a
-registerslib = registers/libregisters.a
+corelib = core/libcore.a
 
 all: $(elf)
 	$(SIZE) $(elf)
 
-$(elf): $(obj) $(src) $(hdr) $(serialgatelib) $(registerslib)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(serialgatelib) $(registerslib) -Wl,-Map,$(map) -o $(elf)
+$(elf): $(obj) $(src) $(hdr) $(serialgatelib) $(corelib)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(serialgatelib) $(corelib) -Wl,-Map,$(map) -o $(elf)
 
 $(serialgatelib):
 	$(MAKE) -C serialgate MCU_FLAGS="$(MCU_FLAGS)" BAUD="$(BAUD)" DEBUG="$(DEBUG)"
 
-$(registerslib):
-	$(MAKE) -C registers MCU_FLAGS="$(MCU_FLAGS)" DEBUG="$(DEBUG)"
+$(corelib):
+	$(MAKE) -C core MCU_FLAGS="$(MCU_FLAGS)" DEBUG="$(DEBUG)"
 
 %.sre: %.elf
 	$(OBJCOPY) -j .text -j .data -O srec $< $@
@@ -86,7 +86,7 @@ tags:
 clean:
 	$(RM) $(elf) $(obj) $(sre) $(lss) $(map) $(hex) $(tag) $(gdbinit)
 	$(MAKE) -C serialgate clean
-	$(MAKE) -C registers clean
+	$(MAKE) -C core clean
 
 .PHONY: docs
 docs:

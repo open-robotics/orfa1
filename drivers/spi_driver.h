@@ -25,7 +25,7 @@
 #ifndef SPI_DRIVER_H
 #define SPI_DRIVER_H
 
-#include "registers/common.h"
+#include "core/common.h"
 
 GATE_RESULT init_spi_driver(void);
 

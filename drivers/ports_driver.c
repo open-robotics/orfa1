@@ -22,9 +22,9 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#include "registers/common.h"
-#include "registers/ports.h"
-#include "registers/driver.h"
+#include "core/common.h"
+#include "core/ports.h"
+#include "core/driver.h"
 #include <avr/io.h>
 
 static GATE_RESULT port_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);

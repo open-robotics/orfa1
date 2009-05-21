@@ -25,7 +25,7 @@
 #ifndef MOTOR_DRIVER_H
 #define MOTOR_DRIVER_H
 
-#include "registers/common.h"
+#include "core/common.h"
 
 GATE_RESULT init_motor_driver(void);
 

@@ -32,7 +32,7 @@ CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
 -fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(MCU_FLAGS) $(DEBUG_) $(DEFINES)
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
-target = libregisters.a
+target = libcore.a
 src = $(filter-out test.c, $(wildcard *.c))
 hdr = $(wildcard *.h)
 obj = $(patsubst %.c,%.o,$(src))
