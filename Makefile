@@ -1,31 +1,9 @@
-PLATFORM=OR-AVR-M32-D
-
-DEBUG = 1
-MCU = atmega32
-F_CPU = 7372800UL
-BAUD = 115200
-DEFINES = -DBAUD=B$(BAUD)
-
-ifeq ($(PLATFORM),OR-AVR-M32-D)
-	drv_src = $(wildcard drivers/*.c)
-	drv_hdr = $(wildcard drivers/*.h)
-	DEFINES += -DOR_AVR_M32_D
+ifeq "$(CONFIG_FILE)"  ""
+    CONFIG_FILE = or-avr-m32-d.conf.mk
 endif
+include $(CONFIG_FILE)
+include resolve.mk
 
-MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
-CROSS_COMPILE_GCC = avr-
-CROSS_COMPILE_BIN = avr-
-
-ifeq ($(DEBUG),0)
-	DEBUG_ = -DNDEBUG
-else
-	DEBUG_ = -DDEBUG=$(DEBUG)
-endif
-ifeq ($(DEBUG),2)
-    MCU_FLAGS =
-    CROSS_COMPILE_GCC =
-    CROSS_COMPILE_BIN =
-endif
 
 AS = $(CROSS_COMPILE_BIN)as
 CC = $(CROSS_COMPILE_GCC)gcc
