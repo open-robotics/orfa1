@@ -21,6 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** RoboMD2 Motor driver
+ * @file motor_driver.h
+ *
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef MOTOR_DRIVER_H
 #define MOTOR_DRIVER_H

@@ -23,6 +23,11 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Serial command processor
+ * @file command.h
+ *
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef COMMAND_H
 #define COMMAND_H
@@ -41,8 +46,8 @@ void print_error(error_code_t error_code);
 /**
  * Executed a parsed command.
  *
- * @param cmd_buf[in] circular buffer that will be filled with the commands.
- * @param tx_buf[out] circular buffer that will contain the error message.
+ * @param[in] cmd_buf circular buffer that will be filled with the commands.
+ * @param[out] tx_buf circular buffer that will contain the error message.
  * @return true on success, false on failure.
  */
 bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code);

@@ -21,6 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Driver core
+ * @file driver.h
+ *
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef DRIVER_H
 #define DRIVER_H

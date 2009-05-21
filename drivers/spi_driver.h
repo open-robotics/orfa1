@@ -21,6 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** RoboBus SPI driver
+ * @file spi_driver.h
+ *
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef SPI_DRIVER_H
 #define SPI_DRIVER_H

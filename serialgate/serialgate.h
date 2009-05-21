@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 /** Serial-to-I2C gate
+ * @file serialgate.h
  *
  * @p Read i2c regex
  * <aa> — i2c address & 0xFE

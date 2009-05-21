@@ -21,6 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** RoboGPIO Digital driver
+ * @file ports_driver.h
+ *
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef PORTS_DRIVER_H
 #define PORTS_DRIVER_H

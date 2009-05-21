@@ -23,6 +23,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Circullar Buffer
+ * @file cbuf.h
+ *
+ * @author Thomas Pircher <tehpeh@gmx.net>
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef CBUF_H
 #define CBUF_H

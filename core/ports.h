@@ -21,6 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Ports core
+ * @file ports.h
+ *
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef PORTS_H
 #define PORTS_H

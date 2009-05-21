@@ -21,6 +21,11 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Serial command parser
+ * @file parser.h
+ *
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef SERIAL_PARSER_H
 #define SERIAL_PARSER_H
@@ -54,7 +59,14 @@ typedef enum {
 	WAIT_RESTART_OR_STOP,	///< wait next i2c frame or stop
 } state_i2creg_t;
 
-
+/**
+ * Parser state machine
+ *
+ * @param[in] co one char from serial stream
+ * @param[out] *cmd_buf command buffer
+ * @param[out] *error_code error
+ * @returns true if command parsed
+ */
 bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code);
 
 

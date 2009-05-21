@@ -21,6 +21,11 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Serial gate common defines
+ * @file common.h
+ *
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -28,6 +33,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/// Debug print
 #ifndef NDEBUG
 #include <stdio.h>
 #define debug(...) printf(__VA_ARGS__)
@@ -36,7 +42,7 @@
 #endif
 
 
-//! error codes
+/// error codes
 typedef enum {
 	NO_ERROR=0,		 //!< no error
 	INTERNAL_ERROR,	 //!< internal parser error

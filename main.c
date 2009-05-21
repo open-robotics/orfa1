@@ -21,6 +21,11 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** ORFA with serial gate
+ * @file main.c
+ *
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
 #include <stdint.h>
 #include <stdio.h>
