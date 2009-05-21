@@ -1,13 +1,20 @@
+PLATFORM=OR-AVR-M32-D
+
 DEBUG = 1
 MCU = atmega32
 F_CPU = 7372800UL
 BAUD = 115200
+DEFINES = -DBAUD=B$(BAUD)
+
+ifeq ($(PLATFORM),OR-AVR-M32-D)
+	drv_src = $(wildcard drivers/*.c)
+	drv_hdr = $(wildcard drivers/*.h)
+	DEFINES += -DOR_AVR_M32_D
+endif
 
 MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
 CROSS_COMPILE_GCC = avr-
 CROSS_COMPILE_BIN = avr-
-
-DEFINES = -DBAUD=B$(BAUD)
 
 ifeq ($(DEBUG),0)
 	DEBUG_ = -DNDEBUG
@@ -35,8 +42,8 @@ CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
 target = i2c-gate
-src = $(wildcard *.c)
-hdr = $(wildcard *.h)
+src = $(wildcard *.c) $(drv_src)
+hdr = $(wildcard *.h) $(drv_hdr)
 obj = $(src:.c=.o)
 elf = $(target).elf
 sre = $(target).srec
@@ -56,10 +63,10 @@ $(elf): $(obj) $(src) $(hdr) $(serialgatelib) $(registerslib)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(serialgatelib) $(registerslib) -Wl,-Map,$(map) -o $(elf)
 
 $(serialgatelib):
-	$(MAKE) -C serialgate MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG) BAUD=$(BAUD)
+	$(MAKE) -C serialgate MCU_FLAGS="$(MCU_FLAGS)" BAUD="$(BAUD)" DEBUG="$(DEBUG)"
 
 $(registerslib):
-	$(MAKE) -C registers MCU=$(MCU) F_CPU=$(F_CPU) DEBUG=$(DEBUG)
+	$(MAKE) -C registers MCU_FLAGS="$(MCU_FLAGS)" DEBUG="$(DEBUG)"
 
 %.sre: %.elf
 	$(OBJCOPY) -j .text -j .data -O srec $< $@

@@ -22,11 +22,11 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#ifndef MOTOR_DRIVER_H
-#define MOTOR_DRIVER_H
+#ifndef SPI_DRIVER_H
+#define SPI_DRIVER_H
 
-#include "common.h"
+#include "registers/common.h"
 
-GATE_RESULT init_motor_driver(void);
+GATE_RESULT init_spi_driver(void);
 
 #endif

@@ -29,9 +29,9 @@
 #include "serialgate/common.h"
 #include "serialgate/serialgate.h"
 #include "registers/driver.h"
-#include "registers/ports_driver.h"
-#include "registers/spi_driver.h"
-#include "registers/motor_driver.h"
+#include "drivers/ports_driver.h"
+#include "drivers/spi_driver.h"
+#include "drivers/motor_driver.h"
 
 #define BUF_LEN 65
 

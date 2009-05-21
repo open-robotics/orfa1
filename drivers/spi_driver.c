@@ -22,9 +22,9 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#include "common.h"
-#include "ports.h"
-#include "driver.h"
+#include "registers/common.h"
+#include "registers/ports.h"
+#include "registers/driver.h"
 #include <avr/io.h>
 #include <string.h>
 
