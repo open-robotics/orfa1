@@ -68,7 +68,7 @@ static uint8_t registers[] = {
 };
 
 static GATE_DRIVER driver = {
-	.uid = 0x0100, // motor id
+	.uid = 0x0060, // motor id
 	.major_version = 1,
 	.minor_version = 0,
 	.read = motor_driver_read,

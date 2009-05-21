@@ -82,7 +82,7 @@ static uint8_t registers[] = {
 };
 
 static GATE_DRIVER driver = {
-	.uid = 0x0010, // port id
+	.uid = 0x0020, // port id
 	.major_version = 1,
 	.minor_version = 0,
 	.read = port_driver_read,
