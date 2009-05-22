@@ -22,6 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
+#include <ctype.h>
 #include "parser.h"
 
 /**
@@ -286,8 +287,10 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					}
 					break;
 
-				} // parse_i2c state machine
-				break;
+				default:
+					break;
+			} // parse_i2c state machine
+			break;
 
 		case PARSE_READ:
 			switch(state_i2creg)

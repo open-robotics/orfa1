@@ -124,6 +124,7 @@ static uint8_t idriver_len = 0;
 
 static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
+	(void)reg;
 	if (!*data_len) {
 		return GR_OK;
 	}
@@ -160,6 +161,7 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
+	(void)reg;
 	if (data_len != 1) {
 		return GR_INVALID_ARG;
 	}
