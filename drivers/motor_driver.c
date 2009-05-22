@@ -102,6 +102,7 @@ static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_l
 static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	// TODO: use ATOMIC_BLOCK()
+	if (!data_len) return GR_INVALID_ARG;
 	switch (reg)
 	{
 		case PWM1_REG:

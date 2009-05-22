@@ -61,6 +61,7 @@ void usart_init(uint16_t baud)
  */
 int usart_putchar(char c, FILE *stream)
 {
+	(void)stream;
 	if ( c == '\n' )
 		usart_putchar('\r', stream);
 	loop_until_bit_is_set(UCSRA, UDRE);
@@ -71,6 +72,7 @@ int usart_putchar(char c, FILE *stream)
 
 int usart_putchar0(char c, FILE *stream)
 {
+	(void)stream;
 	loop_until_bit_is_set(UCSRA, UDRE);
 	UDR = c;
 	return 0;
@@ -79,6 +81,7 @@ int usart_putchar0(char c, FILE *stream)
 int usart_getchar(FILE *stream)
 {
 	uint8_t c;
+	(void)stream;
 	loop_until_bit_is_set(UCSRA, RXC);
 	c = UDR;
 	if ( c == '\r' )
@@ -89,6 +92,7 @@ int usart_getchar(FILE *stream)
 int usart_getchar0(FILE *stream)
 {
 	uint8_t c;
+	(void)stream;
 	loop_until_bit_is_set(UCSRA, RXC);
 	c = UDR;
 	return c;

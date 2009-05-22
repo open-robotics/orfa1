@@ -142,7 +142,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
 	return true;
 }
 
-int main()
+int main(void)
 {
 	gate_init_introspection();
 	init_ports_driver();
