@@ -35,18 +35,28 @@ static GATE_DRIVER* find_driver(uint8_t reg)
 {
 	GATE_DRIVER* driver = drivers;
 	while (driver) {
-		uint8_t i = driver->num_registers;
-		uint8_t* cur = driver->registers;
-		while (i) {
-			if (*cur == reg) {
-				return driver;
-			}
-			i--;
-			cur++;
+		uint8_t num = driver->num_registers;
+		uint8_t start = driver->start_register;
+		if ((reg >= start) && (reg < start+num)) {
+			return driver;
 		}
 		driver = driver->next;
 	}
 	return 0;
+}
+
+static uint8_t gate_allocate_registers(uint8_t count)
+{
+	uint8_t reg = 0;
+	if (!free_register) {
+		return 0;
+	}
+	if (!(free_register + count)) {
+		return 0;
+	}
+	reg = free_register;
+	free_register += count;
+	return reg;
 }
 
 GATE_RESULT gate_register_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
@@ -56,7 +66,7 @@ GATE_RESULT gate_register_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 		if (!driver->read) {
 			return GR_NO_ACCESS;
 		}
-		return driver->read(reg, data, data_len);
+		return driver->read((reg-driver->start_register), data, data_len);
 	}
 	return GR_INVALID_REGISTER;
 }
@@ -68,23 +78,26 @@ GATE_RESULT gate_register_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 		if (!driver->write) {
 			return GR_NO_ACCESS;
 		}
-		return driver->write(reg, data, data_len);
+		return driver->write((reg-driver->start_register), data, data_len);
 	}
 	return GR_INVALID_REGISTER;
 }
 
 GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 {
-	uint8_t i = driver->num_registers;
-	uint8_t* cur = driver->registers;
-	while (i) {
-		if (find_driver(*cur)) {
-			return GR_DUPLICATE_REGISTER;
-		}
-		i--;
-		cur++;
-	}
+	uint8_t num = driver->num_registers;
+	uint8_t reg = 0x00;
 	GATE_RESULT res = GR_OK;
+
+	if (driver->uid) {
+		// if not introspection UID
+		// allocate registers
+		reg = gate_allocate_registers(num);
+		if (!reg) {
+			return GR_ALLOCATE_REGISTER;
+		}
+	}
+	driver->start_register = reg;
 	if (driver->init) {
 		res = driver->init();
 	}
@@ -95,28 +108,18 @@ GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 	return res;
 }
 
-uint8_t gate_allocate_register(void)
-{
-	if (!free_register) {
-		return 0;
-	}
-	return free_register++;
-}
-
 // introspection driver -------------------------------------------------------
 
 static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static uint8_t iregisters[] = {0x00};
 static GATE_DRIVER idriver = {
 	.uid = 0x0000, // introspection id
 	.major_version = 1,
 	.minor_version = 0,
 	.read = idriver_read,
 	.write = idriver_write,
-	.registers = iregisters,
-	.num_registers = NUM_ELEMENTS(iregisters),
+	.num_registers = 1,
 };
 
 static uint8_t idriver_num = 0;
@@ -151,7 +154,7 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 		data[1] = (uint8_t) uid;
 		data[2] = driver->major_version;
 		data[3] = driver->minor_version;
-		data[4] = driver->registers[0];
+		data[4] = driver->start_register;
 		data[5] = driver->num_registers;
 	}
 

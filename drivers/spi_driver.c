@@ -34,8 +34,8 @@ static GATE_RESULT spi_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len
 
 #define SPI_BUF_SIZE 64
 
-#define DATA_REG   0x50
-#define CONFIG_REG 0x51
+#define DATA_REG   0x00
+#define CONFIG_REG 0x01
 
 typedef struct {
 	GATE_PORT* port;
@@ -46,19 +46,13 @@ static SPI_CONTROL_PIN control_pin[4];
 static uint8_t buf[SPI_BUF_SIZE];
 static uint8_t buf_len;
 
-static uint8_t registers[] = {
-	CONFIG_REG,
-	DATA_REG,
-};
-
 static GATE_DRIVER driver = {
 	.uid = 0x0001, // spi id
 	.major_version = 1,
 	.minor_version = 0,
 	.read = spi_driver_read,
 	.write = spi_driver_write,
-	.registers = registers,
-	.num_registers = NUM_ELEMENTS(registers),
+	.num_registers = 2,
 };
 
 static GATE_RESULT spi_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)

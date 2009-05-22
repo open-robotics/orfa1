@@ -30,15 +30,15 @@
 static GATE_RESULT port_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT port_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-#define DATA_A   0x40
-#define DATA_B   0x41
-#define DATA_C   0x42
-#define DATA_D   0x43
+#define DATA_A   0x00
+#define DATA_B   0x01
+#define DATA_C   0x02
+#define DATA_D   0x03
 
-#define CONFIG_A 0x44
-#define CONFIG_B 0x45
-#define CONFIG_C 0x46
-#define CONFIG_D 0x47
+#define CONFIG_A 0x04
+#define CONFIG_B 0x05
+#define CONFIG_C 0x06
+#define CONFIG_D 0x07
 
 static GATE_PORT ports[] = {
 	// PORTA
@@ -70,25 +70,13 @@ static GATE_PORT ports[] = {
 	},
 };
 
-static uint8_t registers[] = {
-	CONFIG_A,
-	CONFIG_B,
-	CONFIG_C,
-	CONFIG_D,
-	DATA_A,
-	DATA_B,
-	DATA_C,
-	DATA_D,
-};
-
 static GATE_DRIVER driver = {
 	.uid = 0x0020, // port id
 	.major_version = 1,
 	.minor_version = 0,
 	.read = port_driver_read,
 	.write = port_driver_write,
-	.registers = registers,
-	.num_registers = NUM_ELEMENTS(registers),
+	.num_registers = 8,
 };
 
 static GATE_RESULT port_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)

@@ -100,7 +100,7 @@ typedef GATE_RESULT (*GATE_INIT)(void);
  * Конфигурация драйвера устройств.
  */
 typedef struct GATE_DRIVER_ {
-	uint8_t* registers; /**< Массив с номерами регистров, обслуживаемых драйвером */
+	uint8_t start_register; /**< Начальный регистр, из диапазона регистров обслуживаемых драйвером */
 	uint8_t  num_registers; /**< Количество регистров */
 	uint16_t uid; /**< Идентификатор драйвера (для интроспекции) */
 	uint8_t major_version;
@@ -152,14 +152,6 @@ GATE_RESULT gate_register_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
  * @see GATE_WRITE
  */
 GATE_RESULT gate_register_write(uint8_t reg, uint8_t* data, uint8_t data_len);
-
-/**
- * Выделение регистра.
- * Выделяет регистр для использования драйвером.
- *
- * @return 0, если нет доступных регистров, иначе номер регистра.
- */
-uint8_t gate_allocate_register(void);
 
 /**@}*/
 

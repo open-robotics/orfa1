@@ -31,10 +31,10 @@
 static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-#define PWM1_REG   0x60
-#define PWM2_REG   0x61
-#define DIR1_REG   0x62
-#define DIR2_REG   0x63
+#define PWM1_REG   0x00
+#define PWM2_REG   0x01
+#define DIR1_REG   0x02
+#define DIR2_REG   0x03
 
 #define DIR_PORT   PORTB
 #define DIR_DDR    DDRB
@@ -60,12 +60,6 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 #define ATTACH_PWM2_PIN()  TCCR1A |= COM_PWM2
 #define DETACH_PWM2_PIN()  TCCR1A &= ~COM_PWM2
 
-static uint8_t registers[] = {
-	PWM1_REG,
-	PWM2_REG,
-	DIR1_REG,
-	DIR2_REG
-};
 
 static GATE_DRIVER driver = {
 	.uid = 0x0060, // motor id
@@ -73,8 +67,7 @@ static GATE_DRIVER driver = {
 	.minor_version = 0,
 	.read = motor_driver_read,
 	.write = motor_driver_write,
-	.registers = registers,
-	.num_registers = NUM_ELEMENTS(registers),
+	.num_registers = 4,
 };
 
 static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
