@@ -36,21 +36,13 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 // #define REG2 0xXX
 // #define REG2 0xXX
 
-static uint8_t registers[] = {
-	REG1,
-	// REG2,
-	// REG3,
-	// .....
-};
-
 static GATE_DRIVER driver = {
 	.uid = MY_UID,
 	.major_version = 1,
 	.minor_version = 0,
 	.read = driver_read,
 	.write = driver_write,
-	.registers = registers,
-	.num_registers = NUM_ELEMENTS(registers),
+	.num_registers = 1,
 };
 
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
