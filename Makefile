@@ -41,10 +41,10 @@ $(elf): $(obj) $(src) $(hdr) $(serialgatelib) $(corelib)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(serialgatelib) $(corelib) -Wl,-Map,$(map) -o $(elf)
 
 $(serialgatelib):
-	$(MAKE) -C serialgate MCU_FLAGS="$(MCU_FLAGS)" BAUD="$(BAUD)" DEBUG="$(DEBUG)"
+	$(MAKE) -C serialgate all MCU_FLAGS='$(MCU_FLAGS)' BAUD='$(BAUD)' DEBUG='$(DEBUG)'
 
 $(corelib):
-	$(MAKE) -C core MCU_FLAGS="$(MCU_FLAGS)" DEBUG="$(DEBUG)"
+	$(MAKE) -C core all MCU_FLAGS='$(MCU_FLAGS)' DEBUG='$(DEBUG)'
 
 %.sre: %.elf
 	$(OBJCOPY) -j .text -j .data -O srec $< $@

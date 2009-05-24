@@ -12,4 +12,3 @@ ifeq ($(DEBUG),2)
     CROSS_COMPILE_GCC =
     CROSS_COMPILE_BIN =
 endif
-
