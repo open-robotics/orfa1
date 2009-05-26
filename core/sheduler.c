@@ -26,25 +26,29 @@
 #include "sheduler.h"
 #include <stdint.h>
 
-static GATE_TASKS* tasks;
-static GATE_TASK* supertask;
-static GATE_CHECK_EVENT* check_event;
+static GATE_TASK* tasks;
+static GATE_TASK_FUNC supertask;
+static GATE_CHECK_EVENT check_event;
 
-GATE_RESULT gate_task_register(GATE_TASKS* task)
+GATE_RESULT gate_task_register(GATE_TASK* task)
 {
-	if (tasks == NULL) {
+	if (!tasks) {
 		tasks = task;
 		tasks->next = task;
 	}
 
 	task->next = tasks->next;
 	tasks->next = task;
+
+	return GR_OK;
 }
 
-GATE_RESULT gate_supertask_register(GATE_TASK* task, GATE_CHECK_EVENT* check_event)
+GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task, GATE_CHECK_EVENT check_event)
 {
 	supertask = task;
 	check_event = check_event;
+
+	return GR_OK;
 }
 
 void gate_sheduler_loop(void)
@@ -64,11 +68,14 @@ void gate_sheduler_loop(void)
 			// error!
 			break;
 		}
+
+		tasks = tasks->next;
 	}
 
 	for (;;) {
 		// catch errors
 		// for watchdog timer
+		// puts("Error");
 	}
 }
 

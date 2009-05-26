@@ -92,3 +92,7 @@ docs:
 
 force: clean all
 
+PROGRAMMER = dragon_isp
+program: $(target).hex
+	avrdude -p $(MCU) -P usb -c $(PROGRAMMER) -U flash:w:$<
+

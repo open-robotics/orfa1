@@ -32,6 +32,7 @@
 #define SHEDULER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "common.h"
 
 /**
@@ -40,16 +41,15 @@
 
 /**@{*/
 
-typedef void (*GATE_TASK)(void);
-typedef bool (*GATE_CHECK_EVENT)(void);
+typedef void (*GATE_TASK_FUNC)(void);
 
-typedef struct GATE_TASKS_ {
-	GATE_TASK task;
-	struct GATE_TASKS_* next;
-} GATE_TASKS;
+typedef struct GATE_TASK_ {
+	GATE_TASK_FUNC task;
+	struct GATE_TASK_* next;
+} GATE_TASK;
 
-GATE_RESULT gate_task_register(GATE_TASKS* task);
-GATE_RESULT gate_supertask_register(GATE_TASK* task, GATE_CHECK_EVENT* check_event);
+GATE_RESULT gate_task_register(GATE_TASK* task);
+GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task);
 void gate_sheduler_loop(void);
 
 #endif

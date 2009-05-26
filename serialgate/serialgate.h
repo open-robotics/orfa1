@@ -67,7 +67,8 @@
 #ifndef SERAILGATE_H
 #define SERAILGATE_H
 
-void serialgate_mainloop(void);
+void serialgate_init(void);
+void serialgate_supertask(void);
 
 #endif // SERAILGATE_H
 

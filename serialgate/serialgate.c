@@ -33,15 +33,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
-void serialgate_mainloop(void)
+//! command buffer
+static cbf_t cmd_buf, tx_buf;
+
+//! error state
+static error_code_t error_code=NO_ERROR;
+
+void serialgate_init(void)
 {
-	uint8_t c;
-
-	//! command buffer
-	cbf_t cmd_buf, tx_buf;
-
-	//! error state
-	error_code_t error_code=NO_ERROR;
 
 	cbf_init(&cmd_buf);
 	cbf_init(&tx_buf);
@@ -52,27 +51,27 @@ void serialgate_mainloop(void)
 	#endif // AVR_IO
 
 	i2c_init();
+}
 
-	for(;;)
+void serialgate_supertask(void)
+{
+	uint8_t c = getchar();
+
+	if(parse_cmd(c, &cmd_buf, &error_code))
 	{
-		c = getchar();
-
-		if(parse_cmd(c, &cmd_buf, &error_code))
+		if(exec_cmd(&cmd_buf, &tx_buf, &error_code))
 		{
-			if(exec_cmd(&cmd_buf, &tx_buf, &error_code))
+			while(!cbf_isempty(&tx_buf))
 			{
-				while(!cbf_isempty(&tx_buf))
-				{
-					putchar(cbf_get(&tx_buf));
-				}
+				putchar(cbf_get(&tx_buf));
 			}
 		}
+	}
 
-		if(error_code != NO_ERROR)
-		{
-			print_error(error_code);
-			cbf_init(&tx_buf);
-			error_code = NO_ERROR;
-		}
-	} // for
+	if(error_code != NO_ERROR)
+	{
+		print_error(error_code);
+		cbf_init(&tx_buf);
+		error_code = NO_ERROR;
+	}
 }

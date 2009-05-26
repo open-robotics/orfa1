@@ -34,6 +34,7 @@
 #include "serialgate/common.h"
 #include "serialgate/serialgate.h"
 #include "core/driver.h"
+#include "core/sheduler.h"
 
 #ifdef HAVE_PORTS
 #include "ports_driver.h"
@@ -153,7 +154,11 @@ bool cmd_rxc(uint8_t *c, bool ack)
 
 int main(void)
 {
+	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);
+	serialgate_init();
+
 	gate_init_introspection();
+
 #ifdef HAVE_PORTS
 	init_ports_driver();
 #endif
@@ -163,10 +168,9 @@ int main(void)
 #ifdef HAVE_MOTOR
 	init_motor_driver();
 #endif
-
-	i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
-
-	serialgate_mainloop();
+	
+	gate_supertask_register(serialgate_supertask);
+	gate_sheduler_loop();
 
 	return 0;
 }
