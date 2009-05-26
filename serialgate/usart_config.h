@@ -1,5 +1,6 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
+ *  Based on Joerg Wunsch's UART lib (THE BEER-WARE LICENSE)
  *
  *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
@@ -22,43 +23,32 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
+/** Platform-specific UART macros
+ * @file usart_config.h
+ *
+ * @author Andrey Demenev
+ */
 
-#include "i2c.h"
-#include "common.h"
-#include "serialgate.h"
+#ifndef USART_CONFIG_H
+#define USART_CONFIG_H
 
-bool cmd_start(uint8_t address, i2c_rdwr_t flag)
-{
-	debug("# > cmd_start(0x%02x, %i)\n", address, flag);
-	return true;
-}
+#include <avr/io.h>
 
-void cmd_stop(void)
-{
-	debug("# > cmd_stop()\n");
-}
+#ifdef OR_AVR_M32_D
+	#define GATE_UDR UDR
+	#define GATE_UCSRA UCSRA
+	#define GATE_UCSRB UCSRB
+	#define GATE_UBRRL UBRRL
+	#define GATE_UBRRH UBRRH
+#endif
 
-bool cmd_txc(uint8_t c)
-{
-	debug("# > cmd_txc(0x%02x)\n", c);
-	return true;
-}
+#ifdef OR_AVR_M64_S
+	#define GATE_UDR UDR1
+	#define GATE_UCSRA UCSR1A
+	#define GATE_UCSRB UCSR1B
+	#define GATE_UBRRL UBRR1L
+	#define GATE_UBRRH UBRR1H
+#endif
 
-bool cmd_rxc(uint8_t *c, bool ack)
-{
-	debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
-	return true;
-}
-
-int main(void)
-{
-	i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
-
-	serialgate_mainloop();
-	
-	return 0;
-} // main()
+#endif // USART_CONFIG_H
 

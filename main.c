@@ -34,9 +34,18 @@
 #include "serialgate/common.h"
 #include "serialgate/serialgate.h"
 #include "core/driver.h"
-#include "drivers/ports_driver.h"
-#include "drivers/spi_driver.h"
-#include "drivers/motor_driver.h"
+
+#ifdef HAVE_PORTS
+#include "ports_driver.h"
+#endif
+
+#ifdef HAVE_SPI
+#include "spi_driver.h"
+#endif
+
+#ifdef HAVE_MOTOR
+#include "motor_driver.h"
+#endif
 
 #define BUF_LEN 65
 
@@ -145,9 +154,15 @@ bool cmd_rxc(uint8_t *c, bool ack)
 int main(void)
 {
 	gate_init_introspection();
+#ifdef HAVE_PORTS
 	init_ports_driver();
+#endif
+#ifdef HAVE_SPI
 	init_spi_driver();
+#endif
+#ifdef HAVE_MOTOR
 	init_motor_driver();
+#endif
 
 	i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 

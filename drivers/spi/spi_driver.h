@@ -35,4 +35,25 @@
 
 GATE_RESULT init_spi_driver(void);
 
+
+#ifdef OR_AVR_M32_D
+	#define GATE_SPI_PORT_NUMBER 1
+	#define GATE_SPI_PORT PORTB
+	#define GATE_SPI_DDR DDRB
+	#define GATE_SPI_SS 4
+	#define GATE_SPI_SCK 7
+	#define GATE_SPI_MOSI 5
+	#define GATE_SPI_MISO 6
+#endif
+
+#ifdef OR_AVR_M64_S
+	#define GATE_SPI_PORT_NUMBER -1
+	#define GATE_SPI_PORT PORTB
+	#define GATE_SPI_DDR DDRB
+	#define GATE_SPI_SS 0
+	#define GATE_SPI_SCK 1
+	#define GATE_SPI_MOSI 2
+	#define GATE_SPI_MISO 3
+#endif
+
 #endif

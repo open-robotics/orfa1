@@ -35,4 +35,31 @@
 
 GATE_RESULT init_ports_driver(void);
 
+
+#ifdef OR_AVR_M32_D
+	#define GATE_NUM_PORTS 4
+	#define GATE_PORT_MASK_A 0
+	#define	GATE_PORT_MASK_B 0xF3
+	#define	GATE_PORT_MASK_C 0x03
+	#define	GATE_PORT_MASK_D 0xC3
+	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(B), GATE_PORT_SPEC(C), GATE_PORT_SPEC(D)
+#endif
+
+#ifdef OR_AVR_M64_S
+	#define GATE_NUM_PORTS 2
+	#define GATE_PORT_MASK_A 0
+	#define	GATE_PORT_MASK_F 0
+	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(F)
+#endif
+
+#define GATE_PORT_SPEC(p) \
+	{\
+		.PORT = (void*)_SFR_MEM_ADDR(PORT ## p),				\
+		.PIN = (void*)_SFR_MEM_ADDR(PIN ## p),					\
+		.DDR = (void*)_SFR_MEM_ADDR(DDR ## p ),					\
+		.default_busy_mask = GATE_PORT_MASK_ ## p,				\
+	}
+
+
+
 #endif

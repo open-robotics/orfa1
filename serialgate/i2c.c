@@ -200,6 +200,7 @@ void i2c_bus_clear()
 
 void i2c_config(uint16_t freq)
 {
+	(void)freq;
 	#ifdef AVR_IO
 	avr_i2c_config(freq);
 	#endif

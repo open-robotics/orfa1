@@ -39,20 +39,20 @@ FILE usart_fdev = FDEV_SETUP_STREAM(usart_putchar, usart_getchar, _FDEV_SETUP_RW
 void usart_init(uint16_t baud)
 	{
 	// disable the USART
-	UCSRB = 0x00;
-	UCSRA = 0x00;
+	GATE_UCSRB = 0x00;
+	GATE_UCSRA = 0x00;
 
 	if ( baud & DOUBLE_SPEED_BIT )
-		UCSRA |= (1 << U2X);
+		GATE_UCSRA |= (1 << U2X);
 
 	// load the baudrate divisor register
-	UBRRL = baud;
+	GATE_UBRRL = baud;
 
 	// output the upper four bits of the baudrate divisor
-	UBRRH = (baud >> 8) & 0x0F;
+	GATE_UBRRH = (baud >> 8) & 0x0F;
 
 	// enable the USART0 transmitter & receiver
-	UCSRB = (1 << TXEN) | (1 << RXEN);
+	GATE_UCSRB = (1 << TXEN) | (1 << RXEN);
 	}
 
 /*
@@ -64,8 +64,8 @@ int usart_putchar(char c, FILE *stream)
 	(void)stream;
 	if ( c == '\n' )
 		usart_putchar('\r', stream);
-	loop_until_bit_is_set(UCSRA, UDRE);
-	UDR = c;
+	loop_until_bit_is_set(GATE_UCSRA, UDRE);
+	GATE_UDR = c;
 
 	return 0;
 }
@@ -73,8 +73,8 @@ int usart_putchar(char c, FILE *stream)
 int usart_putchar0(char c, FILE *stream)
 {
 	(void)stream;
-	loop_until_bit_is_set(UCSRA, UDRE);
-	UDR = c;
+	loop_until_bit_is_set(GATE_UCSRA, UDRE);
+	GATE_UDR = c;
 	return 0;
 }
 
@@ -82,8 +82,8 @@ int usart_getchar(FILE *stream)
 {
 	uint8_t c;
 	(void)stream;
-	loop_until_bit_is_set(UCSRA, RXC);
-	c = UDR;
+	loop_until_bit_is_set(GATE_UCSRA, RXC);
+	c = GATE_UDR;
 	if ( c == '\r' )
 		c = '\n';
 	return c;
@@ -93,8 +93,8 @@ int usart_getchar0(FILE *stream)
 {
 	uint8_t c;
 	(void)stream;
-	loop_until_bit_is_set(UCSRA, RXC);
-	c = UDR;
+	loop_until_bit_is_set(GATE_UCSRA, RXC);
+	c = GATE_UDR;
 	return c;
 }
 #endif // AVR_IO

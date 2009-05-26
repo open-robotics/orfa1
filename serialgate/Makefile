@@ -1,50 +1,26 @@
-DEBUG = 1
-MCU = atmega32
-F_CPU = 7372800UL
-BAUD = 115200
+AS = as
+CC = gcc
+CPLUSPLUS = g++
+LD = ld
+AR = ar
+OBJCOPY = objcopy
+OBJDUMP = objdump
 
-MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
-CROSS_COMPILE_GCC = avr-
-CROSS_COMPILE_BIN = avr-
-
-DEFINES = -DBAUD=B$(BAUD)
-
-ifeq ($(DEBUG),0)
-	DEBUG_ = -DNDEBUG
-else
-	DEBUG_ = -DDEBUG=$(DEBUG)
-endif
-ifeq ($(DEBUG),2)
-	MCU_FLAGS =
-	CROSS_COMPILE_GCC =
-	CROSS_COMPILE_BIN =
-endif
-
-AS = $(CROSS_COMPILE_BIN)as
-CC = $(CROSS_COMPILE_GCC)gcc
-CPLUSPLUS = $(CROSS_COMPILE_GCC)g++
-LD = $(CROSS_COMPILE_BIN)ld
-AR = $(CROSS_COMPILE_BIN)ar
-OBJCOPY = $(CROSS_COMPILE_BIN)objcopy
-OBJDUMP = $(CROSS_COMPILE_BIN)objdump
-
-CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
+CFLAGS = -std=gnu99 -W -Wall -Werror -pedantic -Wstrict-prototypes -Wundef \
 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
--fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(MCU_FLAGS) $(DEBUG_) $(DEFINES)
+-fpack-struct -fshort-enums -ffreestanding -Os -g -I. 
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
-target = libserialgate.a
-src = $(filter-out test.c, $(wildcard *.c))
+target = test
+src = $(filter-out usart.c,$(wildcard *.c))
 hdr = $(wildcard *.h)
 obj = $(patsubst %.c,%.o,$(src))
 tag = tags
 
 all: $(target)
 
-$(target): $(target)($(obj))
-
-test: $(target) test.c
-	$(CC) $(CFLAGS) $(LDFLAGS) test.c $(target) -o $@
+$(target): $(src) $(hdr)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(src)  -o $@
 
 .PHONY: tags
 tags:

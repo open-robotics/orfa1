@@ -44,6 +44,8 @@
 #include <stdbool.h>
 #include <avr/io.h>
 
+#include "usart_config.h"
+
 /**
  * Use the following macros to determine the 'baud' parameter values
  * for uart_init()

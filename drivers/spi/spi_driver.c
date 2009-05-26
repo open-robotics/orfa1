@@ -27,6 +27,7 @@
 #include "core/driver.h"
 #include <avr/io.h>
 #include <string.h>
+#include "spi_driver.h"
 
 
 static GATE_RESULT spi_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
@@ -100,6 +101,7 @@ static GATE_RESULT spi_write(uint8_t* data, uint8_t data_len)
 
 static GATE_RESULT spi_config(uint8_t* data, uint8_t data_len)
 {
+	GATE_PORT* port;
 	if (data_len < 2) {
 		return GR_INVALID_DATA;
 	}
@@ -129,7 +131,24 @@ static GATE_RESULT spi_config(uint8_t* data, uint8_t data_len)
 	if (res != GR_OK) {
 		return res;
 	}
-	GATE_PORT* port = find_port(data[1]);
+#if GATE_SPI_PORT_NUMBER > -1
+	port = find_port(GATE_SPI_PORT_NUMBER);
+	if (port) {
+		uint8_t res = gate_port_reserve(
+			GATE_SPI_PORT_NUMBER,
+			(1 << GATE_SPI_SCK) | (1 << GATE_SPI_MOSI) | (1 << GATE_SPI_MISO),
+			(1 << GATE_SPI_SCK) | (1 << GATE_SPI_MOSI) | (1 << GATE_SPI_MISO)
+		);
+		if (res != GR_OK) {
+			return res;
+		}
+	}
+#endif
+	GATE_SPI_DDR |= (1 << GATE_SPI_SS) | (1 << GATE_SPI_MOSI) | (1 << GATE_SPI_SCK);
+	GATE_SPI_DDR &= ~(1 << GATE_SPI_MISO);
+	GATE_SPI_PORT |= (1 << GATE_SPI_MISO);
+
+	port = find_port(data[1]);
 	control_pin[channel].port = port;
 	control_pin[channel].mask = mask;
 	*(port->PORT) |= mask;

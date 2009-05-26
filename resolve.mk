@@ -12,3 +12,8 @@ ifeq ($(DEBUG),2)
     CROSS_COMPILE_GCC =
     CROSS_COMPILE_BIN =
 endif
+
+include core/resolve.mk
+include drivers/resolve.mk
+include serialgate/resolve.mk
+

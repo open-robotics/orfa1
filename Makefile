@@ -1,9 +1,13 @@
-ifeq "$(CONFIG_FILE)"  ""
-    CONFIG_FILE = or-avr-m32-d.conf.mk
-endif
-include $(CONFIG_FILE)
-include resolve.mk
+target = orfa
 
+ifeq "$(PLATFORM)"  ""
+    PLATFORM = OR_AVR_M32_D
+endif
+
+CONFIG_FILE = platform/$(PLATFORM).mk
+
+CROSS_COMPILE_GCC =
+CROSS_COMPILE_BIN =
 
 AS = $(CROSS_COMPILE_BIN)as
 CC = $(CROSS_COMPILE_GCC)gcc
@@ -12,86 +16,72 @@ LD = $(CROSS_COMPILE_BIN)ld
 AR = $(CROSS_COMPILE_BIN)ar
 OBJCOPY = $(CROSS_COMPILE_BIN)objcopy
 OBJDUMP = $(CROSS_COMPILE_BIN)objdump
-SIZE = $(CROSS_COMPILE_BIN)size
 
-CFLAGS = -std=gnu99 -W -Wall -pedantic -Wstrict-prototypes -Wundef \
--funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
--fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(MCU_FLAGS) $(DEBUG_) $(DEFINES)
-LDFLAGS = -Wl,--relax -Wl,--gc-sections
+INCLUDES = 
+INCLUDE_DIRS = 
 
-target = orfa
-src = $(wildcard *.c) $(drv_src)
-hdr = $(wildcard *.h) $(drv_hdr)
-obj = $(src:.c=.o)
-elf = $(target).elf
-sre = $(target).srec
-hex = $(target).hex
-lss = $(target).lss
-map = $(target).map
-gdbinit = $(target).gdb
-tag = tags
+CFLAGS = -std=gnu99 -I. $(INCLUDE_DIRS) -Wall -Os -Wstrict-prototypes  -Werror $(MCU_FLAGS) -g
+ASFLAGS = -I. $(INCLUDE_DIRS) $(MCU_FLAGS) -xassembler-with-cpp
 
-serialgatelib = serialgate/libserialgate.a
-corelib = core/libcore.a
-
-all: $(elf)
-	$(SIZE) $(elf)
-
-$(elf): $(obj) $(src) $(hdr) $(serialgatelib) $(corelib)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(obj) $(serialgatelib) $(corelib) -Wl,-Map,$(map) -o $(elf)
-
-$(serialgatelib):
-	$(MAKE) -C serialgate all MCU_FLAGS='$(MCU_FLAGS)' BAUD='$(BAUD)' DEBUG='$(DEBUG)'
-
-$(corelib):
-	$(MAKE) -C core all MCU_FLAGS='$(MCU_FLAGS)' DEBUG='$(DEBUG)'
-
-%.sre: %.elf
-	$(OBJCOPY) -j .text -j .data -O srec $< $@
-
-%.lss: %.elf
-	$(OBJDUMP) -D $< > $@
-
-%.hex: %.elf
-	$(OBJCOPY) -O ihex $< $@
+COFFCONVERT=$(OBJCOPY) --debugging \
+   -O coff-ext-avr \
+	--change-section-address .data-0x800000 \
+	--change-section-address .bss-0x800000 \
+	--change-section-address .noinit-0x800000 \
+	--change-section-address .eeprom-0x810000
 
 
-.PHONY: tags
-tags:
-	ctags -o $(tag) -R $(src) $(hdr)
 
-.PHONY: clean
+
+DEFINES = -D$(PLATFORM)
+
+LIBS = 
+LIBS_RULES = 
+SRC = main.c
+
+include $(CONFIG_FILE)
+-include local_config.mk
+include resolve.mk
+
+OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SRC))))
+
+all: $(target).elf
+
+$(target).hex: $(target).elf
+	$(OBJCOPY) -j .text -j .data -O ihex $(target).elf $(target).hex
+	chmod -x $(target).hex $(target).elf
+
+$(target).elf: $(OBJS) $(LIBS_RULES)
+	$(CC) $(CFLAGS) -o $(target).elf \
+		$(OBJS) $(LIBS)
+
+$(target).cof : $(target).elf
+	$(COFFCONVERT) -O coff-ext-avr $< $(target).cof
+
+
+%.o : %.c
+
+%.o : %.cpp
+
+%.o : %.S
+
+
+%.o: %.c $(CONFIG_FILE)
+	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cpp $(CONFIG_FILE)
+	$(CPLUSPLUS) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
+
+%.o: %.S $(CONFIG_FILE)
+	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
+
+
 clean:
-	$(RM) $(elf) $(obj) $(sre) $(lss) $(map) $(hex) $(tag) $(gdbinit)
-	$(MAKE) -C serialgate clean
-	$(MAKE) -C core clean
+	rm -rf `find -name '*.o' -o -name '*.a'  -o -name ${target}.hex -o -name $(target).elf `
+	rm -f doxygen.log
 
-.PHONY: docs
 docs:
 	doxygen
 
-# programming
-.PHONY: program
-program: $(hex)
-	avrdude -p $(MCU) -P usb -c dragon_isp -U flash:w:$<
-
-# debugging-related targets
-.PHONY: ddd
-ddd: gdbinit
-	ddd --debugger "avr-gdb -x $(gdbinit)"
-
-.PHONY: gdbserver
-gdbserver: gdbinit
-	simulavr --device $(MCU) --gdbserver
-
-gdbinit: $(gdbinit)
-
-$(gdbinit): $(hex)
-	@echo "file $(elf)" > $(gdbinit)
-	@echo "target remote localhost:1212" >> $(gdbinit)
-	@echo "load"        >> $(gdbinit)
-	@echo "break main"  >> $(gdbinit)
-	@echo "continue"    >> $(gdbinit)
-	@echo
-	@echo "Use 'avr-gdb -x $(gdbinit)'"
+force: clean all
 
