@@ -115,7 +115,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 	}
 
 
-	if (c != ' ') switch(state_cmd)
+	switch(state_cmd)
 	{
 		case GET_COMMAND:
 			switch(c)
@@ -156,6 +156,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case '\r':
 				case '\n':
+				case ' ':
 					break;
 
 				case '#':

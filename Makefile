@@ -20,8 +20,11 @@ OBJDUMP = $(CROSS_COMPILE_BIN)objdump
 INCLUDES = 
 INCLUDE_DIRS = 
 
-CFLAGS = -std=gnu99 -I. $(INCLUDE_DIRS) -Wall -Os -Wstrict-prototypes  -Werror $(MCU_FLAGS) -g
+CFLAGS = -std=gnu99 -I. $(INCLUDE_DIRS) -Wall -Os -Wstrict-prototypes  -Werror $(MCU_FLAGS) -g \
+		 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
+		 -fpack-struct -fshort-enums -ffreestanding
 ASFLAGS = -I. $(INCLUDE_DIRS) $(MCU_FLAGS) -xassembler-with-cpp
+LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
 COFFCONVERT=$(OBJCOPY) --debugging \
    -O coff-ext-avr \
