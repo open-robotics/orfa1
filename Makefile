@@ -43,9 +43,13 @@ include $(CONFIG_FILE)
 -include local_config.mk
 include resolve.mk
 
+ifeq "$(DEBUG)" ""
+    DEFINES += -DNDEBUG
+endif
+
 OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SRC))))
 
-all: $(target).elf
+all: $(target).hex
 
 $(target).hex: $(target).elf
 	$(OBJCOPY) -j .text -j .data -O ihex $(target).elf $(target).hex
