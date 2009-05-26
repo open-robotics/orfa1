@@ -114,9 +114,8 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 		error_c = *error_code;
 	}
 
-	// ---------------------------------------------------------------
 
-	switch(state_cmd)
+	if (c != ' ') switch(state_cmd)
 	{
 		case GET_COMMAND:
 			switch(c)
