@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Driver core
+/** Sheduler core
  * @file sheduler.h
  *
  * @author Andrey Demenev
@@ -37,19 +37,48 @@
 
 /**
  * @defgroup Sheduler Планировщик задач
+ *
+ * Простой кооперативный планировщик задач
+ * 
+ * Есть одна суперзадача, которая вызывается перед выполнением
+ * любой другой задачи. Все остальные задачи выполняются по кольцу.
  */
 
 /**@{*/
 
+/**
+ * Прототип функции процесса.
+ * Задача должна возвращать управление, если ее событи еще не наступило.
+ * При этом нужно учитывать, что в следующий раз функция получит управление
+ * через недетерминированный промежуток времени.
+ */
 typedef void (*GATE_TASK_FUNC)(void);
 
+/**
+ * Конфигурация процесса.
+ */
 typedef struct GATE_TASK_ {
-	GATE_TASK_FUNC task;
-	struct GATE_TASK_* next;
+	GATE_TASK_FUNC task; /**< Функция процесса */
+	struct GATE_TASK_* next; /**< Указатель на следующий процесс */
 } GATE_TASK;
 
+/**
+ * Регистрирует процесс.
+ * @param task указатель на структуру задачи.
+ * @return GR_OK, если задача была добавлена.
+ */
 GATE_RESULT gate_task_register(GATE_TASK* task);
+
+/**
+ * Устанавливает суперзадачу.
+ * @param task указатель на функцию суперзадачи.
+ * @return GR_OK если задача была установлена.
+ */
 GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task);
+
+/**
+ * Главный цикл задач.
+ */
 void gate_sheduler_loop(void);
 
 #endif
