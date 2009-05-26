@@ -36,7 +36,7 @@ static GATE_PORT ports[] = {
 };
 
 static GATE_DRIVER driver = {
-	.uid = 0x0020, // port id
+	.uid = GATE_PORT_UID,
 	.major_version = 1,
 	.minor_version = 0,
 	.read = port_driver_read,
@@ -97,5 +97,4 @@ GATE_RESULT init_ports_driver(void)
 	}
 	return gate_driver_register(&driver);
 }
-
 

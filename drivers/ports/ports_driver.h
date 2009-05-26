@@ -43,6 +43,7 @@ GATE_RESULT init_ports_driver(void);
 	#define	GATE_PORT_MASK_C 0x03
 	#define	GATE_PORT_MASK_D 0x33
 	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(B), GATE_PORT_SPEC(C), GATE_PORT_SPEC(D)
+	#define GATE_PORT_UID 0x0020
 #endif
 
 #ifdef OR_AVR_M64_S
@@ -52,6 +53,7 @@ GATE_RESULT init_ports_driver(void);
 	#define GATE_PORT_MASK_E 0x3F
 	#define	GATE_PORT_MASK_F 0
 	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(F), GATE_PORT_SPEC(B), GATE_PORT_SPEC(E)
+	#define GATE_PORT_UID 0x0021
 #endif
 
 #define GATE_PORT_SPEC(p) \
