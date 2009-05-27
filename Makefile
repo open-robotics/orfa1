@@ -16,6 +16,7 @@ LD = $(CROSS_COMPILE_BIN)ld
 AR = $(CROSS_COMPILE_BIN)ar
 OBJCOPY = $(CROSS_COMPILE_BIN)objcopy
 OBJDUMP = $(CROSS_COMPILE_BIN)objdump
+SIZE = $(CROSS_COMPILE_BIN)size 
 
 INCLUDES = 
 INCLUDE_DIRS = 
@@ -53,6 +54,7 @@ endif
 OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SRC))))
 
 all: $(target).hex
+	$(SIZE) $(target).elf
 
 $(target).hex: $(target).elf
 	$(OBJCOPY) -j .text -j .data -O ihex $(target).elf $(target).hex
