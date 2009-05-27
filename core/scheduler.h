@@ -22,14 +22,14 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** Sheduler core
- * @file sheduler.h
+ * @file scheduler.h
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov <vooon341@gmail.com>
  */
 
-#ifndef SHEDULER_H
-#define SHEDULER_H
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -79,6 +79,6 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task);
 /**
  * Главный цикл задач.
  */
-void gate_sheduler_loop(void);
+void gate_scheduler_loop(void);
 
 #endif

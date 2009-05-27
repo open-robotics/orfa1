@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "common.h"
-#include "sheduler.h"
+#include "scheduler.h"
 #include <stdint.h>
 
 static GATE_TASK* tasks;
@@ -51,7 +51,7 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task, GATE_CHECK_EVENT check_
 	return GR_OK;
 }
 
-void gate_sheduler_loop(void)
+void gate_scheduler_loop(void)
 {
 	for (;;) {
 		if (check_event) {

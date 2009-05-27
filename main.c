@@ -34,7 +34,7 @@
 #include "serialgate/common.h"
 #include "serialgate/serialgate.h"
 #include "core/driver.h"
-#include "core/sheduler.h"
+#include "core/scheduler.h"
 
 #ifdef HAVE_PORTS
 #include "ports_driver.h"
@@ -170,7 +170,7 @@ int main(void)
 #endif
 	
 	gate_supertask_register(serialgate_supertask);
-	gate_sheduler_loop();
+	gate_scheduler_loop();
 
 	return 0;
 }
