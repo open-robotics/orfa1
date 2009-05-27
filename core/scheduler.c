@@ -28,7 +28,6 @@
 
 static GATE_TASK* tasks;
 static GATE_TASK_FUNC supertask;
-static GATE_CHECK_EVENT check_event;
 
 GATE_RESULT gate_task_register(GATE_TASK* task)
 {
@@ -43,10 +42,9 @@ GATE_RESULT gate_task_register(GATE_TASK* task)
 	return GR_OK;
 }
 
-GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task, GATE_CHECK_EVENT check_event)
+GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task)
 {
 	supertask = task;
-	check_event = check_event;
 
 	return GR_OK;
 }
@@ -54,22 +52,22 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task, GATE_CHECK_EVENT check_
 void gate_scheduler_loop(void)
 {
 	for (;;) {
-		if (check_event) {
-			if (check_event()) {
-				supertask();
+		if (supertask) {
+			supertask();
+		}
+
+		if (tasks) {
+			if (tasks->task) {
+				tasks->task();
 			}
-		}
 
-		if (tasks->task) {
-			tasks->task();
+			if (!tasks->next) {
+				// error!
+				break;
+			}
+		
+			tasks = tasks->next;
 		}
-
-		if (!tasks->next) {
-			// error!
-			break;
-		}
-
-		tasks = tasks->next;
 	}
 
 	for (;;) {
