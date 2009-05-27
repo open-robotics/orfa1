@@ -8,3 +8,7 @@ ifneq "$(HAVE_PORTS)" "" # Yikes !
     include drivers/ports/resolve.mk
 endif
 
+ifneq "$(HAVE_SERVO_4017)" ""
+    include drivers/servo4017/resolve.mk
+endif
+

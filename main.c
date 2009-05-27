@@ -48,6 +48,10 @@
 #include "motor_driver.h"
 #endif
 
+#ifdef HAVE_SERVO
+#include "servo_driver.h"
+#endif
+
 #define BUF_LEN 65
 
 static enum {
@@ -168,7 +172,11 @@ int main(void)
 #ifdef HAVE_MOTOR
 	init_motor_driver();
 #endif
-	
+#ifdef HAVE_SERVO
+	init_servo_driver();
+#endif
+
+	asm volatile ("sei");
 	gate_supertask_register(serialgate_supertask);
 	gate_scheduler_loop();
 
