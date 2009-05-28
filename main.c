@@ -52,6 +52,10 @@
 #include "servo_driver.h"
 #endif
 
+#ifdef HAVE_ADC
+#include "adc_driver.h"
+#endif
+
 #define BUF_LEN 65
 
 static enum {
@@ -174,6 +178,9 @@ int main(void)
 #endif
 #ifdef HAVE_SERVO
 	init_servo_driver();
+#endif
+#ifdef HAVE_ADC
+	init_adc_driver();
 #endif
 
 	asm volatile ("sei");

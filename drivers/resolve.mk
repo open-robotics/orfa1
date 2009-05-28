@@ -12,3 +12,7 @@ ifneq "$(HAVE_SERVO_4017)" ""
     include drivers/servo4017/resolve.mk
 endif
 
+ifneq "$(HAVE_ADC)" ""
+    include drivers/adc/resolve.mk
+endif
+
