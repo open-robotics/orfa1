@@ -101,6 +101,9 @@ GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 	if (driver->init) {
 		res = driver->init();
 	}
+	if (res == GR_OK && driver->task.task) {
+		res = gate_task_register(&driver->task);
+	}
 	if (res == GR_OK) {
 		driver->next = drivers;
 		drivers = driver;
