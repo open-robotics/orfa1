@@ -33,7 +33,6 @@
 
 #include <stdint.h>
 #include "common.h"
-#include "core/scheduler.h"
 
 /**
  * @defgroup Drivers Интерфейс драйверов устройств
@@ -110,7 +109,6 @@ typedef struct GATE_DRIVER_ {
 	GATE_READ read; /**< Функция чтения */
 	GATE_WRITE write; /**< Функция записи */
 	GATE_INIT init; /**< Функция инициализации драйвера */
-	GATE_TASK task; /**< Задача, вызываемая в основном цикле */;
 } GATE_DRIVER;
 
 /**
