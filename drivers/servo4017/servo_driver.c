@@ -113,7 +113,8 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 		return GR_INVALID_DATA;
 	}
 	while (data_len) {
-		set_position(*data, *((uint16_t*)(data+1)));
+		uint16_t pos = data[2] + (data[1] << 8);
+		set_position(*data, pos);
 		data += 3;
 		data_len -= 3;
 		if (data_len < 3 || data_len > 252) {

@@ -108,11 +108,12 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	uint8_t bytes_written = 0;
 	while ((read_channel < 8) && (bytes_written + delta < *data_len)) {
 		if (config & 0x04) {
-			*((uint16_t*)data) = result[read_channel];
+			data[0] = result[read_channel] >> 8;
+			data[1] = result[read_channel] & 0xFF;
 			data += 2;
 			bytes_written += 2;
 		} else {
-			*data = result[read_channel];
+			*data = result[read_channel] & 0xFF;
 			data++;
 			bytes_written ++;
 		}
