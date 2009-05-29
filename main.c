@@ -153,10 +153,6 @@ bool cmd_rxc(uint8_t *c, bool ack)
 		--data_len;
 	}
 
-	if((data_len > 0) ^ ack)
-	{
-		return false; // Nack
-	}
 	return true;
 }
 
