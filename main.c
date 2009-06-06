@@ -80,7 +80,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 {
 	debug("# > cmd_start(0x%02x, %i)\n", address, flag);
 
-	if(is_restart && !is_read && data_len > 0)
+	if (is_restart && !is_read && data_len > 0)
 	{
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
@@ -88,13 +88,16 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	state_i2c = GET_REGISTER;
 	is_read = (address & 0x01) ? true : false;
 	is_restart = true;
-	data_len = 0;
 
-	if(is_read)
+	if (is_read && (!data_len || (register_addr & 0x80)))
 	{
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
 		result = gate_register_read(register_addr, buf, &data_len);
+	}
+	else if (!is_read)
+	{
+		data_len = 0;
 	}
 
 	return true;
@@ -107,7 +110,7 @@ void cmd_stop(void)
 	debug("# > cmd_stop()\n");
 
 	is_restart = false;
-	if(!is_read)
+	if (!is_read)
 	{
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
@@ -119,7 +122,7 @@ void cmd_stop(void)
  */
 bool cmd_txc(uint8_t c)
 {
-	switch(state_i2c)
+	switch (state_i2c)
 	{
 		case GET_REGISTER:
 			register_addr = c;
@@ -127,10 +130,8 @@ bool cmd_txc(uint8_t c)
 			break;
 
 		case GET_DATA:
-			{
-			if((++data_len) < BUF_LEN)
+			if ((++data_len) < BUF_LEN)
 				buf[data_len] = c;
-			}
 			break;
 	};
 
@@ -147,14 +148,26 @@ bool cmd_rxc(uint8_t *c, bool ack)
 {
 	debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
 
+	if(!data_len)
+	{
+		data_len = BUF_LEN - 1;
+		read_ptr = buf;
+		result = gate_register_read(register_addr, buf, &data_len);
+	}
+
 	if(data_len > 0)
 	{
 		*c = *read_ptr++;
 		--data_len;
 	}
+	else
+	{
+		*c = 0;
+	}
 
 	return true;
 }
+
 
 int main(void)
 {

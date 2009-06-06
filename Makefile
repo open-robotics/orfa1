@@ -27,14 +27,11 @@ CFLAGS = -std=gnu99 -I. $(INCLUDE_DIRS) -Wall -Os -Wstrict-prototypes  -Werror $
 ASFLAGS = -I. $(INCLUDE_DIRS) $(MCU_FLAGS) -xassembler-with-cpp
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
-COFFCONVERT=$(OBJCOPY) --debugging \
-   -O coff-ext-avr \
+COFFCONVERT=$(OBJCOPY) --debugging -O coff-ext-avr \
 	--change-section-address .data-0x800000 \
 	--change-section-address .bss-0x800000 \
 	--change-section-address .noinit-0x800000 \
 	--change-section-address .eeprom-0x810000
-
-
 
 
 DEFINES = -D$(PLATFORM)
@@ -42,6 +39,9 @@ DEFINES = -D$(PLATFORM)
 LIBS = 
 LIBS_RULES = 
 SRC = main.c
+
+PROGRAMMER = dragon_isp
+PROGRAMMER_PORT = usb
 
 include $(CONFIG_FILE)
 -include local_config.mk
@@ -87,14 +87,15 @@ $(target).cof : $(target).elf
 
 clean:
 	rm -rf `find -name '*.o' -o -name '*.a'  -o -name ${target}.hex -o -name $(target).elf `
-	rm -f doxygen.log
+	rm -f doxygen.log tags
 
 docs:
 	doxygen
 
 force: clean all
 
-PROGRAMMER = dragon_isp
 program: $(target).hex
-	avrdude -p $(MCU) -P usb -c $(PROGRAMMER) -U flash:w:$<
+	avrdude -p $(MCU) -P $(PROGRAMMER_PORT) -c $(PROGRAMMER) -U flash:w:$<
 
+tags:
+	ctags -o $@ -R $(shell find -name '*.c' -o -name '*.h')
