@@ -134,7 +134,7 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	}
 	
 	if (idriver_num > idriver_len) {
-		idriver_num = 0;
+		idriver_num = 1;
 	}
 
 	if (idriver_num == 0) {
