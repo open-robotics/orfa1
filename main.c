@@ -82,6 +82,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 
 	if (is_restart && !is_read && data_len > 0)
 	{
+		debug("# -> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
 
@@ -93,6 +94,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	{
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
+		debug("# -> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_read(register_addr, buf, &data_len);
 	}
 	else if (!is_read)
@@ -112,6 +114,7 @@ void cmd_stop(void)
 	is_restart = false;
 	if (!is_read)
 	{
+		debug("# -> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
 }
@@ -152,6 +155,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
 	{
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
+		debug("# -> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_read(register_addr, buf, &data_len);
 	}
 
@@ -169,6 +173,8 @@ bool cmd_rxc(uint8_t *c, bool ack)
 }
 
 
+/** Main
+ */
 int main(void)
 {
 	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);

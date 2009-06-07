@@ -12,3 +12,4 @@ tags$
 doxygen.log$
 doc\/doxygen
 test$
+local_config\.mk

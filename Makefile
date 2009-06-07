@@ -49,6 +49,8 @@ include resolve.mk
 
 ifeq "$(DEBUG)" ""
     DEFINES += -DNDEBUG
+else
+	DEFINES += -DDEBUG=$(DEBUG)
 endif
 
 OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SRC))))
@@ -61,10 +63,9 @@ $(target).hex: $(target).elf
 	chmod -x $(target).hex $(target).elf
 
 $(target).elf: $(OBJS) $(LIBS_RULES)
-	$(CC) $(CFLAGS) -o $(target).elf \
-		$(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o $(target).elf $(OBJS) $(LIBS)
 
-$(target).cof : $(target).elf
+$(target).cof: $(target).elf
 	$(COFFCONVERT) -O coff-ext-avr $< $(target).cof
 
 
@@ -86,7 +87,7 @@ $(target).cof : $(target).elf
 
 
 clean:
-	rm -rf `find -name '*.o' -o -name '*.a'  -o -name ${target}.hex -o -name $(target).elf `
+	rm -rf $(shell find -name '*.o' -o -name '*.a'  -o -name ${target}.hex -o -name $(target).elf)
 	rm -f doxygen.log tags
 
 docs:
@@ -99,3 +100,4 @@ program: $(target).hex
 
 tags:
 	ctags -o $@ -R $(shell find -name '*.c' -o -name '*.h')
+
