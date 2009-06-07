@@ -117,6 +117,7 @@ void cmd_stop(void)
 	{
 		debug("# \\-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
+		data_len = 0;
 	}
 }
 
@@ -136,6 +137,8 @@ bool cmd_txc(uint8_t c)
 		case GET_DATA:
 			if ((++data_len) < BUF_LEN)
 				buf[data_len] = c;
+			else
+				data_len = BUF_LEN-1;
 			break;
 	};
 
