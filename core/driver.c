@@ -34,7 +34,6 @@ static GATE_DRIVER* drivers;
 static GATE_DRIVER* find_driver(uint8_t reg)
 {
 	GATE_DRIVER* driver = drivers;
-	reg &= ~0x80; // mask high bit
 	while (driver) {
 		uint8_t num = driver->num_registers;
 		uint8_t start = driver->start_register;

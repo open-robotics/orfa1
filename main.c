@@ -70,6 +70,7 @@ static uint8_t* read_ptr;
 static bool is_restart = false;
 static bool is_read = false;
 static bool prev_is_read = false;
+static bool read_always = false;
 static GATE_RESULT result = GR_OK;
 
 /** Handle I2C Start event
@@ -93,7 +94,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	is_restart = true;
 
 	if ((is_read && !prev_is_read) || 
-		(is_read && (!data_len || register_addr & 0x80)))
+		(is_read && (!data_len || read_always)))
 	{
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
@@ -130,7 +131,8 @@ bool cmd_txc(uint8_t c)
 	switch (state_i2c)
 	{
 		case GET_REGISTER:
-			register_addr = c;
+			read_always = c & 0x80;
+			register_addr = c & ~0x80;
 			state_i2c = GET_DATA;
 			break;
 
