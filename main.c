@@ -69,6 +69,7 @@ static uint8_t data_len = 0;
 static uint8_t* read_ptr;
 static bool is_restart = false;
 static bool is_read = false;
+static bool prev_is_read = false;
 static GATE_RESULT result = GR_OK;
 
 /** Handle I2C Start event
@@ -82,25 +83,25 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 
 	if (is_restart && !is_read && data_len > 0)
 	{
-		debug("# -> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
+		debug("# \\-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
+		data_len = 0;
 	}
 
 	state_i2c = GET_REGISTER;
 	is_read = (address & 0x01) ? true : false;
 	is_restart = true;
 
-	if (is_read && (!data_len || (register_addr & 0x80)))
+	if ((is_read && !prev_is_read) || 
+		(is_read && (!data_len || register_addr & 0x80)))
 	{
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
-		debug("# -> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_read(register_addr, buf, &data_len);
+		debug("# \\-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 	}
-	else if (!is_read)
-	{
-		data_len = 0;
-	}
+
+	prev_is_read = is_read;
 
 	return true;
 }
@@ -114,7 +115,7 @@ void cmd_stop(void)
 	is_restart = false;
 	if (!is_read)
 	{
-		debug("# -> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
+		debug("# \\-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 	}
 }
@@ -149,14 +150,12 @@ bool cmd_txc(uint8_t c)
  */
 bool cmd_rxc(uint8_t *c, bool ack)
 {
-	debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
-
 	if(!data_len)
 	{
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
-		debug("# -> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_read(register_addr, buf, &data_len);
+		debug("# /-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 	}
 
 	if(data_len > 0)
@@ -169,6 +168,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
 		*c = 0;
 	}
 
+	debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
 	return true;
 }
 
