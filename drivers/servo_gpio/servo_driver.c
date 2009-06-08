@@ -176,12 +176,12 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	}
 
 	if (reg == 0) {
-		if (data_len != 4) {
+		if (data_len != 2) {
 			return GR_INVALID_DATA;
 		}
 
 		uint8_t byte = 0;
-		while (byte < 4) {
+		while (byte < 2) {
 			uint8_t bit = 0;
 			while (bit < 8) {
 				set_enable( (byte << 3) + bit , *data & 0x01);
