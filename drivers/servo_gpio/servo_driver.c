@@ -28,6 +28,7 @@
 #endif
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include "core/common.h"
 #include "core/driver.h"
 #include <stdint.h>
@@ -53,9 +54,9 @@
 
 static uint8_t gpio_servo_pos[16];
 static uint8_t gpio_servo_enb[16];
-static uint16_t tmr,tmp;
+static uint16_t tmr, tmp;
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+//static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 static GATE_DRIVER driver = {
@@ -70,7 +71,6 @@ static GATE_DRIVER driver = {
 ISR(SIG_OVERFLOW0)
 {
 	TCNT0 = REST_IN_TICKS;
-	uint8_t tmp;
 
 	if (tmr < WORKSPACE*8) {
 		if (tmr < WORKSPACE*4) {
@@ -161,13 +161,13 @@ static inline void set_position(uint8_t n, uint16_t pos)
 }
 
 
-#if 0 // comment out now
+/* comment out now
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	*data_len = 0;
 	return GR_OK;
 }
-#endif
+*/
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
@@ -193,7 +193,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 			byte++;
 		}
 
-		return GR_OR;
+		return GR_OK;
 	}
 
 	if (data_len < 3) {
