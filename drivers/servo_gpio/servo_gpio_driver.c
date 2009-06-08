@@ -173,7 +173,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
-GATE_RESULT init_servo_driver(void)
+GATE_RESULT init_servo_gpio_driver(void)
 {
 
 	uint8_t i;
