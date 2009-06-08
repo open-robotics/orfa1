@@ -52,10 +52,6 @@
 #include "servo_driver.h"
 #endif
 
-#ifdef HAVE_SERVO_GPIO
-#include "servo_gpio_driver.h"
-#endif
-
 #ifdef HAVE_ADC
 #include "adc_driver.h"
 #endif
@@ -202,9 +198,6 @@ int main(void)
 #endif
 #ifdef HAVE_SERVO
 	init_servo_driver();
-#endif
-#ifdef HAVE_SERVO_GPIO
-	init_servo_gpio_driver();
 #endif
 #ifdef HAVE_ADC
 	init_adc_driver();
