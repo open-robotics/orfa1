@@ -32,6 +32,7 @@
 #include "core/common.h"
 #include "core/driver.h"
 #include <stdint.h>
+#include "serialgate/common.h"
 
 #define RESOLUTION_IN_TICKS 160
 #define RESOLUTION_TIME (7372800/RESOLUTION_IN_TICKS)
@@ -50,6 +51,9 @@
 			port &= ~(1<<pin); \
 		}; \
 	};
+
+#define CODE_FOR_ENABLE(servo_id, ddr, pin) \
+	if (gpio_servo_enb[servo_id] == 1){ ddr|=1<<pin; }else{ ddr&=~(1<<pin); };
 
 
 static uint8_t gpio_servo_pos[16];
@@ -143,6 +147,22 @@ ISR(SIG_OVERFLOW0)
 static inline void set_enable(uint8_t n, uint8_t enable)
 {
 	gpio_servo_enb[n] = (enable > 0) ? 1 : 0;
+	CODE_FOR_ENABLE(0, DDRA, 0);
+	CODE_FOR_ENABLE(1, DDRA, 1);
+	CODE_FOR_ENABLE(2, DDRA, 2);
+    CODE_FOR_ENABLE(3, DDRA, 3);
+	CODE_FOR_ENABLE(4, DDRA, 4);
+	CODE_FOR_ENABLE(5, DDRA, 5);
+	CODE_FOR_ENABLE(6, DDRA, 6);
+    CODE_FOR_ENABLE(7, DDRA, 7);
+	CODE_FOR_ENABLE(8, DDRC, 7);
+	CODE_FOR_ENABLE(9, DDRC, 6);
+	CODE_FOR_ENABLE(10,DDRC, 5);
+    CODE_FOR_ENABLE(11,DDRC, 4);
+	CODE_FOR_ENABLE(12,DDRB, 3);
+	CODE_FOR_ENABLE(13,DDRB, 2);
+	CODE_FOR_ENABLE(14,DDRD, 5);
+    CODE_FOR_ENABLE(15,DDRD, 4);
 }
 
 static inline void set_position(uint8_t n, uint16_t pos)
@@ -174,6 +194,8 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	if (reg > 1) {
 		return GR_NO_ACCESS;
 	}
+
+	debug("reg=%d len=%d\n",reg,data_len);
 
 	if (reg == 0) {
 		if (data_len != 2) {
