@@ -38,7 +38,7 @@
 #define RESOLUTION_TIME (7372800/RESOLUTION_IN_TICKS)
 #define REST_IN_TICKS (255-RESOLUTION_IN_TICKS)
 #define MAX_TMR (7372800/50/RESOLUTION_IN_TICKS)
-#define MAXSERVO (7372800/400/RESOLUTION_IN_TICKS)
+#define MAXSERVO (7372800/ 400/RESOLUTION_IN_TICKS)
 #define MINSERVO (7372800/2000/RESOLUTION_IN_TICKS)
 #define WORKSPACE (MAXSERVO+1)
 
@@ -165,19 +165,19 @@ static inline void set_enable(uint8_t n, uint8_t enable)
     CODE_FOR_ENABLE(15,DDRD, 4);
 }
 
-static inline void set_position(uint8_t n, uint16_t pos)
+static inline void set_position(uint8_t n, uint32_t pos)
 {
 	if (n > 15) 
 		return;
 
-	pos = pos / RESOLUTION_TIME;
-
+    pos = pos * RESOLUTION_TIME/1000000;
+	
 	if (pos < MINSERVO)
 		pos = MINSERVO;
 	else if (pos > MAXSERVO)
 		pos = MAXSERVO;
 
-	gpio_servo_pos[n] = pos;
+    gpio_servo_pos[n] = pos;
 }
 
 
@@ -191,14 +191,14 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
+	debug("reg=%d len=%d\n",reg,data_len);
+	
 	if (reg > 1) {
 		return GR_NO_ACCESS;
 	}
 
-	debug("reg=%d len=%d\n",reg,data_len);
-
 	if (reg == 0) {
-		if (data_len != 2) {
+		if (data_len != 3) {
 			return GR_INVALID_DATA;
 		}
 
@@ -241,7 +241,7 @@ GATE_RESULT init_servo_driver(void)
 {
 	for (uint16_t i=0; i < 16; i++) {
 		set_enable(i, 0);
-		set_position(i, 1500);
+		set_position(i, 1000);
     };
 
 	// Prepare TIMER0 interrupt
