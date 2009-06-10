@@ -203,8 +203,6 @@ int main(void)
 	init_adc_driver();
 #endif
 
-    debug("go!\n");
-
 	asm volatile ("sei");
 	gate_supertask_register(serialgate_supertask);
 	gate_scheduler_loop();
