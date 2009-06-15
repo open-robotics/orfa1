@@ -32,7 +32,11 @@
 #include "core/common.h"
 #include "core/driver.h"
 #include <stdint.h>
+#include <stdbool.h>
+
+#ifndef NDEBUG
 #include "serialgate/common.h"
+#endif
 
 #define RESOLUTION_IN_TICKS 160
 #define RESOLUTION_TIME (7372800/RESOLUTION_IN_TICKS)
@@ -43,21 +47,25 @@
 #define WORKSPACE (MAXSERVO+1)
 
 #define CODE_FOR_SERVO(servo_id, port, pin) \
-	if (gpio_servo_enb[servo_id] == 1) { \
+	if (gpio_servo_enb[servo_id]) { \
 		if (tmp == 0) { \
 			port |= (1<<pin); \
-		}; \
+		} \
 		if (tmp == gpio_servo_pos[servo_id]) { \
 			port &= ~(1<<pin); \
-		}; \
-	};
+		} \
+	}
 
 #define CODE_FOR_ENABLE(servo_id, ddr, pin) \
-	if (gpio_servo_enb[servo_id] == 1){ ddr|=1<<pin; }else{ ddr&=~(1<<pin); };
+	if (gpio_servo_enb[servo_id]) { \
+		ddr |= (1<<pin); \
+	} else { \
+		ddr &= ~(1<<pin); \
+	}
 
 
 static uint8_t gpio_servo_pos[16];
-static uint8_t gpio_servo_enb[16];
+static bool gpio_servo_enb[16];
 static uint16_t tmr, tmp;
 
 //static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
@@ -144,25 +152,26 @@ ISR(SIG_OVERFLOW0)
 }
 
 
-static inline void set_enable(uint8_t n, uint8_t enable)
+static inline void set_enable(uint8_t n, bool enable)
 {
-	gpio_servo_enb[n] = (enable > 0) ? 1 : 0;
-	CODE_FOR_ENABLE(0, DDRA, 0);
-	CODE_FOR_ENABLE(1, DDRA, 1);
-	CODE_FOR_ENABLE(2, DDRA, 2);
-    CODE_FOR_ENABLE(3, DDRA, 3);
-	CODE_FOR_ENABLE(4, DDRA, 4);
-	CODE_FOR_ENABLE(5, DDRA, 5);
-	CODE_FOR_ENABLE(6, DDRA, 6);
-    CODE_FOR_ENABLE(7, DDRA, 7);
-	CODE_FOR_ENABLE(8, DDRC, 7);
-	CODE_FOR_ENABLE(9, DDRC, 6);
-	CODE_FOR_ENABLE(10,DDRC, 5);
-    CODE_FOR_ENABLE(11,DDRC, 4);
-	CODE_FOR_ENABLE(12,DDRB, 3);
-	CODE_FOR_ENABLE(13,DDRB, 2);
-	CODE_FOR_ENABLE(14,DDRD, 5);
-    CODE_FOR_ENABLE(15,DDRD, 4);
+	gpio_servo_enb[n] = (enable > 0) ? true : false;
+	
+	CODE_FOR_ENABLE(0,  DDRA, 0);
+	CODE_FOR_ENABLE(1,  DDRA, 1);
+	CODE_FOR_ENABLE(2,  DDRA, 2);
+	CODE_FOR_ENABLE(3,  DDRA, 3);
+	CODE_FOR_ENABLE(4,  DDRA, 4);
+	CODE_FOR_ENABLE(5,  DDRA, 5);
+	CODE_FOR_ENABLE(6,  DDRA, 6);
+	CODE_FOR_ENABLE(7,  DDRA, 7);
+	CODE_FOR_ENABLE(8,  DDRC, 7);
+	CODE_FOR_ENABLE(9,  DDRC, 6);
+	CODE_FOR_ENABLE(10, DDRC, 5);
+	CODE_FOR_ENABLE(11, DDRC, 4);
+	CODE_FOR_ENABLE(12, DDRB, 3);
+	CODE_FOR_ENABLE(13, DDRB, 2);
+	CODE_FOR_ENABLE(14, DDRD, 5);
+	CODE_FOR_ENABLE(15, DDRD, 4);
 }
 
 static inline void set_position(uint8_t n, uint32_t pos)
@@ -170,14 +179,14 @@ static inline void set_position(uint8_t n, uint32_t pos)
 	if (n > 15) 
 		return;
 
-    pos = pos * RESOLUTION_TIME/1000000;
+	pos = pos * RESOLUTION_TIME/1000000;
 	
 	if (pos < MINSERVO)
 		pos = MINSERVO;
 	else if (pos > MAXSERVO)
 		pos = MAXSERVO;
 
-    gpio_servo_pos[n] = pos;
+	gpio_servo_pos[n] = pos;
 }
 
 
@@ -191,7 +200,7 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	debug("reg=%d len=%d\n",reg,data_len);
+	debug("# servo_gpio->write(0x%02X, buf, %i)\n", reg, data_len);
 	
 	if (reg > 1) {
 		return GR_NO_ACCESS;
@@ -218,17 +227,16 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 		return GR_OK;
 	}
 
-	if (data_len < 3) {
+	if (data_len < 3 || data_len > 252) {
 		return GR_INVALID_DATA;
 	}
 
 	while (data_len) {
-		uint16_t pos = data[2] + (data[1] << 8);
-		set_position(*data, pos);
+		set_position(*data, (data[1]<<8)|data[2]);
 		data += 3;
 		data_len -= 3;
 
-		if (data_len < 3 || data_len > 252) {
+		if (data_len < 3) {
 			return GR_INVALID_DATA;
 		}
 	}
@@ -239,8 +247,8 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 GATE_RESULT init_servo_driver(void)
 {
-	for (uint16_t i=0; i < 16; i++) {
-		set_enable(i, 0);
+	for (uint8_t i=0; i < 16; i++) {
+		set_enable(i, false);
 		set_position(i, 1000);
     };
 
