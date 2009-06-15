@@ -39,12 +39,12 @@
 #endif
 
 #define RESOLUTION_IN_TICKS 160
-#define RESOLUTION_TIME (7372800/RESOLUTION_IN_TICKS)
-#define REST_IN_TICKS (255-RESOLUTION_IN_TICKS)
-#define MAX_TMR (7372800/50/RESOLUTION_IN_TICKS)
-#define MAXSERVO (7372800/ 400/RESOLUTION_IN_TICKS)
-#define MINSERVO (7372800/2000/RESOLUTION_IN_TICKS)
-#define WORKSPACE (MAXSERVO+1)
+#define RESOLUTION_TIME     (F_CPU / RESOLUTION_IN_TICKS)
+#define REST_IN_TICKS       (255-RESOLUTION_IN_TICKS)
+#define MAX_TMR             (F_CPU/50/RESOLUTION_IN_TICKS)
+#define MAXSERVO            (F_CPU/ 400/RESOLUTION_IN_TICKS)
+#define MINSERVO            (F_CPU/2000/RESOLUTION_IN_TICKS)
+#define WORKSPACE           (MAXSERVO+1)
 
 #define CODE_FOR_SERVO(servo_id, port, pin) \
 	if (gpio_servo_enb[servo_id]) { \
@@ -200,7 +200,9 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
+#ifndef NDEBUG
 	debug("# servo_gpio->write(0x%02X, buf, %i)\n", reg, data_len);
+#endif
 	
 	if (reg > 1) {
 		return GR_NO_ACCESS;
