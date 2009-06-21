@@ -1,5 +1,8 @@
 target = orfa
 
+# $(PLATFORM) hack
+-include local_config.mk
+
 ifeq "$(PLATFORM)"  ""
     PLATFORM = OR_AVR_M32_D
 endif

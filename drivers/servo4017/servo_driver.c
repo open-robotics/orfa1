@@ -30,7 +30,16 @@
 #include "core/common.h"
 #include "core/driver.h"
 #include <stdint.h>
+#include <stdbool.h>
 #include <avr/pgmspace.h>
+
+#ifdef USE_EEPROM
+#include <avr/eeprom.h>
+#endif
+
+#ifndef NDEBUG
+#include <stdio.h>
+#endif
 
 #define US2CLOCK(us) (((uint32_t)(us) * (uint32_t)(F_CPU / 8000000.0 * 0x10000UL)) >> 16)
 
@@ -97,6 +106,45 @@ static void set_position(uint8_t n, uint16_t pos)
 	calc_ocr[block][idx] = pos;
 }
 
+#ifdef USE_EEPROM
+uint8_t EEMEM ee_load_calc_ocr = false;
+uint16_t EEMEM ee_calc_ocr[4][9];
+
+static void save_positions(bool load_flag)
+{
+#ifndef NDEBUG
+	printf("# servo4017->save_positions(%i)\n", load_flag);
+#endif
+
+	if (load_flag) {
+		eeprom_write_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
+	}
+	eeprom_write_byte(&ee_load_calc_ocr, load_flag);
+}
+
+static void load_positions(void)
+{
+	uint8_t load_flag = eeprom_read_byte(&ee_load_calc_ocr);
+#ifndef NDEBUG
+	printf("# servo4017->load_positions()\n# :: load_flag = %i\n", load_flag);
+#endif
+
+	if (load_flag) {
+		eeprom_read_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
+
+#ifndef NDEBUG
+		printf("# :: Loaded:\n");
+		for (uint8_t i=0; i<4; i++) {
+			printf("# [%i]:", i);
+			for (uint8_t j=0; j<9; j++) {
+				printf(" 0x%04X", calc_ocr[i][j]);
+			}
+			printf("\n");
+		}
+#endif
+	}
+}
+#endif
 
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
@@ -106,8 +154,14 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	if (reg != 1) {
+	if (reg > 1) {
 		return GR_NO_ACCESS;
+	}
+	if (!reg) {
+#ifdef USE_EEPROM
+		save_positions(*data);
+#endif
+		return GR_OK;
 	}
 	if (data_len < 3) {
 		return GR_INVALID_DATA;
@@ -126,6 +180,10 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 GATE_RESULT init_servo_driver(void)
 {
+#ifdef USE_EEPROM
+	load_positions();
+#endif
+
 	DDRE = _BV(2) | _BV(3) | _BV(4) | _BV(5);
 	DDRB = _BV(7);
 
@@ -148,7 +206,4 @@ GATE_RESULT init_servo_driver(void)
 
 	return gate_driver_register(&driver);
 }
-
-
-
 
