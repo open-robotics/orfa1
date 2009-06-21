@@ -218,7 +218,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 				pause0[1] = pauseX0-210;     mask0[1] = 0xFF;    pause1[1] = 0; mask1[1] = 0xFF;
 				pause0[2] = pauseX1-pauseX0; mask0[2] = ~maskX0; pause1[2] = 0; mask1[2] = 0xFF;		
 				pause0[3] = paus >> 1;       mask0[3] = ~maskX1; pause1[3] = 0; mask1[3] = 0xFF;
-				pause0[4] = paus-(pause>>1); mask0[4] = 0xFF;    pause1[4] = 0; mask1[4] = 0xFF;
+				pause0[4] = paus-(paus>>1);  mask0[4] = 0xFF;    pause1[4] = 0; mask1[4] = 0xFF;
 
 			} else {
 				uint16_t paus=600-pauseX1;
@@ -226,7 +226,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 				pause0[1] = pauseX0-10;      mask0[1] = 0xFF;    pause1[1] = 0; mask1[1] = 0xFF;
 				pause0[2] = pauseX1-pauseX0; mask0[2] = ~maskX0; pause1[2] = 0; mask1[2] = 0xFF;
 				pause0[3] = paus >> 1;       mask0[3] = ~maskX1; pause1[3] = 0; mask1[3] = 0xFF;
-				pause0[4] = paus-(pause>>1); mask0[4] = 0xFF;    pause1[4] = 0; mask1[4] = 0xFF;
+				pause0[4] = paus-(paus>>1);  mask0[4] = 0xFF;    pause1[4] = 0; mask1[4] = 0xFF;
 			}
 		}
 	}
