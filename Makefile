@@ -104,3 +104,5 @@ program: $(target).hex
 tags:
 	ctags -o $@ -R $(shell find -name '*.c' -o -name '*.h')
 
+# debugging
+include debug.mk
