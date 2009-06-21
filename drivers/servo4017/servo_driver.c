@@ -119,12 +119,12 @@ static void save_positions(bool load_flag)
 	if (load_flag) {
 		eeprom_write_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
 	}
-	eeprom_write_byte(&ee_load_calc_ocr, load_flag);
+	eeprom_write_byte(&ee_load_calc_ocr, !load_flag);
 }
 
 static void load_positions(void)
 {
-	uint8_t load_flag = eeprom_read_byte(&ee_load_calc_ocr);
+	uint8_t load_flag = !eeprom_read_byte(&ee_load_calc_ocr);
 #ifndef NDEBUG
 	printf("# servo4017->load_positions()\n# :: load_flag = %i\n", load_flag);
 #endif
