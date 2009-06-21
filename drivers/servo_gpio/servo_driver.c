@@ -38,6 +38,9 @@
 #include "serialgate/common.h"
 #endif
 
+#include <util/delay.h>
+#define delay_us(x) _delay_us(x)
+
 #define RESOLUTION_IN_TICKS 32
 #define RESOLUTION_TIME     (F_CPU / RESOLUTION_IN_TICKS)
 #define MAXSERVO            (F_CPU/ 400/RESOLUTION_IN_TICKS)
@@ -112,6 +115,7 @@ uint8_t port_mask[16] = {
 	portHandlerOR (process##0, port, process##1,     (id))
 
 void processD0(void);
+void (*handler)(void) = processD0;
 
 portHandlers(processAa, PORTA, processD,  0);
 portHandlers(processAb, PORTA, processAa, 4);
@@ -122,7 +126,7 @@ portHandlers(processCb, PORTC, processCa, 20);
 portHandlers(processB,  PORTB, processCb, 24);
 portHandlers(processD,  PORTD, processB,  28);
 
-static inline generateParams(const unit8_t port_id, const uint8_t param_id)
+static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 {
 	uint8_t maskX0=0,
 			maskX1=0;
