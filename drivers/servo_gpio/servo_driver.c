@@ -354,7 +354,6 @@ GATE_RESULT init_servo_driver(void)
 	// Prepare TIMER0 interrupt
 	TCCR0 = 0x01;
 	TCNT0 = 0;
-	tmr = 0;
 	TIMSK |= 0x01;
 
 	return gate_driver_register(&driver);
