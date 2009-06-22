@@ -50,16 +50,32 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 #define PWM2_MASK  _BV(PD5) // OC1B
 #define PWM_MASK   (PWM1_MASK|PWM2_MASK) // avr/iom32.h OC1A, OC1B
 
-// timer1 OC1A config
+// Timer1 OC1A, OC1B config
 #define COM_PWM1           ((1<<COM1A1)|(0<<COM1A0))
-#define ATTACH_PWM1_PIN()  TCCR1A |= COM_PWM1
-#define DETACH_PWM1_PIN()  TCCR1A &= ~COM_PWM1
-
-// timer1 OC1A config
 #define COM_PWM2           ((1<<COM1B1)|(0<<COM1B0))
-#define ATTACH_PWM2_PIN()  TCCR1A |= COM_PWM2
-#define DETACH_PWM2_PIN()  TCCR1A &= ~COM_PWM2
+#define ATTACH_PWM_PIN(ch)  TCCR1A |= COM_PWM##ch
+#define DETACH_PWM_PIN(ch)  TCCR1A &= ~COM_PWM#ch
 
+#define setDirection(ch, value) \
+	if (value) \
+		DIR_PORT |= DIR##ch##_MASK; \
+	else \
+		DIR_PORT &= ~DIR##ch##_MASK
+
+#define setPwm(ch, value) \
+	if (value) \
+		ATTACH_PWM_PIN(ch); \
+	else { \
+		DETACH_PWM_PIN(ch); \
+		PWM_PORT &= ~PWM##ch##_MASK; \
+	} \
+	PWM##ch##_OC = (uint16_t) value
+
+#define getDirection(ch) \
+	(DIR_PORT & DIR##ch##_MASK) ? true : false
+
+#define getPwm(ch) \
+	(uint8_t) PWM##ch##_OC
 
 static GATE_DRIVER driver = {
 	.uid = 0x0060, // motor id
@@ -80,19 +96,19 @@ static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_l
 	switch (reg)
 	{
 		case PWM1_REG:
-			*data = (uint8_t) PWM1_OC;
+			*data = getPwm(1);
 			break;
 
 		case PWM2_REG:
-			*data = (uint8_t) PWM1_OC;
+			*data = getPwm(2);
 			break;
 
 		case DIR1_REG:
-			*data = (DIR_PORT & DIR1_MASK) ? true : false;
+			*data = getDirection(1);
 			break;
 
 		case DIR2_REG:
-			*data = (DIR_PORT & DIR2_MASK) ? true : false;
+			*data = getDirection(2);
 			break;
 	}
 	
@@ -106,39 +122,19 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 	switch (reg)
 	{
 		case PWM1_REG:
-			if (*data)
-				ATTACH_PWM1_PIN();
-			else
-			{
-				DETACH_PWM1_PIN();
-				PWM_PORT &= ~PWM1_MASK;
-			}
-			PWM1_OC = (uint16_t) *data;
+			setPwm(1, *data);
 			break;
 
 		case PWM2_REG:
-			if (*data)
-				ATTACH_PWM2_PIN();
-			else
-			{
-				DETACH_PWM2_PIN();
-				PWM_PORT &= ~PWM2_MASK;
-			}
-			PWM2_OC = (uint16_t) *data;
+			setPwm(2, *data);
 			break;
 
 		case DIR1_REG:
-			if (*data)
-				DIR_PORT |= DIR1_MASK;
-			else
-				DIR_PORT &= ~DIR1_MASK;
+			setDirection(1, *data);
 			break;
 
 		case DIR2_REG:
-			if (*data)
-				DIR_PORT |= DIR2_MASK;
-			else
-				DIR_PORT &= ~DIR2_MASK;
+			setDirection(2, *data);
 			break;
 	}
 	
