@@ -235,19 +235,19 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 
 ISR(SIG_OUTPUT_COMPARE2)
 {
-   handler();
+	 handler();
 }
 
 static inline void generateParameters(void)
 {
-  generateParams(0,  0);
-  generateParams(2,  5);
-  generateParams(4,  10);
-  generateParams(6,  15);
-  generateParams(8,  20);
-  generateParams(10, 25);
-  generateParams(12, 30);
-  generateParams(14, 35);
+	generateParams(0,  0);
+	generateParams(2,  5);
+	generateParams(4,  10);
+	generateParams(6,  15);
+	generateParams(8,  20);
+	generateParams(10, 25);
+	generateParams(12, 30);
+	generateParams(14, 35);
 };
 
 static inline void set_enable(uint8_t n, bool enable)
@@ -349,12 +349,14 @@ GATE_RESULT init_servo_driver(void)
 	for (uint8_t i=0; i < 16; i++) {
 		set_enable(i, false);
 		set_position(i, 1000);
-    };
+	  };
 
-	// Prepare TIMER0 interrupt
-	TCCR0 = 0x01;
-	TCNT0 = 0;
-	TIMSK |= 0x01;
+	// Prepare TIMER2 interrupt
+	// 1/32 F clk, Normal mode
+	// enable Timer2 compare isr
+	TCCR2 = (0<<CS22)|(1<<CS21)|(1<<CS20);
+	TCNT2 = 0;
+	TIMSK |= (1<<OCIE2);
 
 	return gate_driver_register(&driver);
 }
