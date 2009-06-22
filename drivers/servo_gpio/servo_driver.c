@@ -153,11 +153,11 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 		maskX1 = tmp8;
 	}
 
-	mask0[param_id] = maskX0 | maskX1;
+	mask0[param_id+0] = maskX0 | maskX1;
 
 	if (pauseX1-pauseX0 < 2) {
 		if (pauseX0 > 400) {
-			pause0[param_id] = 190;         mask0[param_id] = maskX0 | maskX1;
+			pause0[param_id+0] = 190;         mask0[param_id+0] = maskX0 | maskX1;
 			pause0[param_id+1] = 190;         mask0[param_id+1] = 0xFF; pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 			pause0[param_id+2] = pauseX0-380; mask0[param_id+2] = 0xFF; pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;
 
@@ -170,7 +170,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 			pause0[param_id+4] = 10; mask0[param_id+4] = 0xFF; pause1[param_id+4] = 0; mask1[param_id+4] = 0xFF;
 			
 		} else if (pauseX0 > 200) {
-			pause0[param_id] = 190;         mask0[param_id] = maskX0 | maskX1;
+			pause0[param_id+0] = 190;         mask0[param_id+0] = maskX0 | maskX1;
 			pause0[param_id+1] = pauseX0-190; mask0[param_id+1] = 0xFF; pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 			
 			if (pauseX0 == pauseX1) {
@@ -183,7 +183,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 			pause0[param_id+4] = 90;          mask0[param_id+4] = 0xFF; pause1[param_id+4] = 0; mask1[param_id+4] = 0xFF;
 
 		} else {
-			pause0[param_id] = pauseX0; mask0[param_id] = maskX0 | maskX1;
+			pause0[param_id+0] = pauseX0; mask0[param_id+0] = maskX0 | maskX1;
 			
 			if (pauseX0 == pauseX1) {
 				pause0[param_id+1] = 250-pauseX0; mask0[param_id+1] = ~(maskX0|maskX1); pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
@@ -198,7 +198,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 
 	} else {
 		if (pauseX1-pauseX0 > 235) {
-			pause0[param_id] = 110;                 mask0[param_id] = maskX0 | maskX1;
+			pause0[param_id+0] = 110;                 mask0[param_id+0] = maskX0 | maskX1;
 			pause0[param_id+1] = pauseX0-110;         mask0[param_id+1] = 0xFF;    pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 			pause0[param_id+2] = 230;                 mask0[param_id+2] = ~maskX0; pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;
 			pause0[param_id+3] = pauseX1-pauseX0-230; mask0[param_id+3] = 0xFF;    pause1[param_id+3] = 0; mask1[param_id+3] = 0xFF;
@@ -206,7 +206,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 
 		} else {
 			if (pauseX0 > 440) {
-				pause0[param_id] = 210;             mask0[param_id] = maskX0 | maskX1;
+				pause0[param_id+0] = 210;             mask0[param_id+0] = maskX0 | maskX1;
 				pause0[param_id+1] = 210;             mask0[param_id+1] = 0xFF;    pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 				pause0[param_id+2] = pauseX0-420;     mask0[param_id+2] = 0xFF;    pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;
 				pause0[param_id+3] = pauseX1-pauseX0; mask0[param_id+3] = ~maskX0; pause1[param_id+3] = 0; mask1[param_id+3] = 0xFF;
@@ -214,7 +214,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 
 			} else if (pauseX0 > 220) {
 				uint16_t paus=600-pauseX1;
-				pause0[param_id] = 210;             mask0[param_id] = maskX0 | maskX1;
+				pause0[param_id+0] = 210;             mask0[param_id+0] = maskX0 | maskX1;
 				pause0[param_id+1] = pauseX0-210;     mask0[param_id+1] = 0xFF;    pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 				pause0[param_id+2] = pauseX1-pauseX0; mask0[param_id+2] = ~maskX0; pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;		
 				pause0[param_id+3] = paus >> 1;       mask0[param_id+3] = ~maskX1; pause1[param_id+3] = 0; mask1[param_id+3] = 0xFF;
@@ -222,7 +222,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 
 			} else {
 				uint16_t paus=600-pauseX1;
-				pause0[param_id] = 10;              mask0[param_id] = maskX0 | maskX1;
+				pause0[param_id+0] = 10;              mask0[param_id+0] = maskX0 | maskX1;
 				pause0[param_id+1] = pauseX0-10;      mask0[param_id+1] = 0xFF;    pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 				pause0[param_id+2] = pauseX1-pauseX0; mask0[param_id+2] = ~maskX0; pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;
 				pause0[param_id+3] = paus >> 1;       mask0[param_id+3] = ~maskX1; pause1[param_id+3] = 0; mask1[param_id+3] = 0xFF;
