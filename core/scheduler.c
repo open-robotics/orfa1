@@ -25,6 +25,7 @@
 #include "common.h"
 #include "scheduler.h"
 #include <stdint.h>
+#include <avr/wdt.h>
 
 static GATE_TASK* tasks;
 static GATE_TASK_FUNC supertask;
@@ -51,22 +52,23 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task)
 
 void gate_scheduler_loop(void)
 {
-	for (;;) {
-		if (supertask) {
+	if (supertask) {
+		for (;;) {
+			wdt_reset();
 			supertask();
-		}
-
-		if (tasks) {
-			if (tasks->task) {
-				tasks->task();
+			
+			if (tasks) {
+				if (tasks->task) {
+					tasks->task();
+				}
+				
+				if (!tasks->next) {
+					// error!
+					break;
+				}
+				
+				tasks = tasks->next;
 			}
-
-			if (!tasks->next) {
-				// error!
-				break;
-			}
-		
-			tasks = tasks->next;
 		}
 	}
 
