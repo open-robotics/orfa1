@@ -118,20 +118,20 @@ void processD0(void);
 void (*handler)(void) = processD0;
 
 portHandlers(processAa, PORTA, processD,  0);
-portHandlers(processAb, PORTA, processAa, 4);
-portHandlers(processAc, PORTA, processAb, 8);
-portHandlers(processAd, PORTA, processAc, 12);
-portHandlers(processCa, PORTC, processAd, 16);
-portHandlers(processCb, PORTC, processCa, 20);
-portHandlers(processB,  PORTB, processCb, 24);
-portHandlers(processD,  PORTD, processB,  28);
+portHandlers(processAb, PORTA, processAa, 5);
+portHandlers(processAc, PORTA, processAb, 10);
+portHandlers(processAd, PORTA, processAc, 15);
+portHandlers(processCa, PORTC, processAd, 20);
+portHandlers(processCb, PORTC, processCa, 25);
+portHandlers(processB,  PORTB, processCb, 30);
+portHandlers(processD,  PORTD, processB,  35);
 
 static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 {
 	uint8_t maskX0=0,
 			maskX1=0;
-	uint16_t pauseX0=0,
-			 pauseX1=0;
+	uint16_t pauseX0=200,
+			 pauseX1=200;
 	
 	if (gpio_servo_enb[port_id]) {
 		maskX0 = port_mask[port_id]; 
@@ -153,11 +153,9 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 		maskX1 = tmp8;
 	}
 
-	mask0[param_id] = maskX0 | maskX1;
-
 	if (pauseX1-pauseX0 < 2) {
 		if (pauseX0 > 400) {
-			pause0[param_id] = 190;         mask0[param_id] = maskX0 | maskX1;
+			pause0[param_id] = 190;           mask0[param_id] = maskX0 | maskX1;
 			pause0[param_id+1] = 190;         mask0[param_id+1] = 0xFF; pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 			pause0[param_id+2] = pauseX0-380; mask0[param_id+2] = 0xFF; pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;
 
@@ -347,8 +345,9 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 GATE_RESULT init_servo_driver(void)
 {
 	for (uint8_t i=0; i < 16; i++) {
-		set_enable(i, false);
-		set_position(i, 1000);
+		//set_enable(i, false);
+		set_enable(i, true);
+		set_position(i, 1500);
 	  };
 
 	// Prepare TIMER2 interrupt
