@@ -101,7 +101,7 @@ uint8_t port_mask[16] = {
 		port &= mask0[id]; \
 		OCR2 += pause0[id]; \
 		for (iterator=0; iterator<pause1[id]; iterator++) { \
-			delay_us(1); \
+			delay_us(4); \
 		} \
 		port &= mask1[id]; \
 		handler = nextHandler; \
