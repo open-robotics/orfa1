@@ -250,6 +250,10 @@ static inline void generateParameters(void)
 
 static inline void set_enable(uint8_t n, bool enable)
 {
+	#ifndef NDEBUG
+	debug("# servo_gpio_set_enb(%d, %d)\n", n, enable);
+	#endif
+	
 	gpio_servo_enb[n] = (enable > 0) ? true : false;
 	
 	CODE_FOR_ENABLE(0,  DDRA, 0);
@@ -268,10 +272,17 @@ static inline void set_enable(uint8_t n, bool enable)
 	CODE_FOR_ENABLE(13, DDRB, 2);
 	CODE_FOR_ENABLE(14, DDRD, 5);
 	CODE_FOR_ENABLE(15, DDRD, 4);
+
+	generateParameters();
 }
 
 static inline void set_position(uint8_t n, uint32_t pos)
 {
+	#ifndef NDEBUG
+	debug("# servo_gpio_set_pos(%d, %d)\n", n, pos);
+	#endif
+
+	
 	if (n > 15) 
 		return;
 
@@ -304,9 +315,16 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	}
 
 	if (reg == 0) {
-		if (data_len != 3) {
+	    #ifndef NDEBUG
+			debug("# reg==0\n");
+		#endif
+		if (data_len != 2) {
 			return GR_INVALID_DATA;
 		}
+
+		#ifndef NDEBUG
+			debug("# reg===0\n");
+		#endif
 
 		uint8_t byte = 0;
 		while (byte < 2) {
@@ -329,7 +347,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	}
 
 	while (data_len) {
-		set_position(*data, (data[1]<<8)|data[2]);
+		set_position(*data, (data[2]<<8)|data[1]);
 		data += 3;
 		data_len -= 3;
 
