@@ -54,7 +54,7 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 #define COM_PWM1           ((1<<COM1A1)|(0<<COM1A0))
 #define COM_PWM2           ((1<<COM1B1)|(0<<COM1B0))
 #define ATTACH_PWM_PIN(ch)  TCCR1A |= COM_PWM##ch
-#define DETACH_PWM_PIN(ch)  TCCR1A &= ~COM_PWM#ch
+#define DETACH_PWM_PIN(ch)  TCCR1A &= ~COM_PWM##ch
 
 #define setDirection(ch, value) \
 	if (value) \
