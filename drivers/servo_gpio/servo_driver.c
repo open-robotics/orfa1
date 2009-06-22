@@ -345,8 +345,8 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 GATE_RESULT init_servo_driver(void)
 {
 	for (uint8_t i=0; i < 16; i++) {
-		//set_enable(i, false);
-		set_enable(i, true);
+		set_enable(i, false);
+		//set_enable(i, true);
 		set_position(i, 1500);
 	  };
 
