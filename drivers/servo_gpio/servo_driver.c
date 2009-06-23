@@ -347,7 +347,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	}
 
 	while (data_len) {
-		set_position(*data, (data[2]<<8)|data[1]);
+		set_position(*data, (data[1]<<8)|data[2]);
 		data += 3;
 		data_len -= 3;
 
