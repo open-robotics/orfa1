@@ -47,7 +47,7 @@
 #define MINSERVO            (F_CPU/2000/RESOLUTION_IN_TICKS)
 #define WORKSPACE           (MAXSERVO+1)
 
-#define CODE_FOR_ENABLE(servo_id, ddr, pin) \
+#define enablePin(servo_id, ddr, pin) \
 	if (gpio_servo_enb[servo_id]) { \
 		ddr |= (1<<pin); \
 	} else { \
@@ -155,7 +155,7 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 
 	if (pauseX1-pauseX0 < 2) {
 		if (pauseX0 > 400) {
-			pause0[param_id+0] = 190;           mask0[param_id+0] = maskX0 | maskX1;
+			pause0[param_id+0] = 190;         mask0[param_id+0] = maskX0 | maskX1;
 			pause0[param_id+1] = 190;         mask0[param_id+1] = 0xFF; pause1[param_id+1] = 0; mask1[param_id+1] = 0xFF;
 			pause0[param_id+2] = pauseX0-380; mask0[param_id+2] = 0xFF; pause1[param_id+2] = 0; mask1[param_id+2] = 0xFF;
 
@@ -251,27 +251,27 @@ static inline void generateParameters(void)
 static inline void set_enable(uint8_t n, bool enable)
 {
 	#ifndef NDEBUG
-	debug("# servo_gpio_set_enb(%d, %d)\n", n, enable);
+	debug("# servo_gpio::set_enable(%i, %i)\n", n, enable);
 	#endif
 	
 	gpio_servo_enb[n] = (enable > 0) ? true : false;
 	
-	CODE_FOR_ENABLE(0,  DDRA, 0);
-	CODE_FOR_ENABLE(1,  DDRA, 1);
-	CODE_FOR_ENABLE(2,  DDRA, 2);
-	CODE_FOR_ENABLE(3,  DDRA, 3);
-	CODE_FOR_ENABLE(4,  DDRA, 4);
-	CODE_FOR_ENABLE(5,  DDRA, 5);
-	CODE_FOR_ENABLE(6,  DDRA, 6);
-	CODE_FOR_ENABLE(7,  DDRA, 7);
-	CODE_FOR_ENABLE(8,  DDRC, 7);
-	CODE_FOR_ENABLE(9,  DDRC, 6);
-	CODE_FOR_ENABLE(10, DDRC, 5);
-	CODE_FOR_ENABLE(11, DDRC, 4);
-	CODE_FOR_ENABLE(12, DDRB, 3);
-	CODE_FOR_ENABLE(13, DDRB, 2);
-	CODE_FOR_ENABLE(14, DDRD, 5);
-	CODE_FOR_ENABLE(15, DDRD, 4);
+	enablePin(0,  DDRA, 0);
+	enablePin(1,  DDRA, 1);
+	enablePin(2,  DDRA, 2);
+	enablePin(3,  DDRA, 3);
+	enablePin(4,  DDRA, 4);
+	enablePin(5,  DDRA, 5);
+	enablePin(6,  DDRA, 6);
+	enablePin(7,  DDRA, 7);
+	enablePin(8,  DDRC, 7);
+	enablePin(9,  DDRC, 6);
+	enablePin(10, DDRC, 5);
+	enablePin(11, DDRC, 4);
+	enablePin(12, DDRB, 3);
+	enablePin(13, DDRB, 2);
+	enablePin(14, DDRD, 5);
+	enablePin(15, DDRD, 4);
 
 	generateParameters();
 }
@@ -279,10 +279,9 @@ static inline void set_enable(uint8_t n, bool enable)
 static inline void set_position(uint8_t n, uint32_t pos)
 {
 	#ifndef NDEBUG
-	debug("# servo_gpio_set_pos(%d, %d)\n", n, pos);
+	debug("# servo_gpio::set_position(%i, %i)\n", n, pos);
 	#endif
 
-	
 	if (n > 15) 
 		return;
 
@@ -306,9 +305,9 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-#ifndef NDEBUG
+	#ifndef NDEBUG
 	debug("# servo_gpio->write(0x%02X, buf, %i)\n", reg, data_len);
-#endif
+	#endif
 	
 	if (reg > 1) {
 		return GR_NO_ACCESS;
@@ -316,15 +315,12 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 	if (reg == 0) {
 	    #ifndef NDEBUG
-			debug("# reg==0\n");
+		debug("# :: reg=0, (data_len != 2) == %i\n", (data_len != 2));
 		#endif
+
 		if (data_len != 2) {
 			return GR_INVALID_DATA;
 		}
-
-		#ifndef NDEBUG
-			debug("# reg===0\n");
-		#endif
 
 		uint8_t byte = 0;
 		while (byte < 2) {
@@ -366,9 +362,9 @@ GATE_RESULT init_servo_driver(void)
 		set_enable(i, false);
 		//set_enable(i, true);
 		set_position(i, 1500);
-	  };
+	};
 
-	// Prepare TIMER2 interrupt
+	// Prepare TIMER2
 	// 1/32 F clk, Normal mode
 	// enable Timer2 compare isr
 	TCCR2 = (0<<CS22)|(1<<CS21)|(1<<CS20);
