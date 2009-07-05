@@ -250,6 +250,8 @@ static inline void generateParameters(void)
 
 static inline void set_enable(uint8_t n, bool enable)
 {
+	if(n>=14){ return; };
+	
 	#ifndef NDEBUG
 	debug("# servo_gpio::set_enable(%i, %i)\n", n, enable);
 	#endif
@@ -270,8 +272,8 @@ static inline void set_enable(uint8_t n, bool enable)
 	enablePin(11, DDRC, 4);
 	enablePin(12, DDRB, 3);
 	enablePin(13, DDRB, 2);
-	enablePin(14, DDRD, 5);
-	enablePin(15, DDRD, 4);
+	//enablePin(14, DDRD, 5);
+	//enablePin(15, DDRD, 4);
 
 	generateParameters();
 }
