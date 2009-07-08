@@ -53,7 +53,7 @@ include resolve.mk
 ifeq "$(DEBUG)" ""
     DEFINES += -DNDEBUG
 else
-	DEFINES += -DDEBUG=$(DEBUG)
+    DEFINES += -DDEBUG=$(DEBUG)
 endif
 
 OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SRC))))
@@ -79,14 +79,18 @@ $(target).cof: $(target).elf
 %.o : %.S
 
 
-%.o: %.c $(CONFIG_FILE)
+%.o: %.c $(CONFIG_FILE) resolve.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
-%.o: %.cpp $(CONFIG_FILE)
+%.o: %.cpp $(CONFIG_FILE) resolve.mk
 	$(CPLUSPLUS) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
-%.o: %.S $(CONFIG_FILE)
+%.o: %.S $(CONFIG_FILE) resolve.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
+
+resolve.mk: local_config.mk
+	touch local_config.mk
+	touch resolve.mk
 
 
 clean:
