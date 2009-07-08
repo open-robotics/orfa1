@@ -79,18 +79,17 @@ $(target).cof: $(target).elf
 %.o : %.S
 
 
-%.o: %.c $(CONFIG_FILE) resolve.mk
+%.o: %.c $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
-%.o: %.cpp $(CONFIG_FILE) resolve.mk
+%.o: %.cpp $(CONFIG_FILE) local_config.mk
 	$(CPLUSPLUS) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
-%.o: %.S $(CONFIG_FILE) resolve.mk
+%.o: %.S $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
 
-resolve.mk: local_config.mk
+%::
 	touch local_config.mk
-	touch resolve.mk
 
 
 clean:
