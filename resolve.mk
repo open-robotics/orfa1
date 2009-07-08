@@ -1,3 +1,5 @@
+# -*- Makefile -*-
+
 MCU_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DAVR_IO
 CROSS_COMPILE_GCC = avr-
 CROSS_COMPILE_BIN = avr-

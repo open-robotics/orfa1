@@ -1,3 +1,5 @@
+# -*- Makefile -*-
+
 ifneq "$(HAVE_MOTOR)" ""
     include drivers/motor/resolve.mk
 endif
@@ -19,4 +21,3 @@ endif
 ifneq "$(HAVE_ADC)" ""
     include drivers/adc/resolve.mk
 endif
-

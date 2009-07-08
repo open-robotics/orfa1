@@ -1,3 +1,5 @@
+# -*- Makefile -*-
+
 gdbinit = $(target).gdb
 
 ddd: $(gdbinit)
