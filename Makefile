@@ -88,7 +88,7 @@ $(target).cof: $(target).elf
 %.o: %.S $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
 
-%::
+local_config.mk:
 	touch local_config.mk
 
 
