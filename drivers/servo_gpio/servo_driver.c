@@ -34,10 +34,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifndef NDEBUG
-#include "serialgate/common.h"
-#endif
-
 #include <util/delay.h>
 #define delay_us(x) _delay_us(x)
 
@@ -254,9 +250,7 @@ static inline void set_enable(uint8_t n, bool enable)
 		return;
 	}
 	
-	#ifndef NDEBUG
 	debug("# servo_gpio::set_enable(%i, %i)\n", n, enable);
-	#endif
 	
 	gpio_servo_enb[n] = (enable > 0) ? true : false;
 	
@@ -286,9 +280,7 @@ static inline void set_enable(uint8_t n, bool enable)
 
 static inline void set_position(uint8_t n, uint32_t pos)
 {
-	#ifndef NDEBUG
 	debug("# servo_gpio::set_position(%i, %i)\n", n, pos);
-	#endif
 
 	if (n > 15) 
 		return;
@@ -313,18 +305,14 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	#ifndef NDEBUG
 	debug("# servo_gpio->write(0x%02X, buf, %i)\n", reg, data_len);
-	#endif
 	
 	if (reg > 1) {
 		return GR_NO_ACCESS;
 	}
 
 	if (reg == 0) {
-	    #ifndef NDEBUG
 		debug("# :: reg=0, (data_len != 2) == %i\n", (data_len != 2));
-		#endif
 
 		if (data_len != 2) {
 			return GR_INVALID_DATA;

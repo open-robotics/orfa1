@@ -33,6 +33,15 @@
 
 #define NUM_ELEMENTS(array) (sizeof(array) / sizeof(*(array)))
 
+// debug print
+#ifndef debug
+	#ifndef NDEBUG
+		#include <stdio.h>
+		#define debug(...) printf(__VA_ARGS__)
+	#else
+		#define debug(...)
+	#endif
+#endif
 
 /**
  * @defgroup Errors Коды ошибок

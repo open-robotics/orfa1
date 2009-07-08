@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
+/** 4017 Servo driver
  * @file servo4017.c
  *
  * @author Andrey Demenev
@@ -43,10 +43,10 @@
 
 #define US2CLOCK(us) (((uint32_t)(us) * (uint32_t)(F_CPU / 8000000.0 * 0x10000UL)) >> 16)
 
-#define process_timer(OCRX, TCCRX, block, FOC_MASK) {\
-	OCRX += *(table_ptr[block]);							\
-	if (table_ptr[block] == &(calc_ocr[block][8]) ) {		\
-		table_ptr[block] = &(calc_ocr[block][0]);				\
+#define process_timer(OCRX, TCCRX, block, FOC_MASK) {	\
+	OCRX += *(table_ptr[block]);						\
+	if (table_ptr[block] == &(calc_ocr[block][8]) ) {	\
+		table_ptr[block] = &(calc_ocr[block][0]);		\
 		TCCRX |= FOC_MASK;								\
 		TCCRX |= FOC_MASK;								\
 	} else {											\
@@ -99,9 +99,9 @@ static uint16_t EEMEM ee_calc_ocr[4][9];
 
 void s4017_save_positions(bool load_flag)
 {
-#ifndef NDEBUG
+	#ifndef NDEBUG
 	printf("# servo4017->save_positions(%i)\n", load_flag);
-#endif
+	#endif
 
 	if (load_flag) {
 		eeprom_write_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
@@ -112,14 +112,14 @@ void s4017_save_positions(bool load_flag)
 void s4017_load_positions(void)
 {
 	uint8_t load_flag = !eeprom_read_byte(&ee_load_calc_ocr);
-#ifndef NDEBUG
+	#ifndef NDEBUG
 	printf("# servo4017->load_positions()\n# :: load_flag = %i\n", load_flag);
-#endif
+	#endif
 
 	if (load_flag) {
 		eeprom_read_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
 
-#ifndef NDEBUG
+		#ifndef NDEBUG
 		printf("# :: Loaded:\n");
 		for (uint8_t i=0; i<4; i++) {
 			printf("# [%i]:", i);
@@ -128,7 +128,7 @@ void s4017_load_positions(void)
 			}
 			printf("\n");
 		}
-#endif
+		#endif
 	}
 }
 #endif
@@ -165,9 +165,9 @@ void s4017_set_position(uint8_t n, uint16_t pos)
 
 void s4017_init(void)
 {
-#ifdef USE_EEPROM
+	#ifdef USE_EEPROM
 	s4017_load_positions();
-#endif
+	#endif
 
 	DDRE = _BV(2) | _BV(3) | _BV(4) | _BV(5);
 	DDRB = _BV(7);
