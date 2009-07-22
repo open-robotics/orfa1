@@ -33,7 +33,11 @@
 #include "command.h"
 
 #ifndef INTERFACE_VERSION_STRING
-#define INTERFACE_VERSION_STRING  "1.0"
+# ifndef SG_STRICT
+#  define INTERFACE_VERSION_STRING  "1.0"
+# else
+#  define INTERFACE_VERSION_STRING  "1.1"
+# endif
 #endif
 
 /**
