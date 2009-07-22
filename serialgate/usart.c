@@ -32,12 +32,29 @@
 
 #include "usart.h"
 
+#ifdef SG_ENABLE_IRQ
+#include <avr/interrupt.h>
+#include "cbuf.h"
+
+static cbf_t usart_cbf;
+
+bool usart_isempty(void)
+{
+	return cbf_isempty(&usart_cbf);
+}
+
+ISR(USART_RXC_vect)
+{
+	cbf_put(&usart_cbf, GATE_UDR);
+}
+#endif
+
 // usart file device
 FILE usart_fdev = FDEV_SETUP_STREAM(usart_putchar, usart_getchar, _FDEV_SETUP_RW);
 
 // This function initializes the USART
 void usart_init(uint16_t baud)
-	{
+{
 	// disable the USART
 	GATE_UCSRB = 0x00;
 	GATE_UCSRA = 0x00;
@@ -52,8 +69,13 @@ void usart_init(uint16_t baud)
 	GATE_UBRRH = (baud >> 8) & 0x0F;
 
 	// enable the USART0 transmitter & receiver
+#ifndef SG_ENABLE_IRQ
 	GATE_UCSRB = (1 << TXEN) | (1 << RXEN);
-	}
+#else
+	cbf_init(&usart_cbf);
+	GATE_UCSRB = (1 << RXCIE) | (1 << TXEN) | (1 << RXEN);
+#endif
+}
 
 /*
  * Send character c down the UART Tx, wait until tx holding register
@@ -80,6 +102,7 @@ int usart_putchar0(char c, FILE *stream)
 
 int usart_getchar(FILE *stream)
 {
+#ifndef SG_ENABLE_IRQ
 	uint8_t c;
 	(void)stream;
 	loop_until_bit_is_set(GATE_UCSRA, RXC);
@@ -87,6 +110,9 @@ int usart_getchar(FILE *stream)
 	if ( c == '\r' )
 		c = '\n';
 	return c;
+#else
+	return cbf_get(&usart_cbf);
+#endif
 }
 
 int usart_getchar0(FILE *stream)

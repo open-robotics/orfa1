@@ -55,6 +55,9 @@ void serialgate_init(void)
 
 void serialgate_supertask(void)
 {
+	if(usart_isempty())
+		return;
+
 	uint8_t c = getchar();
 
 	if(parse_cmd(c, &cmd_buf, &error_code))
