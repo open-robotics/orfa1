@@ -55,9 +55,11 @@ bool cmd_rxc(uint8_t *c, bool ack)
 
 int main(void)
 {
+	serialgate_init();
 	i2c_set_handlers(&cmd_start, &cmd_stop, &cmd_txc, &cmd_rxc);
 
-	serialgate_mainloop();
+	while(true)
+		serialgate_supertask();
 	
 	return 0;
 } // main()

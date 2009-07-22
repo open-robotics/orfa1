@@ -8,7 +8,7 @@ OBJDUMP = objdump
 
 CFLAGS = -std=gnu99 -W -Wall -Werror -pedantic -Wstrict-prototypes -Wundef \
 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
--fpack-struct -fshort-enums -ffreestanding -Os -g -I. 
+-fpack-struct -fshort-enums -ffreestanding -Os -g -I. $(DEFINES)
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
 target = test
