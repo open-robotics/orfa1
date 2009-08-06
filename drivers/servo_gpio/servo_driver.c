@@ -43,36 +43,42 @@
 #define MINSERVO            (F_CPU/2000/RESOLUTION_IN_TICKS)
 #define WORKSPACE           (MAXSERVO+1)
 
-#define enablePin(servo_id, ddr, pin) \
-	if (gpio_servo_enb[servo_id]) { \
-		ddr |= (1<<pin); \
-	} else { \
-		ddr &= ~(1<<pin); \
-	}
+#ifndef HAVE_MOTOR
+# define CHMAX 15
+#else
+// if motor driver exists we can't use channels 14 and 15
+# define CHMAX 13
+#endif
 
-
-static uint16_t gpio_servo_pos[16];
-static bool gpio_servo_enb[16];
-
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+//static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 static GATE_DRIVER driver = {
 	.uid = 0x0031,
 	.major_version = 1,
-	.minor_version = 0,
-	.read = driver_read,
+	.minor_version = 1,
+//	.read = driver_read,  // not used
 	.write = driver_write,
 	.num_registers = 2,
 };
 
-uint8_t pause0[40];
-uint8_t pause1[40];
-uint8_t mask0[40];
-uint8_t mask1[40];
-uint8_t iterator;
+// -- driver module data --
 
-uint8_t port_mask[16] = {
+static uint16_t gpio_servo_pos[16];
+static bool gpio_servo_enb[16] = {
+	false, false, false, false,
+	false, false, false, false,
+	false, false, false, false,
+	false, false, false, false
+};
+
+static uint8_t pause0[40];
+static uint8_t pause1[40];
+static uint8_t mask0[40];
+static uint8_t mask1[40];
+static uint8_t iterator;
+
+static uint8_t port_mask[16] = {
 	_BV(0), _BV(1),
 	_BV(2), _BV(3),
 	_BV(4), _BV(5),
@@ -82,6 +88,8 @@ uint8_t port_mask[16] = {
 	_BV(3), _BV(2),
 	_BV(5), _BV(4)
 };
+
+// -- handlers --
 
 #define portHandlerOR(name, port, nextHandler, id) \
 	void name(void) \
@@ -113,6 +121,11 @@ uint8_t port_mask[16] = {
 void processD0(void);
 void (*handler)(void) = processD0;
 
+ISR(SIG_OUTPUT_COMPARE2)
+{
+	 handler();
+}
+
 portHandlers(processAa, PORTA, processD,  0);
 portHandlers(processAb, PORTA, processAa, 5);
 portHandlers(processAc, PORTA, processAb, 10);
@@ -121,6 +134,8 @@ portHandlers(processCa, PORTC, processAd, 20);
 portHandlers(processCb, PORTC, processCa, 25);
 portHandlers(processB,  PORTB, processCb, 30);
 portHandlers(processD,  PORTD, processB,  35);
+
+// -- [re]generate parameters --
 
 static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 {
@@ -226,12 +241,6 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 	}
 }
 
-
-ISR(SIG_OUTPUT_COMPARE2)
-{
-	 handler();
-}
-
 static inline void generateParameters(void)
 {
 	generateParams(0,  0);
@@ -242,18 +251,75 @@ static inline void generateParameters(void)
 	generateParams(10, 25);
 	generateParams(12, 30);
 	generateParams(14, 35);
-};
+}
+
+static inline void generateParametersFor(uint8_t n)
+{
+	switch (n) {
+		case 0:
+		case 1:
+			generateParams(0,  0);
+			break;
+
+		case 2:
+		case 3:
+			generateParams(2,  5);
+			break;
+
+		case 4:
+		case 5:
+			generateParams(4,  10);
+			break;
+
+		case 6:
+		case 7:
+			generateParams(6,  15);
+			break;
+
+		case 8:
+		case 9:
+			generateParams(8,  20);
+			break;
+
+		case 10:
+		case 11:
+			generateParams(10, 25);
+			break;
+
+		case 12:
+		case 13:
+			generateParams(12, 30);
+			break;
+
+		case 14:
+		case 15:
+			generateParams(14, 35);
+			break;
+
+		default:
+			break;
+	}
+}
+
+// -- servo controls --
+
+#define enablePin(servo_id, ddr, pin) \
+	if (gpio_servo_enb[servo_id]) { \
+		ddr |= (1<<pin); \
+	} else { \
+		ddr &= ~(1<<pin); \
+	}
 
 static inline void set_enable(uint8_t n, bool enable)
 {
-	if (n > 15) {
+	if (n > CHMAX) {
 		return;
 	}
 	
 	debug("# servo_gpio::set_enable(%i, %i)\n", n, enable);
 	
 	gpio_servo_enb[n] = (enable > 0) ? true : false;
-	
+
 	enablePin(0,  DDRA, 0);
 	enablePin(1,  DDRA, 1);
 	enablePin(2,  DDRA, 2);
@@ -269,21 +335,28 @@ static inline void set_enable(uint8_t n, bool enable)
 	enablePin(12, DDRB, 3);
 	enablePin(13, DDRB, 2);
 
-	#ifndef HAVE_MOTOR
+#ifndef HAVE_MOTOR
 	// Motor driver use this pins as PWM output
 	enablePin(14, DDRD, 5);
 	enablePin(15, DDRD, 4);
-	#endif
+#endif
 
-	generateParameters();
+	// not needed
+	//generateParametersFor(n);
 }
 
 static inline void set_position(uint8_t n, uint32_t pos)
 {
 	debug("# servo_gpio::set_position(%i, %i)\n", n, pos);
 
-	if (n > 15) 
+	if (n > CHMAX)
 		return;
+
+	if (pos == 0) {
+		set_enable(n, false);
+	} else if (!gpio_servo_enb[n]) {
+		set_enable(n, true);
+	}
 
 	pos = pos * RESOLUTION_TIME/1000000;
 	
@@ -293,15 +366,18 @@ static inline void set_position(uint8_t n, uint32_t pos)
 		pos = MAXSERVO;
 
 	gpio_servo_pos[n] = pos;
-	generateParameters();
+	generateParametersFor(n);
 }
 
+// -- driver --
 
+#if 0 // not used
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	*data_len = 0;
 	return GR_OK;
 }
+#endif
 
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
@@ -313,7 +389,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 	if (reg == 0) {
 		debug("# :: reg=0, (data_len != 2) == %i\n", (data_len != 2));
-
+#if 0 // not needed
 		if (data_len != 2) {
 			return GR_INVALID_DATA;
 		}
@@ -322,7 +398,9 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 		while (byte < 2) {
 			uint8_t bit = 0;
 			while (bit < 8) {
-				set_enable( (byte << 3) + bit , *data & 0x01);
+				uint8_t n = (byte << 3) + bit;
+				set_enable(n, *data & 0x01);
+				generateParametersFor(n);
 				*data = *data>>1;
 				bit++;
 			}
@@ -330,7 +408,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 			data++;
 			byte++;
 		}
-
+#endif
 		return GR_OK;
 	}
 
@@ -351,14 +429,11 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
+// -- init --
 
 GATE_RESULT init_servo_driver(void)
 {
-	for (uint8_t i=0; i < 16; i++) {
-		set_enable(i, false);
-		//set_enable(i, true);
-		set_position(i, 1500);
-	};
+	generateParameters();
 
 	// Prepare TIMER2
 	// 1/32 F clk, Normal mode
