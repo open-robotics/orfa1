@@ -32,11 +32,11 @@
 #include "i2c.h"
 #include "command.h"
 
-#ifndef INTERFACE_VERSION_STRING
-# ifndef SG_STRICT
-#  define INTERFACE_VERSION_STRING  "1.0"
+#ifndef PROTOCOL_VERSION_STRING
+# ifndef SG_PROTOCOL_V1_1
+#  define PROTOCOL_VERSION_STRING  "1.0"
 # else
-#  define INTERFACE_VERSION_STRING  "1.1"
+#  define PROTOCOL_VERSION_STRING  "1.1"
 # endif
 #endif
 
@@ -84,24 +84,23 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 {
 	uint8_t c;
 	uint8_t nbytes;
+	uint16_t freq;
+	uint8_t addr=0xaa;
 
 	if (cbf_isempty(cmd_buf)) {
 		return true;
 	}
 	c = cbf_get(cmd_buf);
 
-	switch(c){
-		case 'V': {
+	switch (c) {
+		case 'V':
 			cbf_put(tx_buf, c);
-			for (uint8_t i = 0; i < sizeof(INTERFACE_VERSION_STRING) - 1; i++) {
-				cbf_put(tx_buf, INTERFACE_VERSION_STRING[i]);
+			for (uint8_t i = 0; i < sizeof(PROTOCOL_VERSION_STRING) - 1; i++) {
+				cbf_put(tx_buf, PROTOCOL_VERSION_STRING[i]);
 			}
-		}
-		break;
+			break;
 
-		case 'C': {
-			uint16_t freq;
-
+		case 'C':			
 			if (!cbf_isempty(cmd_buf)) {
 				freq = (cbf_get(cmd_buf) << 8) | cbf_get(cmd_buf);
 				if ((freq > 0) && (freq <= 800)) {
@@ -115,13 +114,9 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 			cbf_put(tx_buf, itox((freq >>  8) & 0x0f));
 			cbf_put(tx_buf, itox((freq >>  4) & 0x0f));
 			cbf_put(tx_buf, itox((freq >>  0) & 0x0f));
+			break;
 
-		}
-		break;
-
-		case 'L': {
-			uint8_t addr=0xaa;
-
+		case 'L':
 			if (!cbf_isempty(cmd_buf)) {
 				addr = cbf_get(cmd_buf) & (~0x01);
 				i2c_set_localhost(addr);
@@ -131,15 +126,14 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 			cbf_put(tx_buf, 'L');
 			cbf_put(tx_buf, itox((addr >>  4) & 0x0f));
 			cbf_put(tx_buf, itox((addr >>  0) & 0x0f));
-		}
-		break;
+			break;
 
-		case 'S': {
+		case 'S':
 			// I2C Read/Write command
 			do {
 				cbf_put(tx_buf, 'S');
 				c = cbf_get(cmd_buf);
-				if ((c & 0x01) == 0x01) {
+				if (c & 0x01) {
 					// Read
 					if (!i2c_master_start(c, i2c_rd)) {
 						i2c_master_stop();
@@ -163,6 +157,7 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 						nbytes--;
 					}
 					c = cbf_get(cmd_buf);
+
 				} else {
 					// Write
 					if (!i2c_master_start(c, i2c_wr)) {
@@ -193,33 +188,33 @@ bool exec_cmd(cbf_t *cmd_buf, cbf_t *tx_buf, error_code_t *error_code)
 				}
 			} while (c == 'S');
 
+			i2c_master_stop();
+
 			if (c != 'P') {
-				i2c_master_stop();
 				debug("# ERROR: P expected\n");
 				*error_code = P_EXPECTED;
 				return false;
 			}
 
-			i2c_master_stop();
 			cbf_put(tx_buf, 'P');
-		}
-		break;
+			break;
 
-		case 'X': {
+		case 'X':
 			i2c_bus_clear();
 			cbf_put(tx_buf, 'X');
-		}
-		break;
+			break;
 
-		default: {
+		default:
 			debug("# exec_cmd() internal error\n");
 			return false;
-		}
-		break;
+			break;
 	}
 
-	//cbf_put(tx_buf, '\r'); // not needed: serial_fdev translate '\n' to '\r\n'
+	// not needed: serial_fdev translate '\n' to '\r\n'
+	// cbf_put(tx_buf, '\r');
+
 	cbf_put(tx_buf, '\n');
 
 	return true;
 }
+

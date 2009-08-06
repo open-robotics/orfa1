@@ -309,3 +309,4 @@ bool i2c_master_rxc(uint8_t *c, bool ack)
 
 	return status;
 }
+

@@ -32,16 +32,11 @@
  */
 static inline int8_t xtoi(uint8_t c)
 {
-	if((c >= '0')&&(c <= '9'))
-	{
+	if ((c >= '0')&&(c <= '9')) {
 		return c - '0';
-	}
-	else if((c >= 'A')&&(c <= 'F'))
-	{
+	} else if ((c >= 'A')&&(c <= 'F')) {
 		return c - 'A' + 10;
-	}
-	else
-	{
+	} else {
 		return -1;
 	}
 }
@@ -55,28 +50,22 @@ static inline int8_t xtoi(uint8_t c)
  */
 static inline bool get_cmd_byte(uint8_t c, uint8_t *data, error_code_t *error_code)
 {
-	static uint8_t cout = 1;
+	static uint8_t count = 1;
+
 	int8_t tmp = xtoi(c);
-	if(tmp >= 0 && cout == 1)
-	{
+	if (tmp >= 0 && count == 1) {
 		// get first nibble
 		*data = tmp << 4;
-		cout = 2;
-	}
-	else if(tmp >= 0 && cout == 2)
-	{
+		count = 2;
+	} else if (tmp >= 0 && count == 2) {
 		// get second nibble
 		*data |= tmp;
-		cout = 1;
+		count = 1;
 		return true;
-	}
-	else if(c == ' ' && cout == 1)
-	{
+	} else if (c == ' ' && count == 1) {
 		// skip spaces
-	}
-	else
-	{
-		cout = 1;
+	} else {
+		count = 1;
 		*error_code = INVALID_XDIGIT;
 	}
 
@@ -91,7 +80,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 	uint8_t c=toupper(co);
 
 	// static per iteration data
-	static uint8_t cout=1;
+	static uint8_t count=1;
 	static uint8_t data=0;
 	static uint8_t addr=0;
 	static uint8_t reg_len=1;
@@ -101,11 +90,10 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 	static state_cmd_t state_cmd=CMD_INIT;
 	static state_i2creg_t state_i2creg=GET_ADDRESS;
 
-	if(state_cmd == CMD_INIT)
-	{
+	if (state_cmd == CMD_INIT) {
 		// Clear machine
 		addr = 0;
-		cout = 1;
+		count = 1;
 		data = 0;
 		reg_len = 1;
 		cbf_init(cmd_buf);
@@ -114,12 +102,9 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 		error_c = *error_code;
 	}
 
-
-	switch(state_cmd)
-	{
+	switch(state_cmd) {
 		case GET_COMMAND:
-			switch(c)
-			{
+			switch(c) {
 				case 'S':
 					// is i2c?
 					state_cmd = PARSE_I2C;
@@ -142,7 +127,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case 'C':
 					cbf_put(cmd_buf, c);
-					state_cmd = PARSE_CONFIG;
+					state_cmd = PARSE_CLOCK;
 					break;
 
 				case 'L':
@@ -173,54 +158,46 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 		case COMMENT_OR_ERROR_EOL:
 			// skip line
-			if(c == '\n')
-			{
+			if (c == '\n') {
 				*error_code = error_c;
 				state_cmd = CMD_INIT;
 			}
 			break;
 
-		case PARSE_CONFIG:
-			if(get_cmd_byte(c, &data, &error_c))
-			{
+		case PARSE_CLOCK:
+			if (get_cmd_byte(c, &data, &error_c)) {
 				cbf_put(cmd_buf, data);
-				if(cout++ > 1)
-				{
+				if (count++ > 1) {
 					state_cmd = WAIT_EOL;
 				}
 			}
 			break;
 
 		case PARSE_LOCAL:
-			if(get_cmd_byte(c, &data, &error_c))
-			{
+			if (get_cmd_byte(c, &data, &error_c)) {
 				cbf_put(cmd_buf, data);
 				state_cmd = WAIT_EOL;
 			}
 			break;
 
 		case PARSE_I2C:
-			switch(state_i2creg)
-			{
+			switch(state_i2creg) {
 				case GET_ADDRESS:
-					if(get_cmd_byte(c, &data, &error_c))
-					{
+					if (get_cmd_byte(c, &data, &error_c)) {
 						cbf_put(cmd_buf, data);
 						state_i2creg = (data & 0x01) ? PARSE_I2C_READ : PARSE_I2C_WRITE;
 					}
 					break;
 
 				case PARSE_I2C_READ:
-					if(get_cmd_byte(c, &data, &error_c))
-					{
+					if (get_cmd_byte(c, &data, &error_c)) {
 						cbf_put(cmd_buf, data);
 						state_i2creg = WAIT_RESTART_OR_STOP;
 					}
 					break;
 
 				case WAIT_RESTART_OR_STOP:
-					switch(c)
-					{
+					switch(c) {
 						case 'S':
 							// reSTART?
 							cbf_put(cmd_buf, c);
@@ -241,52 +218,37 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 				case PARSE_I2C_WRITE:
 					i = xtoi(c);
 #ifndef SG_PROTOCOL_V1_1
-					if(c == '\\' && cout == 1)
-					{
+					if (c == '\\' && count == 1) {
 						// masked byte?
-						cout = '\\';
-					}
-					else if(cout == '\\')
-					{
+						count = '\\';
+					} else if (count == '\\') {
 						// get masked byte
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, co);
-						cout = 1;
-					}
-					else
+						count = 1;
+					} else
 #endif // SG_PROTOCOL_V1_1
-					if(i >= 0 && cout == 1)
-					{
+					if (i >= 0 && count == 1) {
 						// get first nibble
 						data = i << 4;
-						cout = 2;
-					}
-					else if(i >= 0 && cout == 2)
-					{
+						count = 2;
+					} else if (i >= 0 && count == 2) {
 						// get second nibble
 						data |= i;
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, data);
-						cout = 1;
-					}
-					else if(c == 'S' && cout == 1)
-					{
+						count = 1;
+					} else if (c == 'S' && count == 1) {
 						// reSTART?
 						cbf_put(cmd_buf, c);
 						state_i2creg = GET_ADDRESS;
-					}
-					else if(c == 'P' && cout == 1)
-					{
+					} else if (c == 'P' && count == 1) {
 						// STOP?
 						cbf_put(cmd_buf, c);
 						state_cmd = WAIT_EOL;
-					}
-					else if(c == ' ' && cout == 1)
-					{
+					} else if (c == ' ' && count == 1) {
 						// skip spaces
-					}
-					else
-					{
+					} else {
 						error_c = INVALID_DATA;
 					}
 					break;
@@ -298,11 +260,9 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 #ifndef SG_PROTOCOL_V1_1
 		case PARSE_READ:
-			switch(state_i2creg)
-			{
+			switch(state_i2creg) {
 				case GET_ADDRESS:
-					if(get_cmd_byte(c, &data, &error_c))
-					{
+					if (get_cmd_byte(c, &data, &error_c)) {
 						addr = data & (~0x01);
 						cbf_put(cmd_buf, addr);
 						state_i2creg = GET_REGISTER;
@@ -310,8 +270,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 
 				case GET_REGISTER:
-					if(get_cmd_byte(c, &data, &error_c))
-					{
+					if (get_cmd_byte(c, &data, &error_c)) {
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, data);
 						cbf_put(cmd_buf, 'S');
@@ -322,24 +281,17 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case GET_LENGTH_OR_EOF:
 					i = xtoi(c);
-					if(i >= 0 && cout == 1)
-					{
+					if (i >= 0 && count == 1) {
 						// get first nibble
 						reg_len = i << 4;
-						cout = 2;
-					}
-					else if(i >= 0 && cout == 2)
-					{
+						count = 2;
+					} else if (i >= 0 && count == 2) {
 						// get second nibble
 						reg_len |= i;
-						cout = 1;
-					}
-					else if(c == ' ' && cout != 2)
-					{
+						count = 1;
+					} else if (c == ' ' && count != 2) {
 						// skip spaces
-					}
-					else if(c == '\n' && cout != 2)
-					{
+					} else if (c == '\n' && count != 2) {
 						cbf_put(cmd_buf, reg_len);
 						cbf_put(cmd_buf, 'P');
 						cbf_put(cmd_buf, '\n');
@@ -354,11 +306,9 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			break;
 
 		case PARSE_WRITE:
-			switch(state_i2creg)
-			{
+			switch(state_i2creg) {
 				case GET_ADDRESS:
-					if(get_cmd_byte(c, &data, &error_c))
-					{
+					if (get_cmd_byte(c, &data, &error_c)) {
 						addr = data & (~0x01);
 						cbf_put(cmd_buf, addr);
 						state_i2creg = GET_REGISTER;
@@ -366,8 +316,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 
 				case GET_REGISTER:
-					if(get_cmd_byte(c, &data, &error_c))
-					{
+					if (get_cmd_byte(c, &data, &error_c)) {
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, data);
 						state_i2creg = GET_DATA_OR_EOF;
@@ -376,45 +325,31 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case GET_DATA_OR_EOF:
 					i = xtoi(c);
-					if(c == '\\' && cout == 1)
-					{
+					if (c == '\\' && count == 1) {
 						// masked byte?
-						cout = '\\';
-					}
-					else if(cout == '\\')
-					{
+						count = '\\';
+					} else if (count == '\\') {
 						// get masked byte
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, co);
-						cout = 1;
-					}
-					else
-					if(i >= 0 && cout == 1)
-					{
+						count = 1;
+					} else if (i >= 0 && count == 1) {
 						// get first nibble
 						data = i << 4;
-						cout = 2;
-					}
-					else if(i >= 0 && cout == 2)
-					{
+						count = 2;
+					} else if (i >= 0 && count == 2) {
 						// get second nibble
 						data |= i;
 						cbf_put(cmd_buf, 1);
 						cbf_put(cmd_buf, data);
-						cout = 1;
-					}
-					else if(c == ' ' && cout == 1)
-					{
+						count = 1;
+					} else if (c == ' ' && count == 1) {
 						// skip spaces
-					}
-					else if(c == '\n' && cout == 1)
-					{
+					} else if (c == '\n' && count == 1) {
 						cbf_put(cmd_buf, 'P');
 						cbf_put(cmd_buf, '\n');
 						state_cmd = EXEC_COMMAND;
-					}
-					else
-					{
+					} else {
 						error_c = INVALID_DATA;
 					}
 					break;
@@ -427,8 +362,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 #endif // SG_PROTOCOL_V1_1
 
 		case WAIT_EOL:
-			if(c == '\n')
-			{
+			if (c == '\n') {
 				// EOL? (exec)
 				cbf_put(cmd_buf, '\n');
 				state_cmd = EXEC_COMMAND;
@@ -442,18 +376,15 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 	// ---------------------------------------------------------------
 
-	if(error_c != NO_ERROR)
-	{
+	if (error_c != NO_ERROR) {
 		state_cmd = COMMENT_OR_ERROR_EOL;
 	}
 
-	if(*error_code != NO_ERROR)
-	{
+	if (*error_code != NO_ERROR) {
 		state_cmd = CMD_INIT;
 	}
 
-	if(state_cmd == EXEC_COMMAND)
-	{
+	if (state_cmd == EXEC_COMMAND) {
 		state_cmd = CMD_INIT;
 		return true;
 	}

@@ -40,7 +40,7 @@ typedef enum {
 	CMD_INIT,				///< clear cmd buffer
 	GET_COMMAND,			///< get command ( 'S', 'R', 'W', '#', '\r', '\n' )
 	COMMENT_OR_ERROR_EOL,	///< skip all chars, wait '\r' or '\n', change state to CMD_INIT
-	PARSE_CONFIG,			///< parse config command ( C<f1><f2> )
+	PARSE_CLOCK,			///< parse config command ( C<f1><f2> )
 	PARSE_LOCAL,			///< parse set local addr command  ( L<aa> )
 	PARSE_I2C,				///< parse I2C commands ( S<aa><data>[S<aa><data>]P )
 	PARSE_READ,				///< parse read register command ( R<aa><rr>[<ll>] )
@@ -69,5 +69,5 @@ typedef enum {
  */
 bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code);
 
-
 #endif // SERIAL_PARSER_H
+
