@@ -21,3 +21,8 @@ endif
 ifneq "$(HAVE_ADC)" ""
     include drivers/adc/resolve.mk
 endif
+
+ifneq "$(HAVE_CANON)" ""
+	include drivers/canon/resolve.mk
+endif
+

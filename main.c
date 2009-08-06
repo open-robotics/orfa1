@@ -56,6 +56,10 @@
 #include "adc_driver.h"
 #endif
 
+#ifdef HAVE_CANON
+#include "canon_driver.h"
+#endif
+
 #define BUF_LEN 65
 
 static enum {
@@ -183,9 +187,9 @@ bool cmd_rxc(uint8_t *c, bool ack)
 int main(void)
 {
 	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);
-	serialgate_init();
-
+	gate_supertask_register(serialgate_supertask);
 	gate_init_introspection();
+	serialgate_init();
 
 #ifdef HAVE_PORTS
 	init_ports_driver();
@@ -202,10 +206,11 @@ int main(void)
 #ifdef HAVE_ADC
 	init_adc_driver();
 #endif
+#ifdef HAVE_CANON
+	init_canon_driver();
+#endif
 
 	asm volatile ("sei");
-	gate_supertask_register(serialgate_supertask);
 	gate_scheduler_loop();
-
 	return 0;
 }
