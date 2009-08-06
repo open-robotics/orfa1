@@ -70,12 +70,10 @@ static inline bool get_cmd_byte(uint8_t c, uint8_t *data, error_code_t *error_co
 		cout = 1;
 		return true;
 	}
-#ifndef SG_STRICT
 	else if(c == ' ' && cout == 1)
 	{
 		// skip spaces
 	}
-#endif // SG_STRICT
 	else
 	{
 		cout = 1;
@@ -128,7 +126,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					cbf_put(cmd_buf, 'S');
 					break;
 
-#ifndef SG_DISABLE_REGIO
+#ifndef SG_PROTOCOL_V1_1
 				case 'R':
 					// is read register?
 					state_cmd = PARSE_READ;
@@ -140,7 +138,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					state_cmd = PARSE_WRITE;
 					cbf_put(cmd_buf, 'S');
 					break;
-#endif // SG_DISABLE_REGIO
+#endif // SG_PROTOCOL_V1_1
 
 				case 'C':
 					cbf_put(cmd_buf, c);
@@ -158,19 +156,14 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					state_cmd = WAIT_EOL;
 					break;
 
-#ifdef SG_STRICT
 				case ' ':
-				case '\r':
-#endif // SG_STRICT
 				case '\n':
 					break;
 
-#ifndef SG_DISABLE_COMMENT
 				case '#':
 					// is comment?
 					state_cmd = COMMENT_OR_ERROR_EOL;
 					break;
-#endif
 
 				default:
 					error_c = INVALID_COMMAND;
@@ -180,11 +173,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 		case COMMENT_OR_ERROR_EOL:
 			// skip line
-#ifndef SG_STRICT
-			if(c == '\r' || c == '\n')
-#else
 			if(c == '\n')
-#endif // SG_STRICT
 			{
 				*error_code = error_c;
 				state_cmd = CMD_INIT;
@@ -251,7 +240,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case PARSE_I2C_WRITE:
 					i = xtoi(c);
-#ifndef SG_DISABLE_STR
+#ifndef SG_PROTOCOL_V1_1
 					if(c == '\\' && cout == 1)
 					{
 						// masked byte?
@@ -265,7 +254,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 						cout = 1;
 					}
 					else
-#endif // SG_DISABLE_STR
+#endif // SG_PROTOCOL_V1_1
 					if(i >= 0 && cout == 1)
 					{
 						// get first nibble
@@ -292,12 +281,10 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 						cbf_put(cmd_buf, c);
 						state_cmd = WAIT_EOL;
 					}
-#ifndef SG_STRICT
 					else if(c == ' ' && cout == 1)
 					{
 						// skip spaces
 					}
-#endif // SG_STRICT
 					else
 					{
 						error_c = INVALID_DATA;
@@ -309,7 +296,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			} // parse_i2c state machine
 			break;
 
-#ifndef SG_DISABLE_REGIO
+#ifndef SG_PROTOCOL_V1_1
 		case PARSE_READ:
 			switch(state_i2creg)
 			{
@@ -347,15 +334,11 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 						reg_len |= i;
 						cout = 1;
 					}
-#ifndef SG_STRICT
 					else if(c == ' ' && cout != 2)
 					{
 						// skip spaces
 					}
-					else if((c == '\r' || c == '\n') && cout != 2)
-#else
 					else if(c == '\n' && cout != 2)
-#endif // SG_STRICT
 					{
 						cbf_put(cmd_buf, reg_len);
 						cbf_put(cmd_buf, 'P');
@@ -393,7 +376,6 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case GET_DATA_OR_EOF:
 					i = xtoi(c);
-#ifndef SG_DISABLE_STR
 					if(c == '\\' && cout == 1)
 					{
 						// masked byte?
@@ -407,7 +389,6 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 						cout = 1;
 					}
 					else
-#endif // SG_DISABLE_STR
 					if(i >= 0 && cout == 1)
 					{
 						// get first nibble
@@ -422,15 +403,11 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 						cbf_put(cmd_buf, data);
 						cout = 1;
 					}
-#ifndef SG_STRICT
 					else if(c == ' ' && cout == 1)
 					{
 						// skip spaces
 					}
-					else if((c == '\r' || c == '\n') && cout == 1)
-#else
 					else if(c == '\n' && cout == 1)
-#endif // SG_STRICT
 					{
 						cbf_put(cmd_buf, 'P');
 						cbf_put(cmd_buf, '\n');
@@ -447,14 +424,10 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 			}
 			break;
-#endif // SG_DISABLE_REGIO
+#endif // SG_PROTOCOL_V1_1
 
 		case WAIT_EOL:
-#ifndef SG_STRICT
-			if(c == '\r' || c == '\n')
-#else
 			if(c == '\n')
-#endif // SG_STRICT
 			{
 				// EOL? (exec)
 				cbf_put(cmd_buf, '\n');
