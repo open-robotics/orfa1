@@ -99,6 +99,9 @@ clean:
 docs:
 	doxygen
 
+docs_pdf: docs
+	make -C ./doc/doxygen/latex
+
 force: clean all
 
 program: $(target).hex
