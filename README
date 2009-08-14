@@ -1,0 +1,12 @@
+== Compiling ==
+
+You need avr-gcc > 4.2, avr-libc > 1.6, binutils-avr.
+
+First configure youre local_config.mk.
+See documentation at http://robofourm.ru/ORFA
+
+After that do this:
+
+$ make
+
+Done
