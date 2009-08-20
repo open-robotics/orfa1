@@ -1,6 +1,9 @@
 # -*- Makefile -*-
+#
+# Also known as OR-AVR-M64-S
+#
 
-MCU = atmega128 # Временно, будет atmega64
+MCU = atmega128
 F_CPU = 7372800UL
 BAUD = B115200
 

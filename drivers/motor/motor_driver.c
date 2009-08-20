@@ -21,6 +21,15 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** RoboMD2 motor driver
+ * @file motor_driver.c
+ * @author Vladimir Ermakov
+ *
+ * @todo use ATOMIC_BLOCK()
+ *
+ * @note New in version 1.1:
+ *       now you can set all registers in one request
+ */
 
 #include "core/common.h"
 #include "core/driver.h"
@@ -28,8 +37,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT
+motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 #define PWM1_REG   0x00
 #define PWM2_REG   0x01
@@ -72,15 +83,15 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 	PWM##ch##_OC = (uint16_t) value
 
 #define getDirection(ch) \
-	(DIR_PORT & DIR##ch##_MASK) ? true : false
+	((DIR_PORT & DIR##ch##_MASK) ? true : false)
 
 #define getPwm(ch) \
-	(uint8_t) PWM##ch##_OC
+	((uint8_t) PWM##ch##_OC)
 
 static GATE_DRIVER driver = {
 	.uid = 0x0060, // motor id
 	.major_version = 1,
-	.minor_version = 0,
+	.minor_version = 1,
 	.read = motor_driver_read,
 	.write = motor_driver_write,
 	.num_registers = 4,
@@ -117,8 +128,16 @@ static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_l
 
 static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	// TODO: use ATOMIC_BLOCK()
-	if (!data_len) return GR_INVALID_ARG;
+	if (!data_len)
+		return GR_INVALID_ARG;
+
+	if (data_len == 4) {
+		setPwm(1, data[0]);
+		setPwm(2, data[1]);
+		setDirection(1, data[2]);
+		setDirection(2, data[3]);
+	}
+
 	switch (reg)
 	{
 		case PWM1_REG:
