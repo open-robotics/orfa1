@@ -76,7 +76,8 @@ static void canon_task(void)
 
 GATE_RESULT init_canon_driver(void)
 {
-	gate_task_register(&task);
+	//gate_task_register(&task);
+	(void)task;
 
 	return gate_driver_register(&driver);
 }

@@ -45,7 +45,10 @@ bool usart_isempty(void)
 
 ISR(USART_RXC_vect)
 {
-	cbf_put(&usart_cbf, GATE_UDR);
+	uint8_t c=GATE_UDR;
+	// clean EOL
+	c = (c == '\r') ? '\n' : c;
+	cbf_put(&usart_cbf, c);
 }
 #endif
 
