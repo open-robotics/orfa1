@@ -21,6 +21,25 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Servo driver
+ * @file servo_4017_driver.h
+ *
+ * @author Andrey Demenev
+ */
+
+/**
+ * @ingroup Drivers
+ * @defgroup Servo_4017 Servo 4017 driver
+ *
+ * UID: 0x0030
+ *
+ * @{
+ */
+
+/// Servo config. NOT USED
+#define SERVO_CONF 0x00
+/// Servo control register
+#define SERVO 0x01
 
 #ifndef OR_AVR_M64_S
 #error servo4017: unsupported platform

@@ -21,6 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** ADC driver
+ * @file adc_driver.c
+ *
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov
+ */
 
 #include <stdint.h>
 #include <avr/io.h>
@@ -33,9 +39,17 @@
 #include "serialgate/common.h"
 
 
-/*
- * ADC configuration register
+/**
+ * @ingroup Drivers
+ * @defgroup ADC ADC driver
  *
+ * UID: 0x0040
+ *
+ * @{
+ */
+
+/** ADC configuration register
+ * @code
  * Bits 0..2
  *     00     - External reference
  *     01     - AVCC reference
@@ -44,6 +58,7 @@
  * Bit 3
  *     0      -  8-bit
  *     1      - 11-bit
+ * @endcode
  */
 #define ADC_CONFIG_REG 0
 
@@ -63,7 +78,7 @@ static GATE_RESULT adc_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len
 static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 static GATE_DRIVER driver = {
-	.uid = 0x40,
+	.uid = 0x0040,
 	.major_version = 1,
 	.minor_version = 0,
 	.read = adc_driver_read,

@@ -22,7 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** Servo driver
- * @file servo_driver.h
+ * @file servo_4017_driver.h
  *
  * @author Andrey Demenev
  */

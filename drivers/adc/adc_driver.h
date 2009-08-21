@@ -21,10 +21,11 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** My driver
- * @file driver_skeleton.h
+/** ADC driver
+ * @file adc_driver.h
  *
- * @author Vasya Pupkin <pupkin@example.com>
+ * @author Andrey Demenev
+ * @author Vladimir Ermakov
  */
 
 #ifndef ADC_DRIVER_H

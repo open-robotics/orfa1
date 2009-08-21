@@ -31,6 +31,15 @@
  *       now you can set all registers in one request
  */
 
+/**
+ * @ingroup Drivers
+ * @defgroup Motor Motor driver
+ *
+ * UID: 0x0060
+ *
+ * @{
+ */
+
 #include "core/common.h"
 #include "core/driver.h"
 #include <avr/io.h>
@@ -42,9 +51,13 @@ motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT
 motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
+/// PWM register channel 1
 #define PWM1_REG   0x00
+/// PWM register channel 2
 #define PWM2_REG   0x01
+/// Direction register channel 1
 #define DIR1_REG   0x02
+/// Direction register channel 2
 #define DIR2_REG   0x03
 
 #define DIR_PORT   PORTB

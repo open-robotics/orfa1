@@ -22,6 +22,25 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 // vim: set noet:
+/** Servo driver for GPIO ports
+ * @file servo_gpio_driver.h
+ *
+ * @author Anton Botov <airsoft_ekb@mail.ru>
+ */
+
+/**
+ * @ingroup Drivers
+ * @defgroup Servo_GPIO Servo GPIO driver
+ *
+ * UID: 0x0031
+ *
+ * @{
+ */
+
+/// Servo config. NOT USED
+#define SERVO_CONF 0x00
+/// Servo control register
+#define SERVO 0x01
 
 #ifndef OR_AVR_M32_D
 #error servoGPIO: unsupported platform
