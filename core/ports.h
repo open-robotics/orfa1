@@ -94,8 +94,8 @@ GATE_RESULT gate_port_config(uint8_t number, uint8_t mask, uint8_t value);
 GATE_RESULT gate_port_write(uint8_t number, uint8_t mask, uint8_t value);
 
 /** Чтение из порта
- * @param number Идентификатор порта
- * @param bits Указатель на переменную, в которую помещается считанное значение.
+ * @param[in] number Идентификатор порта
+ * @param[out] bits Указатель на переменную, в которую помещается считанное значение.
  */
 GATE_RESULT gate_port_read(uint8_t number, uint8_t* bits);
 
