@@ -21,71 +21,17 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Turret driver
+ * @file turret_driver.h
+ *
+ * @author Vladimir Ermakov
+ */
+
+#ifndef TURRET_DRIVER_H
+#define TURRET_DRIVER_H
 
 #include "core/common.h"
-#include "core/driver.h"
-#include "core/scheduler.h"
-#include <avr/io.h>
-#include <stdint.h>
-#include <stdbool.h>
 
-#define RESERVE_PORT 0
-#define RESERVE_MASK 0x30 // 0b00110000
-#define CANON_PORT PORTA
-#define CANON_DDR DDRA
-#define MOTOR_PIN PA5
-#define BUTTON_PIN PA4
+GATE_RESULT init_turret_driver(void);
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
-static void canon_task(void);
-
-static GATE_DRIVER driver = {
-	.uid = 0xff01, // canon id
-	.major_version = 1,
-	.minor_version = 0,
-	.read = driver_read,
-	.write = driver_write,
-	.num_registers = 1,
-};
-
-static GATE_TASK task = {
-	.task = canon_task,
-};
-
-static uint8_t bam_cnt = 0;
-
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
-{
-	if (!*data_len) {
-		return GR_OK;
-	}
-	
-	*data_len = 1;
-	*data = bam_cnt;
-
-	return GR_OK;
-}
-
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
-{	
-	if (data_len == 1) {
-		bam_cnt = *data;
-	}
-
-	return GR_OK;
-}
-
-static void canon_task(void)
-{
-	debug("# canon task\n");
-}
-
-GATE_RESULT init_canon_driver(void)
-{
-	//gate_task_register(&task);
-	(void)task;
-
-	return gate_driver_register(&driver);
-}
-
+#endif

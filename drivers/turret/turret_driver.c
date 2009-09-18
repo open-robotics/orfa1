@@ -29,19 +29,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define RESERVE_PORT 0
-#define RESERVE_MASK 0x30 // 0b00110000
-#define CANON_PORT PORTA
-#define CANON_DDR DDRA
-#define MOTOR_PIN PA5
-#define BUTTON_PIN PA4
-
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
-static void canon_task(void);
+static void turret_task(void);
 
 static GATE_DRIVER driver = {
-	.uid = 0xff01, // canon id
+	.uid = 0xff02, // turret id
 	.major_version = 1,
 	.minor_version = 0,
 	.read = driver_read,
@@ -50,10 +43,15 @@ static GATE_DRIVER driver = {
 };
 
 static GATE_TASK task = {
-	.task = canon_task,
+	.task = turret_task,
 };
 
-static uint8_t bam_cnt = 0;
+static enum {
+	T_STOP=0  //!< stop turret
+	T_LEFT,   //!< turn left
+	T_RIGHT,  //!< turn right
+	T_CENTER, //!< go to center
+} operation = T_STOP;
 
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
@@ -62,7 +60,7 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	}
 	
 	*data_len = 1;
-	*data = bam_cnt;
+	*data = (uint8_t) operation;
 
 	return GR_OK;
 }
@@ -70,18 +68,21 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {	
 	if (data_len == 1) {
-		bam_cnt = *data;
+		operation = *data;
+		if (operation > 3)
+			operation = T_STOP;
 	}
+	// else error...
 
 	return GR_OK;
 }
 
-static void canon_task(void)
+static void turret_task(void)
 {
-	debug("# canon task\n");
+	debug("# turret task\n");
 }
 
-GATE_RESULT init_canon_driver(void)
+GATE_RESULT init_turret_driver(void)
 {
 	//gate_task_register(&task);
 	(void)task;

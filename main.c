@@ -31,7 +31,6 @@
 #include <stdio.h>
 
 #include "serialgate/i2c.h"
-#include "serialgate/common.h"
 #include "serialgate/serialgate.h"
 #include "core/driver.h"
 #include "core/scheduler.h"
@@ -59,6 +58,12 @@
 #ifdef HAVE_CANON
 #include "canon_driver.h"
 #endif
+
+#ifdef HAVE_TURRET
+#include "turret_driver.h"
+#endif
+
+// -- virtual slave --
 
 #define BUF_LEN 65
 
@@ -181,6 +186,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
 	return true;
 }
 
+// -- Main --
 
 /** Main
  */
@@ -208,6 +214,9 @@ int main(void)
 #endif
 #ifdef HAVE_CANON
 	init_canon_driver();
+#endif
+#ifdef HAVE_TURRET
+	init_turret_driver();
 #endif
 
 	asm volatile ("sei");

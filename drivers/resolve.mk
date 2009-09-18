@@ -26,3 +26,7 @@ ifneq "$(HAVE_CANON)" ""
 	include drivers/canon/resolve.mk
 endif
 
+ifneq "$(HAVE_TURRET)" ""
+	include drivers/turret/resolve.mk
+endif
+
