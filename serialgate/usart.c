@@ -34,21 +34,23 @@
 
 #ifdef SG_ENABLE_IRQ
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include "cbuf.h"
 
-static cbf_t usart_cbf;
+static volatile cbf_t rx_cbf;
 
 bool usart_isempty(void)
 {
-	return cbf_isempty(&usart_cbf);
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		bool ret=cbf_isempty(&rx_cbf);
+	}
+	return ret;
 }
 
 ISR(USART_RXC_vect)
 {
 	uint8_t c=GATE_UDR;
-	// clean EOL
-	c = (c == '\r') ? '\n' : c;
-	cbf_put(&usart_cbf, c);
+	cbf_put(&rx_cbf, c);
 }
 #endif
 
@@ -71,11 +73,13 @@ void usart_init(uint16_t baud)
 	// output the upper four bits of the baudrate divisor
 	GATE_UBRRH = (baud >> 8) & 0x0F;
 
-	// enable the USART0 transmitter & receiver
 #ifndef SG_ENABLE_IRQ
+	// enable the USART0 transmitter & receiver
 	GATE_UCSRB = (1 << TXEN) | (1 << RXEN);
 #else
-	cbf_init(&usart_cbf);
+	// init rx buffer
+	cbf_init(&rx_cbf);
+	// enable the USART0 transmitter & receiver & receiver interrupt
 	GATE_UCSRB = (1 << RXCIE) | (1 << TXEN) | (1 << RXEN);
 #endif
 }
@@ -104,18 +108,20 @@ int usart_putchar0(char c, FILE *stream)
 }
 
 int usart_getchar(FILE *stream)
-{
-#ifndef SG_ENABLE_IRQ
+{	
 	uint8_t c;
 	(void)stream;
+
+#ifndef SG_ENABLE_IRQ
 	loop_until_bit_is_set(GATE_UCSRA, RXC);
 	c = GATE_UDR;
-	if ( c == '\r' )
-		c = '\n';
-	return c;
 #else
-	return cbf_get(&usart_cbf);
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		c = cbf_get(&usart_cbf);
+	}
 #endif
+
+	return c;
 }
 
 int usart_getchar0(FILE *stream)

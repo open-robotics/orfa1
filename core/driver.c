@@ -108,7 +108,7 @@ GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 	return res;
 }
 
-// introspection driver -------------------------------------------------------
+// -- introspection driver --
 
 static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
@@ -131,7 +131,7 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	if (!*data_len) {
 		return GR_OK;
 	}
-	
+
 	if (idriver_num > idriver_len) {
 		idriver_num = 1;
 	}
@@ -148,7 +148,7 @@ static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	while (--i) {
 		driver = driver->next;
 	}
-	
+
 	if (driver) {
 		uint16_t uid = driver->uid;
 		data[0] = (uint8_t) (uid >> 8);

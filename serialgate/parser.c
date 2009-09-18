@@ -78,6 +78,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 	// temp
 	int8_t i;
 	uint8_t c=toupper(co);
+	c = (c == '\r')? '\n' : c;
 
 	// static per iteration data
 	static uint8_t count=1;
