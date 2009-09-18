@@ -89,7 +89,7 @@ $(target).cof: $(target).elf
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
 
 local_config.mk:
-	touch local_config.mk
+	cp ./doc/local_config.mk .
 
 
 clean:
