@@ -35,5 +35,5 @@ PLATFORM = OR_AVR_M32_D
 #DEFINES += -DSG_PROTOCOL_V1_1
 
 # Use interrupt driven serial input
-#DEFINES += -DSG_ENABLE_IRQ
+DEFINES += -DSG_ENABLE_IRQ
 
