@@ -21,71 +21,120 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Canon driver for TermiTiger
+ * @file canon_driver.c
+ *
+ * @author Vladimir Ermakov
+ */
 
 #include "core/common.h"
 #include "core/driver.h"
+#include "core/ports.h"
 #include "core/scheduler.h"
 #include <avr/io.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#define RESERVE_PORT 0
-#define RESERVE_MASK 0x30 // 0b00110000
-#define CANON_PORT PORTA
-#define CANON_DDR DDRA
-#define MOTOR_PIN PA5
-#define BUTTON_PIN PA4
+/* NOTE:
+ * PORTC configuration for TermiTiger (aka TT)
+ * PC5 — canon motor
+ * PC4 — canon button (normal grounded, need pull up)
+ * PC6 — turret left
+ * PC7 — turret rigth
+ */
+#define CANON_PORT  PORTC
+#define CANON_PIN   PINC
+#define CANON_DDR   DDRC
+#define MOTOR_MASK  _BV(PC5) // OUT
+#define BUTTON_MASK _BV(PC4) // IN
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
-static void canon_task(void);
+// See port specs
+#define RESERVE_PORT 3 // PORTC
+#define RESERVE_MASK (MOTOR_MASK | BUTTON_MASK)
 
-static GATE_DRIVER driver = {
+#define motor_on()  CANON_PORT |= MOTOR_MASK
+#define motor_off() CANON_PORT &= ~MOTOR_MASK
+
+#define get_button_state() (CANON_PIN & BUTTON_MASK)
+
+static GATE_RESULT canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT canon_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static void canon_task_func(void);
+
+static GATE_DRIVER canon_driver = {
 	.uid = 0xff01, // canon id
 	.major_version = 1,
 	.minor_version = 0,
-	.read = driver_read,
-	.write = driver_write,
+	.read = canon_driver_read,
+	.write = canon_driver_write,
 	.num_registers = 1,
 };
 
-static GATE_TASK task = {
-	.task = canon_task,
+static GATE_TASK canon_task = {
+	.task = canon_task_func,
 };
 
-static uint8_t bam_cnt = 0;
+static bool fire = 0;
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (!*data_len) {
 		return GR_OK;
 	}
 	
 	*data_len = 1;
-	*data = bam_cnt;
+	*data = fire;
 
 	return GR_OK;
 }
 
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT canon_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {	
-	if (data_len == 1) {
-		bam_cnt = *data;
+	if (data_len != 1) {
+		return GR_INVALID_ARG;
+	}
+	
+	fire = *data;
+
+	return GR_OK;
+}
+
+static void canon_task_func(void)
+{
+	static bool filter=false,
+				state=false, 
+				prev_state=false;
+
+	if (fire) {
+		motor_on();
+	} else {
+		return;
 	}
 
-	return GR_OK;
-}
+	bool bs=get_button_state();
+	if (filter == bs) {
+		state = filter;
+	}
+	filter = bs;
 
-static void canon_task(void)
-{
-	debug("# canon task\n");
+	if (prev_state && !state) {
+		// fire done
+		fire = false;
+		motor_off();
+	}
+
+	prev_state = state;
 }
 
 GATE_RESULT init_canon_driver(void)
 {
-	//gate_task_register(&task);
-	(void)task;
+	// Init DDR and PORT
+	CANON_DDR = (CANON_DDR | MOTOR_MASK) & ~BUTTON_MASK;
+	CANON_PORT = (CANON_PORT | BUTTON_MASK) & ~MOTOR_MASK;
 
-	return gate_driver_register(&driver);
+	gate_port_reserve(RESERVE_PORT, RESERVE_MASK, RESERVE_MASK);
+	gate_task_register(&canon_task);
+
+	return gate_driver_register(&canon_driver);
 }
 

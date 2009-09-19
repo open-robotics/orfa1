@@ -79,13 +79,12 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 static void turret_task(void)
 {
-	debug("# turret task\n");
+	//debug("# turret task\n");
 }
 
 GATE_RESULT init_turret_driver(void)
 {
-	//gate_task_register(&task);
-	(void)task;
+	gate_task_register(&task);
 
 	return gate_driver_register(&driver);
 }
