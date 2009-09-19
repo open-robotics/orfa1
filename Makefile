@@ -71,6 +71,8 @@ $(target).elf: $(OBJS) $(LIBS_RULES)
 $(target).cof: $(target).elf
 	$(COFFCONVERT) -O coff-ext-avr $< $(target).cof
 
+$(target).lss: $(target).elf
+	$(OBJDUMP) -d $< > $@
 
 %.o : %.c
 
@@ -91,10 +93,9 @@ $(target).cof: $(target).elf
 local_config.mk:
 	cp ./doc/local_config.mk .
 
-
 clean:
-	rm -rf $(shell find -name '*.o' -o -name '*.a'  -o -name ${target}.hex -o -name $(target).elf)
-	rm -f doxygen.log tags
+	rm -f $(shell find -name '*.o' -o -name '*.a')
+	rm -f ${target}.hex $(target).elf $(target).cof $(target).lss doxygen.log tags
 
 docs:
 	doxygen

@@ -47,10 +47,10 @@ static GATE_TASK task = {
 };
 
 static enum {
-	T_STOP=0  //!< stop turret
-	T_LEFT,   //!< turn left
-	T_RIGHT,  //!< turn right
-	T_CENTER, //!< go to center
+	T_STOP=0,    //!< stop turret
+	T_LEFT,      //!< turn left
+	T_RIGHT,     //!< turn right
+	T_CENTER,    //!< go to center
 } operation = T_STOP;
 
 static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)

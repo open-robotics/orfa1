@@ -37,12 +37,15 @@
 #include <util/atomic.h>
 #include "cbuf.h"
 
-static volatile cbf_t rx_cbf;
+// static volatile give compilation errors :(
+static cbf_t rx_cbf;
 
 bool usart_isempty(void)
 {
+	bool ret;
+
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		bool ret=cbf_isempty(&rx_cbf);
+		ret = cbf_isempty(&rx_cbf);
 	}
 	return ret;
 }
@@ -117,7 +120,7 @@ int usart_getchar(FILE *stream)
 	c = GATE_UDR;
 #else
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
-		c = cbf_get(&usart_cbf);
+		c = cbf_get(&rx_cbf);
 	}
 #endif
 
