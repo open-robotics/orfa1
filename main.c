@@ -55,14 +55,6 @@
 #include "adc_driver.h"
 #endif
 
-#ifdef HAVE_CANON
-#include "canon_driver.h"
-#endif
-
-#ifdef HAVE_TURRET
-#include "turret_driver.h"
-#endif
-
 // -- virtual slave --
 
 #define BUF_LEN 65
@@ -211,12 +203,6 @@ int main(void)
 #endif
 #ifdef HAVE_ADC
 	init_adc_driver();
-#endif
-#ifdef HAVE_CANON
-	init_canon_driver();
-#endif
-#ifdef HAVE_TURRET
-	init_turret_driver();
 #endif
 
 	asm volatile ("sei");
