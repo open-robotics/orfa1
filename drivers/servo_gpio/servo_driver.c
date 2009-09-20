@@ -33,7 +33,8 @@
  * @defgroup Servo_GPIO Servo GPIO driver
  *
  * UID: 0x0031
- *
+ * Note: if motor driver exists we can't use channels 14 and 15
+ * 
  * @{
  */
 
@@ -52,6 +53,7 @@
 #include "core/driver.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include <util/delay.h>
 #define delay_us(x) _delay_us(x)
@@ -62,12 +64,7 @@
 #define MINSERVO            (F_CPU/2000/RESOLUTION_IN_TICKS)
 #define WORKSPACE           (MAXSERVO+1)
 
-#ifndef HAVE_MOTOR
-# define CHMAX 15
-#else
-// if motor driver exists we can't use channels 14 and 15
-# define CHMAX 13
-#endif
+#define CHMAX 15
 
 //static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
@@ -90,6 +87,13 @@ static bool gpio_servo_enb[16] = {
 	false, false, false, false,
 	false, false, false, false
 };
+static bool gpio_servo_enb_prev[16] = {
+	false, false, false, false,
+	false, false, false, false,
+	false, false, false, false,
+	false, false, false, false
+};
+
 
 static uint8_t pause0[40];
 static uint8_t pause1[40];
@@ -325,7 +329,7 @@ static inline void generateParametersFor(uint8_t n)
 #define enablePin(servo_id, ddr, pin) \
 	if (gpio_servo_enb[servo_id]) { \
 		ddr |= (1<<pin); \
-	} else { \
+	} else if (gpio_servo_enb_prev[servo_id]) { \
 		ddr &= ~(1<<pin); \
 	}
 
@@ -353,12 +357,11 @@ static inline void set_enable(uint8_t n, bool enable)
 	enablePin(11, DDRC, 4);
 	enablePin(12, DDRB, 3);
 	enablePin(13, DDRB, 2);
-
-#ifndef HAVE_MOTOR
-	// Motor driver use this pins as PWM output
 	enablePin(14, DDRD, 5);
 	enablePin(15, DDRD, 4);
-#endif
+
+	// copy previous enable state
+	memcpy(gpio_servo_enb_prev, gpio_servo_enb, 16);
 
 	// not needed
 	//generateParametersFor(n);
