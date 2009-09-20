@@ -21,17 +21,17 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** My driver
- * @file driver_skeleton.h
+/** Example driver
+ * @file example_driver.h
  *
  * @author Vasya Pupkin <pupkin@example.com>
  */
 
-#ifndef MY_DRIVER_H
-#define MY_DRIVER_H
+#ifndef EXAMPLE_DRIVER_H
+#define EXAMPLE_DRIVER_H
 
 #include "core/common.h"
 
-GATE_RESULT init_my_driver(void);
+GATE_RESULT init_example_driver(void);
 
 #endif

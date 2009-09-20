@@ -27,33 +27,39 @@
 #include "core/driver.h"
 #include <stdint.h>
 
-#define MY_UID 0x55
+// User UIDs 0xff00 — 0xffff
+#define EXAMPLE_UID 0xFF55
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT
+example_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+example_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-#define REG1 0x33
-// #define REG2 0xXX
-// #define REG2 0xXX
+#define REG1 0x0
+// #define REG2 0x01
+// #define REG2 0x02
 
-static GATE_DRIVER driver = {
-	.uid = MY_UID,
+static GATE_DRIVER example_driver = {
+	.uid = EXAMPLE_UID,
 	.major_version = 1,
 	.minor_version = 0,
-	.read = driver_read,
-	.write = driver_write,
+	.read = example_driver_read,
+	.write = example_driver_write,
 	.num_registers = 1,
 };
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT
+example_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	switch (reg) {
 		// ....
 	};
+
 	return GR_OK;
 }
 
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+example_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	switch (reg)
 	{
@@ -63,11 +69,11 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
-GATE_RESULT init_my_driver(void)
+GATE_RESULT init_example_driver(void)
 {
 	// ...
 	// ...
 	// ...
-	return gate_driver_register(&driver);
+	return gate_driver_register(&example_driver);
 }
 
