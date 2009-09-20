@@ -37,8 +37,8 @@
 
 /* NOTE:
  * PORTC configuration for TermiTiger (aka TT)
- * PC5 — canon motor
  * PC4 — canon button (normal grounded, need pull up)
+ * PC5 — canon motor
  * PC6 — turret left
  * PC7 — turret rigth
  */
@@ -57,8 +57,10 @@
 
 #define get_button_state() (CANON_PIN & BUTTON_MASK)
 
-static GATE_RESULT canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT canon_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT
+canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+canon_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 static void canon_task_func(void);
 
 static GATE_DRIVER canon_driver = {
@@ -76,7 +78,8 @@ static GATE_TASK canon_task = {
 
 static bool fire = 0;
 
-static GATE_RESULT canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT
+canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (!*data_len) {
 		return GR_OK;
@@ -88,7 +91,8 @@ static GATE_RESULT canon_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_l
 	return GR_OK;
 }
 
-static GATE_RESULT canon_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+canon_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {	
 	if (data_len != 1) {
 		return GR_INVALID_ARG;
@@ -108,6 +112,7 @@ static void canon_task_func(void)
 	if (fire) {
 		motor_on();
 	} else {
+		// all done, exit
 		return;
 	}
 
@@ -133,6 +138,7 @@ GATE_RESULT init_canon_driver(void)
 	CANON_PORT = (CANON_PORT | BUTTON_MASK) & ~MOTOR_MASK;
 
 	gate_port_reserve(RESERVE_PORT, RESERVE_MASK, RESERVE_MASK);
+
 	gate_task_register(&canon_task);
 
 	return gate_driver_register(&canon_driver);

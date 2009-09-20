@@ -21,29 +21,70 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Turret driver for TermiTiger
+ * @file turret_driver.c
+ *
+ * @author Vladimir Ermakov
+ */
 
 #include "core/common.h"
 #include "core/driver.h"
+#include "core/ports.h"
 #include "core/scheduler.h"
 #include <avr/io.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
-static void turret_task(void);
+/* NOTE:
+ * PORTC configuration for TermiTiger (aka TT)
+ * PC4 — canon button (normal grounded, need pull up)
+ * PC5 — canon motor
+ * PC6 — turret left
+ * PC7 — turret right
+ * 
+ * PORTA:
+ * PA1 — turret center sensor
+ */
+#define MOTOR_PORT  PORTC
+#define MOTOR_DDR   DDRC
+#define LEFT_MASK   _BV(PC6) // OUT
+#define RIGHT_MASK  _BV(PC7) // OUT
 
-static GATE_DRIVER driver = {
+#define SENSOR_PORT PORTA
+#define SENSOR_DDR  DDRA
+#define SENSOR_PIN  PINA
+#define SENSOR_MASK _BV(PA1) // IN
+
+// See port specs
+#define RESERVE_MOTOR_PORT 3 // PORTC
+#define RESERVE_MOTOR_MASK (LEFT_MASK | RIGHT_MASK)
+#define RESERVE_SENSOR_PORT 0 // PORTA
+#define RESERVE_SENSOR_MASK SENSOR_MASK
+
+#define motor_left()  MOTOR_PORT = (MOTOR_PORT | LEFT_MASK) & ~RIGHT_MASK
+#define motor_right() MOTOR_PORT = (MOTOR_PORT | RIGHT_MASK) & ~LEFT_MASK
+#define motor_off()   MOTOR_PORT &= ~(LEFT_MASK | RIGHT_MASK)
+
+#define get_sensor_state() (SENSOR_PIN & SENSOR_MASK)
+
+
+static GATE_RESULT
+turret_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+turret_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static void turret_task_func(void);
+
+static GATE_DRIVER turret_driver = {
 	.uid = 0xff02, // turret id
 	.major_version = 1,
 	.minor_version = 0,
-	.read = driver_read,
-	.write = driver_write,
+	.read = turret_driver_read,
+	.write = turret_driver_write,
 	.num_registers = 1,
 };
 
-static GATE_TASK task = {
-	.task = turret_task,
+static GATE_TASK turret_task = {
+	.task = turret_task_func,
 };
 
 static enum {
@@ -53,7 +94,10 @@ static enum {
 	T_CENTER,    //!< go to center
 } operation = T_STOP;
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static bool go_to_center=false;
+
+static GATE_RESULT
+turret_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (!*data_len) {
 		return GR_OK;
@@ -65,27 +109,63 @@ static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 	return GR_OK;
 }
 
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+turret_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {	
-	if (data_len == 1) {
-		operation = *data;
-		if (operation > 3)
-			operation = T_STOP;
+	if (data_len != 1) {
+		return GR_INVALID_ARG;
 	}
-	// else error...
+
+	go_to_center = false;
+	operation = *data;
+	switch (operation) {
+		case T_STOP:
+			motor_off();
+			break;
+
+		case T_LEFT:
+			motor_left();
+			break;
+
+		case T_RIGHT:
+			motor_right();
+			break;
+
+		case T_CENTER:
+			go_to_center = true;
+			motor_off();
+			break;
+
+		default:
+			operation = T_STOP;
+			break;
+	}
 
 	return GR_OK;
 }
 
-static void turret_task(void)
+static void turret_task_func(void)
 {
-	//debug("# turret task\n");
+	// TODO: go to the center proc
 }
 
 GATE_RESULT init_turret_driver(void)
 {
-	gate_task_register(&task);
+	// Port & DDR init
+	MOTOR_PORT &= ~(LEFT_MASK | RIGHT_MASK);
+	MOTOR_DDR |= LEFT_MASK | RIGHT_MASK;
 
-	return gate_driver_register(&driver);
+	SENSOR_PORT &= ~SENSOR_MASK;
+	SENSOR_DDR &= ~SENSOR_MASK;
+
+	// reserve pinouts
+	gate_port_reserve(RESERVE_MOTOR_PORT, 
+			RESERVE_MOTOR_MASK, RESERVE_MOTOR_MASK);
+	gate_port_reserve(RESERVE_SENSOR_PORT, 
+			RESERVE_SENSOR_MASK, RESERVE_SENSOR_MASK);
+
+	gate_task_register(&turret_task);
+
+	return gate_driver_register(&turret_driver);
 }
 
