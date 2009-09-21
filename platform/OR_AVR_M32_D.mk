@@ -4,10 +4,4 @@ MCU = atmega32
 F_CPU = 7372800UL
 BAUD = B115200
 
-HAVE_PORTS = 1
-HAVE_SPI = 1
-HAVE_ADC = 1
-HAVE_MOTOR = 1
-HAVE_SERVO_GPIO = 1
-
-HAVE_SERVO_4017 =
+DRIVERS = ports spi adc motor servo_gpio
