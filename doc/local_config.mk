@@ -17,16 +17,16 @@ PLATFORM = OR_AVR_M32_D
 #------------------------------------------------
 # Drivers
 # Here you can enable or disable driver modules
-# "" — disable, 1 — enable
 
-#HAVE_ADC =
-#HAVE_PORTS =
-#HAVE_SPI =
-#HAVE_MOTOR =
-#HAVE_SERVO_GPIO =
-#HAVE_SERVO_4017 =
-#HAVE_CANON = 1
-#HAVE_TURRET = 1
+#DRIVERS := $(filter-out adc,$(DRIVERS))
+#DRIVERS := $(filter-out spi,$(DRIVERS))
+#DRIVERS := $(filter-out ports,$(DRIVERS))
+#DRIVERS := $(filter-out motor,$(DRIVERS))
+#DRIVERS := $(filter-out servo_gpio,$(DRIVERS))
+#DRIVERS := $(filter-out servo4017,$(DRIVERS))
+
+#DRIVERS += cannon
+#DRIVERS += turret
 
 #------------------------------------------------
 # Defines
