@@ -28,23 +28,26 @@
 #include <avr/io.h>
 #include "ports_driver.h"
 
-static GATE_RESULT port_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT port_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT
+ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+ports_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 static GATE_PORT ports[] = {
 	GATE_PORT_SPECS
 };
 
-static GATE_DRIVER driver = {
+static GATE_DRIVER ports_driver = {
 	.uid = GATE_PORT_UID,
 	.major_version = 1,
 	.minor_version = 0,
-	.read = port_driver_read,
-	.write = port_driver_write,
+	.read = ports_driver_read,
+	.write = ports_driver_write,
 	.num_registers = GATE_NUM_PORTS * 2,
 };
 
-static GATE_RESULT port_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT
+ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (reg >=  GATE_NUM_PORTS) {
 		return GR_NO_ACCESS;
@@ -61,7 +64,8 @@ static GATE_RESULT port_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_le
 	return res;
 }
 
-static GATE_RESULT port_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+ports_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	uint8_t i = 0;
 	uint8_t port;
@@ -87,14 +91,15 @@ static GATE_RESULT port_driver_write(uint8_t reg, uint8_t* data, uint8_t data_le
 	return GR_OK;
 }
 
-GATE_RESULT init_ports_driver(void)
+// Autoload
+MODULE_INIT(ports_driver)
 {
 	uint8_t i;
 	for (i = 0; i < GATE_NUM_PORTS; i++) {
-		GATE_RESULT res;
-		res = gate_port_register(i, ports+i);
-		if (res != GR_OK) return res;
+		if (gate_port_register(i, ports+i) != GR_OK)
+			return;
 	}
-	return gate_driver_register(&driver);
+
+	gate_driver_register(&ports_driver);
 }
 

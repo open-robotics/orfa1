@@ -32,6 +32,4 @@
 
 #include "core/common.h"
 
-GATE_RESULT init_servo_driver(void);
-
 #endif

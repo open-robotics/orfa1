@@ -77,7 +77,7 @@ static uint8_t read_channel;
 static GATE_RESULT adc_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER driver = {
+static GATE_DRIVER adc_driver = {
 	.uid = 0x0040,
 	.major_version = 1,
 	.minor_version = 0,
@@ -181,13 +181,6 @@ static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len
 	return GR_OK;
 }
 
-
-GATE_RESULT init_adc_driver(void)
-{
-	return gate_driver_register(&driver);
-}
-
-
 ISR(ADC_vect)
 {
 	if (conversion_channel != 0xFF) {
@@ -219,5 +212,11 @@ ISR(ADC_vect)
 	// set channel and run conversion
 	ADMUX = (ADMUX & ~0x07) | conversion_channel;
 	ADCSRA = _BV(ADEN) | _BV(ADIE) | (5 << ADPS0) | _BV(ADSC);
+}
+
+// module autoload
+MODULE_INIT(adc_driver)
+{
+	gate_driver_register(&adc_driver);
 }
 

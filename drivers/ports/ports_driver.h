@@ -33,9 +33,6 @@
 
 #include "core/common.h"
 
-GATE_RESULT init_ports_driver(void);
-
-
 #ifdef OR_AVR_M32_D
 	#define GATE_NUM_PORTS 4
 	#define GATE_PORT_MASK_A 0
@@ -64,6 +61,5 @@ GATE_RESULT init_ports_driver(void);
 		.default_busy_mask = GATE_PORT_MASK_ ## p,				\
 	}
 
-
-
 #endif
+

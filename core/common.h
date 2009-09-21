@@ -43,6 +43,19 @@
 	#endif
 #endif
 
+
+#define MODULE_INIT(name) \
+	void init_ ## name ## _module(void) \
+	__attribute__((section (".init8"))) \
+	__attribute__((naked)); \
+	void init_ ## name ## _module(void)
+
+#define SYSTEM_INIT() void init_system(void) \
+	__attribute__ ((naked)) \
+	__attribute__ ((section (".init7"))); \
+	void init_system(void)
+
+
 /**
  * @defgroup Errors Коды ошибок
  */

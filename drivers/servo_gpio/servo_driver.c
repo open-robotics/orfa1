@@ -66,15 +66,17 @@
 
 #define CHMAX 15
 
-//static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+//static GATE_RESULT
+//servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER driver = {
+static GATE_DRIVER servo_driver = {
 	.uid = 0x0031,
 	.major_version = 1,
 	.minor_version = 1,
-//	.read = driver_read,  // not used
-	.write = driver_write,
+//	.read = servo_driver_read,  // not used
+	.write = servo_driver_write,
 	.num_registers = 2,
 };
 
@@ -394,14 +396,16 @@ static inline void set_position(uint8_t n, uint32_t pos)
 // -- driver --
 
 #if 0 // not used
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT
+servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	*data_len = 0;
 	return GR_OK;
 }
 #endif
 
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	debug("# servo_gpio->write(0x%02X, buf, %i)\n", reg, data_len);
 	
@@ -411,26 +415,6 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 	if (reg == 0) {
 		debug("# :: reg=0, (data_len != 2) == %i\n", (data_len != 2));
-#if 0 // not needed
-		if (data_len != 2) {
-			return GR_INVALID_DATA;
-		}
-
-		uint8_t byte = 0;
-		while (byte < 2) {
-			uint8_t bit = 0;
-			while (bit < 8) {
-				uint8_t n = (byte << 3) + bit;
-				set_enable(n, *data & 0x01);
-				generateParametersFor(n);
-				*data = *data>>1;
-				bit++;
-			}
-
-			data++;
-			byte++;
-		}
-#endif
 		return GR_OK;
 	}
 
@@ -453,7 +437,7 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 
 // -- init --
 
-GATE_RESULT init_servo_driver(void)
+MODULE_INIT(servo_driver)
 {
 	generateParameters();
 
@@ -464,6 +448,6 @@ GATE_RESULT init_servo_driver(void)
 	TCNT2 = 0;
 	TIMSK |= (1<<OCIE2);
 
-	return gate_driver_register(&driver);
+	gate_driver_register(&servo_driver);
 }
 
