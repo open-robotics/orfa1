@@ -33,9 +33,6 @@
 
 #include "core/common.h"
 
-GATE_RESULT init_spi_driver(void);
-
-
 #ifdef OR_AVR_M32_D
 	#define GATE_SPI_PORT_NUMBER 1
 	#define GATE_SPI_PORT PORTB

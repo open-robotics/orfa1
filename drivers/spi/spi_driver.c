@@ -30,8 +30,10 @@
 #include "spi_driver.h"
 
 
-static GATE_RESULT spi_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT spi_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT
+spi_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+spi_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 #define SPI_BUF_SIZE 64
 
@@ -47,7 +49,7 @@ static SPI_CONTROL_PIN control_pin[4];
 static uint8_t buf[SPI_BUF_SIZE];
 static uint8_t buf_len;
 
-static GATE_DRIVER driver = {
+static GATE_DRIVER spi_driver = {
 	.uid = 0x0001, // spi id
 	.major_version = 1,
 	.minor_version = 0,
@@ -56,7 +58,8 @@ static GATE_DRIVER driver = {
 	.num_registers = 2,
 };
 
-static GATE_RESULT spi_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT
+spi_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (reg >= CONFIG_REG) {
 		return GR_NO_ACCESS;
@@ -157,7 +160,8 @@ static GATE_RESULT spi_config(uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
-static GATE_RESULT spi_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+spi_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	if (reg < CONFIG_REG) {
 		return spi_write(data, data_len);
@@ -165,9 +169,8 @@ static GATE_RESULT spi_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len
 	return spi_config(data, data_len);
 }
 
-GATE_RESULT init_spi_driver(void)
+MODULE_INIT(spi_driver)
 {
-	return gate_driver_register(&driver);
+	gate_driver_register(&spi_driver);
 }
-
 

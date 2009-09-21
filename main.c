@@ -35,26 +35,6 @@
 #include "core/driver.h"
 #include "core/scheduler.h"
 
-#ifdef HAVE_PORTS
-#include "ports_driver.h"
-#endif
-
-#ifdef HAVE_SPI
-#include "spi_driver.h"
-#endif
-
-#ifdef HAVE_MOTOR
-#include "motor_driver.h"
-#endif
-
-#ifdef HAVE_SERVO
-#include "servo_driver.h"
-#endif
-
-#ifdef HAVE_ADC
-#include "adc_driver.h"
-#endif
-
 // -- virtual slave --
 
 #define BUF_LEN 65
@@ -180,31 +160,18 @@ bool cmd_rxc(uint8_t *c, bool ack)
 
 // -- Main --
 
-/** Main
- */
-int main(void)
+SYSTEM_INIT()
 {
 	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);
 	gate_supertask_register(serialgate_supertask);
 	gate_init_introspection();
 	serialgate_init();
+}
 
-#ifdef HAVE_PORTS
-	init_ports_driver();
-#endif
-#ifdef HAVE_SPI
-	init_spi_driver();
-#endif
-#ifdef HAVE_MOTOR
-	init_motor_driver();
-#endif
-#ifdef HAVE_SERVO
-	init_servo_driver();
-#endif
-#ifdef HAVE_ADC
-	init_adc_driver();
-#endif
-
+/** Main
+ */
+int main(void)
+{
 	asm volatile ("sei");
 	gate_scheduler_loop();
 	return 0;

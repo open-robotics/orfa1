@@ -101,7 +101,7 @@ motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 #define getPwm(ch) \
 	((uint8_t) PWM##ch##_OC)
 
-static GATE_DRIVER driver = {
+static GATE_DRIVER motor_driver = {
 	.uid = 0x0060, // motor id
 	.major_version = 1,
 	.minor_version = 1,
@@ -173,7 +173,8 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 	return GR_OK;
 }
 
-GATE_RESULT init_motor_driver(void)
+// Autoinit
+MODULE_INIT(motor_driver)
 {
 	// init i/o lines
 	DIR_PORT &= ~DIR1_MASK;
@@ -197,6 +198,6 @@ GATE_RESULT init_motor_driver(void)
 	TCCR1A = (0<<WGM11)|(1<<WGM10);
 	TCCR1B = (0<<WGM13)|(1<<WGM12)|(0<<CS12)|(1<<CS11)|(0<<CS10);
 
-	return gate_driver_register(&driver);
+	gate_driver_register(&motor_driver);
 }
 

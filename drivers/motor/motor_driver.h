@@ -33,6 +33,5 @@
 
 #include "core/common.h"
 
-GATE_RESULT init_motor_driver(void);
-
 #endif
+

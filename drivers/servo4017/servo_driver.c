@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
+/** Servo servo_driver\
  * @file servo_4017_driver.h
  *
  * @author Andrey Demenev
@@ -29,7 +29,7 @@
 
 /**
  * @ingroup Drivers
- * @defgroup Servo_4017 Servo 4017 driver
+ * @defgroup Servo_4017 Servo 4017 servo_driver\
  *
  * UID: 0x0030
  *
@@ -57,26 +57,30 @@
 #endif
 
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT
+servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT
+servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER driver = {
+static GATE_DRIVER servo_driver = {
 	.uid = 0x30,
 	.major_version = 1,
 	.minor_version = 0,
-	.read = driver_read,
-	.write = driver_write,
+	.read = servo_driver_read,
+	.write = servo_driver_write,
 	.num_registers = 2,
 };
 
 
-static GATE_RESULT driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT
+servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	*data_len = 0;
 	return GR_OK;
 }
 
-static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT
+servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	if (reg > 1) {
 		return GR_NO_ACCESS;
@@ -102,9 +106,9 @@ static GATE_RESULT driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
-GATE_RESULT init_servo_driver(void)
+MODULE_INIT(servo_driver)
 {
 	s4017_init();
-	return gate_driver_register(&driver);
+	gate_driver_register(&servo_driver);
 }
 

@@ -43,6 +43,4 @@
 	#define GATE_ADC_PORT_NUMBER 3
 #endif
 
-GATE_RESULT init_adc_driver(void);
-
 #endif // ADC_DRIVER_H
