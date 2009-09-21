@@ -50,7 +50,7 @@ bool usart_isempty(void)
 	return ret;
 }
 
-ISR(USART_RXC_vect)
+ISR(GATE_RXC_vect)
 {
 	uint8_t c=GATE_UDR;
 	cbf_put(&rx_cbf, c);

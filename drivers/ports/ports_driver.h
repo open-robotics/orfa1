@@ -43,7 +43,7 @@
 	#define GATE_PORT_UID 0x0020
 #endif
 
-#ifdef OR_AVR_M64_S
+#ifdef OR_AVR_M128_S
 	#define GATE_NUM_PORTS 4
 	#define GATE_PORT_MASK_A 0
 	#define	GATE_PORT_MASK_B 0xFE

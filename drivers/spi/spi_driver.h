@@ -43,7 +43,7 @@
 	#define GATE_SPI_MISO 6
 #endif
 
-#ifdef OR_AVR_M64_S
+#ifdef OR_AVR_M128_S
 	#define GATE_SPI_PORT_NUMBER -1
 	#define GATE_SPI_PORT PORTB
 	#define GATE_SPI_DDR DDRB

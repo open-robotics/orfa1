@@ -38,7 +38,7 @@
 	#define GATE_ADC_PORT_NUMBER 0
 #endif
 
-#ifdef OR_AVR_M64_S
+#ifdef OR_AVR_M128_S
 	#define GATE_ADC_DDR DDRF
 	#define GATE_ADC_PORT_NUMBER 3
 #endif

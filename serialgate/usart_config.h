@@ -40,14 +40,16 @@
 	#define GATE_UCSRB UCSRB
 	#define GATE_UBRRL UBRRL
 	#define GATE_UBRRH UBRRH
+	#define GATE_RXC_vect USART_RXC_vect
 #endif
 
-#ifdef OR_AVR_M64_S
+#ifdef OR_AVR_M128_S
 	#define GATE_UDR UDR1
 	#define GATE_UCSRA UCSR1A
 	#define GATE_UCSRB UCSR1B
 	#define GATE_UBRRL UBRR1L
 	#define GATE_UBRRH UBRR1H
+	#define GATE_RXC_vect USART1_RX_vect
 #endif
 
 #endif // USART_CONFIG_H

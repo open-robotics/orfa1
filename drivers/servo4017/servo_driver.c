@@ -41,7 +41,7 @@
 /// Servo control register
 #define SERVO 0x01
 
-#ifndef OR_AVR_M64_S
+#ifndef OR_AVR_M128_S
 #error servo4017: unsupported platform
 #endif
 
