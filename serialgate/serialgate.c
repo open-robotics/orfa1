@@ -78,3 +78,4 @@ void serialgate_supertask(void)
 		error_code = NO_ERROR;
 	}
 }
+

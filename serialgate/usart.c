@@ -32,7 +32,7 @@
 
 #include "usart.h"
 
-#ifdef SG_ENABLE_IRQ
+#ifndef SG_DISABLE_IRQ
 #include <avr/interrupt.h>
 #include <util/atomic.h>
 #include "cbuf.h"
@@ -76,14 +76,14 @@ void usart_init(uint16_t baud)
 	// output the upper four bits of the baudrate divisor
 	GATE_UBRRH = (baud >> 8) & 0x0F;
 
-#ifndef SG_ENABLE_IRQ
-	// enable the USART0 transmitter & receiver
-	GATE_UCSRB = (1 << TXEN) | (1 << RXEN);
-#else
+#ifndef SG_DISABLE_IRQ
 	// init rx buffer
 	cbf_init(&rx_cbf);
 	// enable the USART0 transmitter & receiver & receiver interrupt
 	GATE_UCSRB = (1 << RXCIE) | (1 << TXEN) | (1 << RXEN);
+#else
+	// enable the USART0 transmitter & receiver
+	GATE_UCSRB = (1 << TXEN) | (1 << RXEN);
 #endif
 }
 
@@ -115,7 +115,7 @@ int usart_getchar(FILE *stream)
 	uint8_t c;
 	(void)stream;
 
-#ifndef SG_ENABLE_IRQ
+#ifdef SG_DISABLE_IRQ
 	loop_until_bit_is_set(GATE_UCSRA, RXC);
 	c = GATE_UDR;
 #else

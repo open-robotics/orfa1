@@ -128,7 +128,7 @@ int usart_getchar0(FILE *stream);
 
 #endif // AVR_IO
 
-#if !(defined(SG_ENABLE_IRQ) && defined(AVR_IO))
+#if defined(SG_DISABLE_IRQ) || !defined(AVR_IO)
 # define usart_isempty() false
 #else
 bool usart_isempty(void);

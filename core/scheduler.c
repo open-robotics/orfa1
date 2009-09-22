@@ -52,6 +52,10 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task)
 
 void gate_scheduler_loop(void)
 {
+#ifndef SG_DISABLE_IRQ
+	wdt_enable(WDTO_1S);
+#endif
+
 	if (supertask) {
 		for (;;) {
 			wdt_reset();
