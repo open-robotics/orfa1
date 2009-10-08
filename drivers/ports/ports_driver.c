@@ -40,7 +40,7 @@ static GATE_PORT ports[] = {
 static GATE_DRIVER ports_driver = {
 	.uid = GATE_PORT_UID,
 	.major_version = 1,
-	.minor_version = 0,
+	.minor_version = 1,
 	.read = ports_driver_read,
 	.write = ports_driver_write,
 	.num_registers = GATE_NUM_PORTS * 2,
@@ -56,8 +56,7 @@ ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 		return GR_OK;
 	}
 	
-	GATE_RESULT res;
-	res = gate_port_read(reg, data);
+	GATE_RESULT res = gate_port_read(reg, data);
 	if (res == GR_OK) {
 		*data_len = 1;
 	}
@@ -67,28 +66,31 @@ ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 static GATE_RESULT
 ports_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	uint8_t i = 0;
+	uint8_t mask=0xFF;
 	uint8_t port;
-	
+	GATE_RESULT res=GR_OK;
+
+	if (data_len == 0) {
+		return GR_OK;
+	}
+
 	if (reg >= GATE_NUM_PORTS) {
 		port = reg - GATE_NUM_PORTS;
 	} else {
 		port = reg;
 	}
 
-	while (i < data_len) {
-		GATE_RESULT res;
-		if (reg < GATE_NUM_PORTS) {
-			res = gate_port_write(port, 0xFF, data[i]);
-		} else {
-			res = gate_port_config(port, 0xFF, data[i]);
-		}
-		if (res != GR_OK) {
-			return res;
-		}
-		i ++;
+	if (data_len > 1) {
+		mask = data[1];
 	}
-	return GR_OK;
+		
+	if (reg < GATE_NUM_PORTS) {
+		res = gate_port_write(port, mask, data[0]);
+	} else {
+		res = gate_port_config(port, mask, data[0]);
+	}
+
+	return res;
 }
 
 // Autoload
