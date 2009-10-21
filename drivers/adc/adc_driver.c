@@ -35,6 +35,7 @@
 #include "core/common.h"
 #include "core/driver.h"
 #include "core/ports.h"
+#include "core/scheduler.h"
 #include "adc_driver.h"
 #include "serialgate/common.h"
 
@@ -64,12 +65,20 @@
 
 #define ADC_DATA_REG 1
 
+#ifdef ADC_ISR
+#define ADC_INTERRUPT_MASK _BV(ADIE)
+#define ADC_VOLATILE volatile
+#else
+#define ADC_INTERRUPT_MASK 0
+#define ADC_VOLATILE
+#endif
+
 // ISR data
-volatile uint8_t conversion_channel = 0xFF;
-volatile uint8_t conversion_mask;
-volatile uint8_t config;
-volatile uint16_t result[8];
-volatile uint8_t mask;
+static ADC_VOLATILE uint8_t conversion_channel = 0xFF;
+static ADC_VOLATILE uint8_t conversion_mask;
+static ADC_VOLATILE uint8_t config;
+static ADC_VOLATILE uint16_t result[8];
+static ADC_VOLATILE uint8_t mask;
 
 // driver data
 static uint8_t read_channel;
@@ -86,6 +95,15 @@ static GATE_DRIVER adc_driver = {
 	.num_registers = 2,
 };
 
+#ifndef ADC_ISR
+static void adc_task(void);
+
+static GATE_TASK task = {
+	&adc_task,
+	0,
+};
+
+#endif
 
 static void reconfigure_adc(uint8_t new_mask)
 {
@@ -118,7 +136,7 @@ static void reconfigure_adc(uint8_t new_mask)
 	if (!mask && new_mask) {
 		mask = new_mask;
 		conversion_channel = 0xFF;
-		ADCSRA = _BV(ADEN) | _BV(ADIE) | (5 << ADPS0) | _BV(ADSC) | _BV(ADIF);
+		ADCSRA = _BV(ADEN) | ADC_INTERRUPT_MASK | (5 << ADPS0) | _BV(ADSC) | _BV(ADIF);
 	} else {
 		mask = new_mask;
 	}
@@ -181,8 +199,16 @@ static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len
 	return GR_OK;
 }
 
+#ifdef ADC_ISR
 ISR(ADC_vect)
+#else
+static void adc_task(void)
+#endif
 {
+#ifndef ADC_ISR
+	if (!(ADCSRA & _BV(ADIF))) return;
+	ADCSRA | _BV(ADIF);
+#endif
 	if (conversion_channel != 0xFF) {
 		result[conversion_channel] = ADC;
 		conversion_channel++;
@@ -211,12 +237,15 @@ ISR(ADC_vect)
 
 	// set channel and run conversion
 	ADMUX = (ADMUX & ~0x07) | conversion_channel;
-	ADCSRA = _BV(ADEN) | _BV(ADIE) | (5 << ADPS0) | _BV(ADSC);
+	ADCSRA = _BV(ADEN) | ADC_INTERRUPT_MASK | (5 << ADPS0) | _BV(ADSC);
 }
 
 // module autoload
 MODULE_INIT(adc_driver)
 {
 	gate_driver_register(&adc_driver);
+#ifndef ADC_ISR
+	gate_task_register(&task);
+#endif
 }
 
