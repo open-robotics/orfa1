@@ -121,7 +121,7 @@ bool cmd_txc(uint8_t c)
 			if ((++data_len) < BUF_LEN)
 				buf[data_len] = c;
 			else
-				data_len = BUF_LEN-1;
+				data_len = BUF_LEN - 1;
 			break;
 	};
 
@@ -162,9 +162,13 @@ bool cmd_rxc(uint8_t *c, bool ack)
 
 SYSTEM_INIT()
 {
+	// Set I2C
 	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);
+	// register supertask
 	gate_supertask_register(serialgate_supertask);
+	// register introspection driver
 	gate_init_introspection();
+	// init serialgate
 	serialgate_init();
 }
 
