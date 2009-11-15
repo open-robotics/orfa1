@@ -96,13 +96,11 @@ static GATE_DRIVER adc_driver = {
 };
 
 #ifndef ADC_ISR
-static void adc_task(void);
+static void adc_task_func(void);
 
-static GATE_TASK task = {
-	&adc_task,
-	0,
+static GATE_TASK adc_task = {
+	.task = adc_task_func,
 };
-
 #endif
 
 static void reconfigure_adc(uint8_t new_mask)
@@ -202,12 +200,15 @@ static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len
 #ifdef ADC_ISR
 ISR(ADC_vect)
 #else
-static void adc_task(void)
+static void adc_task_func(void)
 #endif
 {
 #ifndef ADC_ISR
-	if (!(ADCSRA & _BV(ADIF))) return;
-	ADCSRA | _BV(ADIF);
+	if (!(ADCSRA & _BV(ADIF)))
+		// conversion isn't done
+		return;
+	// clear Interrupt Flag
+	ADCSRA |= _BV(ADIF);
 #endif
 	if (conversion_channel != 0xFF) {
 		result[conversion_channel] = ADC;
@@ -243,9 +244,9 @@ static void adc_task(void)
 // module autoload
 MODULE_INIT(adc_driver)
 {
-	gate_driver_register(&adc_driver);
 #ifndef ADC_ISR
-	gate_task_register(&task);
+	gate_task_register(&adc_task);
 #endif
+	gate_driver_register(&adc_driver);
 }
 
