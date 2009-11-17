@@ -70,5 +70,8 @@
 void serialgate_init(void);
 void serialgate_supertask(void);
 
+#define gate_supertask serialgate_supertask
+#define gate_init serialgate_init
+
 #endif // SERAILGATE_H
 

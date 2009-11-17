@@ -7,3 +7,6 @@ SERLIB_OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SERLI
 LIBS += $(SERLIB_TARGET)
 LIBS_RULES += $(SERLIB_TARGET)($(SERLIB_OBJS))
 DEFINES += -DBAUD=$(BAUD)
+
+INCLUDES += -includeserialgate/i2c.h -includeserialgate/serialgate.h
+

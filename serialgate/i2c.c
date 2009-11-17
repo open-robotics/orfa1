@@ -241,7 +241,7 @@ bool i2c_master_start(uint8_t address, i2c_rdwr_t flag)
 
 	if(current_addr == localhost_addr && local_start != NULL)
 	{
-		status = local_start(address, flag);
+		status = local_start(flag);
 	}
 	else
 	{
@@ -304,7 +304,7 @@ bool i2c_master_rxc(uint8_t *c, bool ack)
 	}
 	else if(local_rxc != NULL)
 	{
-		status = local_rxc(c, ack);
+		status = local_rxc(c, &ack);
 	}
 
 	return status;

@@ -17,5 +17,9 @@ endif
 
 include core/resolve.mk
 include drivers/resolve.mk
+ifeq "$(I2C_SLAVE)" ""
 include serialgate/resolve.mk
+else
+include i2c_slave/resolve.mk
+endif
 

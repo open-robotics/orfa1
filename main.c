@@ -30,8 +30,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "serialgate/i2c.h"
-#include "serialgate/serialgate.h"
 #include "core/driver.h"
 #include "core/scheduler.h"
 
@@ -59,7 +57,7 @@ static GATE_RESULT result = GR_OK;
  * @param[in] flag Write/Read flag
  * @return true if success (always)
  */
-bool cmd_start(uint8_t address, i2c_rdwr_t flag)
+bool cmd_start(uint8_t flag)
 {
 	debug("# > cmd_start(0x%02x, %i)\n", address, flag);
 
@@ -71,7 +69,7 @@ bool cmd_start(uint8_t address, i2c_rdwr_t flag)
 	}
 
 	state_i2c = GET_REGISTER;
-	is_read = (address & 0x01) ? true : false;
+	is_read = (flag == 0) ? false : true;
 	is_restart = true;
 
 	if ((is_read && !prev_is_read) || 
@@ -134,7 +132,7 @@ bool cmd_txc(uint8_t c)
  * @param[in] ack ack/nack
  * @return true if success
  */
-bool cmd_rxc(uint8_t *c, bool ack)
+bool cmd_rxc(uint8_t *c, bool *ack)
 {
 	if(!data_len)
 	{
@@ -154,7 +152,7 @@ bool cmd_rxc(uint8_t *c, bool ack)
 		*c = 0;
 	}
 
-	debug("# > cmd_rxc(0x%02x, %i)\n", *c, ack);
+	debug("# > cmd_rxc(0x%02x, %i)\n", *c, *ack);
 	return true;
 }
 
@@ -165,11 +163,11 @@ SYSTEM_INIT()
 	// Set I2C
 	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);
 	// register supertask
-	gate_supertask_register(serialgate_supertask);
+	gate_supertask_register(gate_supertask);
 	// register introspection driver
 	gate_init_introspection();
 	// init serialgate
-	serialgate_init();
+	gate_init();
 }
 
 /** Main

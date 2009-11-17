@@ -40,12 +40,12 @@
  * I2C read or write status flags
  */
 typedef enum {
-	i2c_wr,	 ///< the following operation is a write operation.
-	i2c_rd,	 ///< the following operation is a read operation.
+	i2c_wr = 0,	 ///< the following operation is a write operation.
+	i2c_rd = 1,	 ///< the following operation is a read operation.
 } i2c_rdwr_t;
 
 /// Localhost start request processors
-typedef bool (*i2c_localhost_start)(uint8_t address, i2c_rdwr_t flag);
+typedef bool (*i2c_localhost_start)(i2c_rdwr_t flag);
 
 /// Localhost stop request processors
 typedef void (*i2c_localhost_stop)(void);
@@ -54,7 +54,7 @@ typedef void (*i2c_localhost_stop)(void);
 typedef bool (*i2c_localhost_txc)(uint8_t c);
 
 /// Localhost receive request processors
-typedef bool (*i2c_localhost_rxc)(uint8_t *c, bool ack);
+typedef bool (*i2c_localhost_rxc)(uint8_t *c, bool *ack);
 
 /**
  * Initialise the I2C hardware.
