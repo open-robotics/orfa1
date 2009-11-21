@@ -68,6 +68,7 @@
 #define B9600   (USART_BAUD(9600))
 #define B4800   (USART_BAUD(4800))
 #define B2400   (USART_BAUD(2400))
+#define B_AUTO  0
 
 /**
  * Double Speed operation
@@ -132,6 +133,18 @@ int usart_getchar0(FILE *stream);
 # define usart_isempty() false
 #else
 bool usart_isempty(void);
+#endif
+
+#ifdef OR_AVR_M32_D
+#define USART_DDR DDRD
+#define USART_PIN PIND
+#define USART_RXD_BIT 0
+#endif
+
+#ifdef OR_AVR_M128_S
+#define USART_DDR PORTD
+#define USART_PIN PIND
+#define USART_RXD_BIT 2
 #endif
 
 #endif // USART_H

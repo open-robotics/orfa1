@@ -59,7 +59,7 @@ static GATE_RESULT result = GR_OK;
  */
 bool cmd_start(uint8_t flag)
 {
-	debug("# > cmd_start(0x%02x, %i)\n", address, flag);
+	debug("# > cmd_start(0x%02x, %i)\n", 0, flag);
 
 	if (is_restart && !is_read && data_len > 0)
 	{
