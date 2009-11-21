@@ -38,6 +38,7 @@
 #include <avr/interrupt.h>
 #include <util/atomic.h>
 #include "cbuf.h"
+#endif
 
 
 PROGMEM int16_t baud_cycles[] = {
@@ -54,6 +55,7 @@ PROGMEM int16_t baud_cycles[] = {
 	0,
 };
 
+#ifndef SG_DISABLE_IRQ
 // static volatile give compilation errors :(
 static cbf_t rx_cbf;
 
@@ -74,11 +76,14 @@ ISR(GATE_RXC_vect)
 }
 #endif
 
+// autodetecting baud rate
+// need send "\x0d\x0d\x0d\x0d\x0d\x0d\x0d\x0d"
 uint16_t detect_baud_rate(void)
 {
 	uint16_t min;
 	int16_t baud;
 	uint8_t count;
+
 	USART_DDR &= ~_BV(USART_RXD_BIT);
 	asm volatile("\
 		ldi %[count], 8				\n\
@@ -108,6 +113,7 @@ uint16_t detect_baud_rate(void)
         : [bit] "I" (USART_RXD_BIT), 
           [port] "I" (_SFR_IO_ADDR(USART_PIN))
     );
+
 	baud = min * 6;
 	min = 0xFFFF;
 	int16_t *cur, cycles;
@@ -128,7 +134,7 @@ uint16_t detect_baud_rate(void)
 		ldi	R21, %[delay3]		\n\
 1:		sbis %[port], %[bit]	\n\
 		rjmp 2b					\n\
-		sbiw R24,1				\n\
+		sbiw R24, 1				\n\
 		sbci R20, 0				\n\
 		sbci R21, 0				\n\
 		ldi R19, 0				\n\
@@ -150,7 +156,6 @@ uint16_t detect_baud_rate(void)
 
 	return min / 16 - 1;
 }
-
 
 // usart file device
 FILE usart_fdev = FDEV_SETUP_STREAM(usart_putchar, usart_getchar, _FDEV_SETUP_RW);
