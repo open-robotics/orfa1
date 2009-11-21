@@ -14,6 +14,11 @@ PLATFORM = OR_AVR_M32_D
 # Is debug build? (default nope)
 #DEBUG = 1
 
+# Baudrate
+BAUD = B_AUTO
+#BAUD = B9600
+#BAUD = B115200
+
 #------------------------------------------------
 # Drivers
 # Here you can enable or disable driver modules
