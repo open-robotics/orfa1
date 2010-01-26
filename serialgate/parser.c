@@ -112,7 +112,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					cbf_put(cmd_buf, 'S');
 					break;
 
-#ifndef SG_PROTOCOL_V1_1
+#ifdef SG_PROTOCOL_V1_0
 				case 'R':
 					// is read register?
 					state_cmd = PARSE_READ;
@@ -124,7 +124,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					state_cmd = PARSE_WRITE;
 					cbf_put(cmd_buf, 'S');
 					break;
-#endif // SG_PROTOCOL_V1_1
+#endif // SG_PROTOCOL_V1_0
 
 				case 'C':
 					cbf_put(cmd_buf, c);
@@ -218,7 +218,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 
 				case PARSE_I2C_WRITE:
 					i = xtoi(c);
-#ifndef SG_PROTOCOL_V1_1
+#ifdef SG_PROTOCOL_V1_0
 					if (c == '\\' && count == 1) {
 						// masked byte?
 						count = '\\';
@@ -228,7 +228,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 						cbf_put(cmd_buf, co);
 						count = 1;
 					} else
-#endif // SG_PROTOCOL_V1_1
+#endif // SG_PROTOCOL_V1_0
 					if (i >= 0 && count == 1) {
 						// get first nibble
 						data = i << 4;
@@ -259,7 +259,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 			} // parse_i2c state machine
 			break;
 
-#ifndef SG_PROTOCOL_V1_1
+#ifdef SG_PROTOCOL_V1_0
 		case PARSE_READ:
 			switch(state_i2creg) {
 				case GET_ADDRESS:
@@ -360,7 +360,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 					break;
 			}
 			break;
-#endif // SG_PROTOCOL_V1_1
+#endif // SG_PROTOCOL_V1_0
 
 		case WAIT_EOL:
 			if (c == '\n') {

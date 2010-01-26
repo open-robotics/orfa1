@@ -19,6 +19,8 @@ BAUD = B_AUTO
 #BAUD = B9600
 #BAUD = B115200
 
+#I2C_SLAVE = 1
+
 #------------------------------------------------
 # Drivers
 # Here you can enable or disable driver modules
@@ -36,8 +38,8 @@ BAUD = B_AUTO
 #------------------------------------------------
 # Defines
 
-# Use protocol version 1.1
-#DEFINES += -DSG_PROTOCOL_V1_1
+# Use protocol version 1.0
+#DEFINES += -DSG_PROTOCOL_V1_0
 
 # Disable interrupt driven serial input
 #DEFINES += -DSG_DISABLE_IRQ

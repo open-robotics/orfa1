@@ -33,7 +33,7 @@
 #include "command.h"
 
 #ifndef PROTOCOL_VERSION_STRING
-# ifndef SG_PROTOCOL_V1_1
+# ifdef SG_PROTOCOL_V1_0
 #  define PROTOCOL_VERSION_STRING  "1.0"
 # else
 #  define PROTOCOL_VERSION_STRING  "1.1"
