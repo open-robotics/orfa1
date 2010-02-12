@@ -23,7 +23,7 @@
  *****************************************************************************/
 // vim: set noet:
 /** Servo driver for GPIO ports
- * @file servo/gpio.c
+ * @file servo/gpio_lld.c
  *
  * @author Anton Botov <airsoft_ekb@mail.ru>
  */
@@ -289,7 +289,7 @@ static inline void generateParametersFor(uint8_t n)
 		ddr &= ~(1<<pin); \
 	}
 
-static void set_enable(uint8_t n, bool enable)
+static void servo_set_enable(uint8_t n, bool enable)
 {	
 	gpio_servo_enb[n] = enable;
 
@@ -316,15 +316,15 @@ static void set_enable(uint8_t n, bool enable)
 
 // -- api --
 
-void sgpio_set_position(uint8_t n, uint32_t pos)
+void servo_lld_set_position(uint8_t n, uint32_t pos)
 {
 	if (n > CHMAX)
 		return;
 
 	if (pos == 0) {
-		set_enable(n, false);
+		servo_set_enable(n, false);
 	} else if (!gpio_servo_enb[n]) {
-		set_enable(n, true);
+		servo_set_enable(n, true);
 	}
 
 	pos = pos * RESOLUTION_TIME/1000000;
@@ -338,7 +338,7 @@ void sgpio_set_position(uint8_t n, uint32_t pos)
 	generateParametersFor(n);
 }
 
-void sgpio_init(void)
+void servo_lld_init(void)
 {
 	generateParams(0,  0);
 	generateParams(2,  5);

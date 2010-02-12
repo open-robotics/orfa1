@@ -22,7 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** 4017 Servo driver
- * @file servo/4017.c
+ * @file servo/4017_lld.c
  *
  * @author Andrey Demenev
  */
@@ -106,7 +106,7 @@ ISR(SIG_OUTPUT_COMPARE1C) {
 }
 
 
-void s4017_set_position(uint8_t n, uint16_t pos)
+void servo_lld_set_position(uint8_t n, uint16_t pos)
 {
 	if (n > 31) return;
 	if (pos < 500) pos = 500;
@@ -119,7 +119,7 @@ void s4017_set_position(uint8_t n, uint16_t pos)
 	calc_ocr[block][idx] = pos;
 }
 
-void s4017_init(void)
+void servo_lld_init(void)
 {
 	DDRE = _BV(2) | _BV(3) | _BV(4) | _BV(5);
 	DDRB = _BV(7);

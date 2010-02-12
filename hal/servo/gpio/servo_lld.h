@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev, Anton Botov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,23 +21,20 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo/4017.h
+/** Servo driver for GPIO ports
+ * @file servo/gpio_lld.h
  *
- * @author Andrey Demenev
+ * @author Anton Botov <airsoft_ekb@mail.ru>
  */
 
-#ifndef SERVO4017_H
-#define SERVO4017_H
+#ifndef SERVOGPIO_H
+#define SERVOGPIO_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-extern uint16_t calc_ocr[4][9];
-extern uint16_t* table_ptr[4];
+void servo_lld_set_position(uint8_t n, uint16_t pos);
+void servo_lld_init(void);
 
-void s4017_set_position(uint8_t n, uint16_t pos);
-void s4017_init(void);
-
-#endif // SERVO4017_H
+#endif // SERVOGPIO_H
 
