@@ -1,4 +1,5 @@
 target = orfa
+ORFA = .
 
 # $(PLATFORM) hack
 -include local_config.mk

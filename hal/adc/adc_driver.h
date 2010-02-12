@@ -21,15 +21,26 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo_4017_driver.h
+/** ADC driver
+ * @file adc_driver.h
  *
  * @author Andrey Demenev
+ * @author Vladimir Ermakov
  */
 
-#ifndef SERVO_DRIVER_H
-#define SERVO_DRIVER_H
+#ifndef ADC_DRIVER_H
+#define ADC_DRIVER_H
 
 #include "core/common.h"
 
-#endif // SERVO_DRIVER_H
+#ifdef OR_AVR_M32_D
+	#define GATE_ADC_DDR DDRA
+	#define GATE_ADC_PORT_NUMBER 0
+#endif
+
+#ifdef OR_AVR_M128_S
+	#define GATE_ADC_DDR DDRF
+	#define GATE_ADC_PORT_NUMBER 3
+#endif
+
+#endif // ADC_DRIVER_H

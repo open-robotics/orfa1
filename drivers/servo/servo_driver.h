@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev, Anton Botov
+ *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,49 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver for GPIO ports
- * @file servo_gpio_driver.h
+/** Servo driver
+ * @file servo_driver.h
  *
- * @author Anton Botov <airsoft_ekb@mail.ru>
+ * @author Vladimir Ermakov
  */
 
-#ifndef SERVO_GPIO_DRIVER_H
-#define SERVO_GPIO_DRIVER_H
+#ifndef SERVO_DRIVER_H
+#define SERVO_DRIVER_H
 
-#include "core/common.h"
+/**
+ * @ingroup Drivers
+ * @defgroup Servo Servo driver
+ *
+ * @{
+ */
 
+/// Servo config. NOT USED
+#define SERVO_CONF 0x00
+/// Servo control register
+#define SERVO 0x01
+
+#ifdef OR_AVR_M128_S
+
+#define SERVO_UID   0x30
+#define SERVO_MINOR 0
+#define SERVO_MAX   31
+
+#elif defined(OR_AVR_M32_D)
+
+#define SERVO_UID   0x31
+#define SERVO_MINOR 1
+#define SERVO_MAX   15
+
+#else
+#error Unsupported platform
 #endif
+
+#include <avr/io.h>
+#include "core/common.h"
+#include "core/driver.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "hal/servo.h"
+
+#endif // SERVO_DRIVER_H
