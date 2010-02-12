@@ -7,5 +7,6 @@ MCU = atmega128
 F_CPU = 7372800UL
 BAUD = B115200
 
-DRIVERS = ports spi adc servo4017
+DRIVERS = ports spi adc servo
 DEFINES += -DADC_ISR
+
