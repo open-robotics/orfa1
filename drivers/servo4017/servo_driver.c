@@ -50,7 +50,7 @@
 #include "core/driver.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "servo4017.h"
+#include "servo/4017.h"
 
 #ifndef NDEBUG
 #include <stdio.h>
@@ -86,9 +86,6 @@ servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 		return GR_NO_ACCESS;
 	}
 	if (!reg) {
-#ifdef USE_EEPROM
-		s4017_save_positions(*data);
-#endif
 		return GR_OK;
 	}
 	if (data_len < 3) {

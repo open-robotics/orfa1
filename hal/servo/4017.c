@@ -22,7 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** 4017 Servo driver
- * @file servo4017.c
+ * @file servo/4017.c
  *
  * @author Andrey Demenev
  */
@@ -32,10 +32,6 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <stdbool.h>
-
-#ifdef USE_EEPROM
-#include <avr/eeprom.h>
-#endif
 
 #ifndef NDEBUG
 #include <stdio.h>
@@ -93,47 +89,6 @@ static uint16_t* table_ptr[4] = {
 };
 
 
-#ifdef USE_EEPROM
-static uint8_t EEMEM ee_load_calc_ocr = false;
-static uint16_t EEMEM ee_calc_ocr[4][9];
-
-void s4017_save_positions(bool load_flag)
-{
-	#ifndef NDEBUG
-	printf("# servo4017->save_positions(%i)\n", load_flag);
-	#endif
-
-	if (load_flag) {
-		eeprom_write_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
-	}
-	eeprom_write_byte(&ee_load_calc_ocr, !load_flag);
-}
-
-void s4017_load_positions(void)
-{
-	uint8_t load_flag = !eeprom_read_byte(&ee_load_calc_ocr);
-	#ifndef NDEBUG
-	printf("# servo4017->load_positions()\n# :: load_flag = %i\n", load_flag);
-	#endif
-
-	if (load_flag) {
-		eeprom_read_block(calc_ocr, ee_calc_ocr, sizeof(calc_ocr));
-
-		#ifndef NDEBUG
-		printf("# :: Loaded:\n");
-		for (uint8_t i=0; i<4; i++) {
-			printf("# [%i]:", i);
-			for (uint8_t j=0; j<9; j++) {
-				printf(" 0x%04X", calc_ocr[i][j]);
-			}
-			printf("\n");
-		}
-		#endif
-	}
-}
-#endif
-
-
 ISR(SIG_OUTPUT_COMPARE3A) {
 	process_timer(OCR3A, TCCR3C, 2, (1 << FOC3A));
 }
@@ -150,6 +105,7 @@ ISR(SIG_OUTPUT_COMPARE1C) {
 	process_timer(OCR1C, TCCR1C, 1, (1 << FOC1C));
 }
 
+
 void s4017_set_position(uint8_t n, uint16_t pos)
 {
 	if (n > 31) return;
@@ -165,10 +121,6 @@ void s4017_set_position(uint8_t n, uint16_t pos)
 
 void s4017_init(void)
 {
-	#ifdef USE_EEPROM
-	s4017_load_positions();
-	#endif
-
 	DDRE = _BV(2) | _BV(3) | _BV(4) | _BV(5);
 	DDRB = _BV(7);
 
