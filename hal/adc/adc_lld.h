@@ -21,26 +21,60 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** ADC driver
- * @file adc_driver.h
+/** ADC low level driver header
+ * @file adc_lld.h
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov
  */
 
-#ifndef ADC_DRIVER_H
-#define ADC_DRIVER_H
+#ifndef ADCLLD_H
+#define ADCLLD_H
 
-#include "core/common.h"
+#include <stdint.h>
+#include <stdbool.h>
 
-#ifdef OR_AVR_M32_D
-	#define GATE_ADC_DDR DDRA
-	#define GATE_ADC_PORT_NUMBER 0
+#ifndef HAL_ADC_NISR
+#define ADC_VOLATILE volatile
+#else
+#define ADC_VOLATILE
 #endif
 
-#ifdef OR_AVR_M128_S
-	#define GATE_ADC_DDR DDRF
-	#define GATE_ADC_PORT_NUMBER 3
+#define ADC_LEN 8
+
+/** ADC configuration register
+ * @code
+ * Bits 0..1
+ *     00     - External reference
+ *     01     - AVCC reference
+ *     10, 11 - Internal reference
+ * 
+ * Bit 2
+ *     0      -  8-bit
+ *     1      - 10-bit
+ * @endcode
+ */
+extern ADC_VOLATILE uint8_t adc_lld_config;
+
+/** ADC result table
+ */
+extern ADC_VOLATILE uint16_t adc_lld_result[ADC_LEN];
+
+#define adc_lld_is_10bit() \
+	(adc_lld_config & 0x04)
+
+#define adc_lld_is_8bit() \
+	(!adc_lld_is_10bit())
+
+/** Reconfigure ADC
+ */
+void adc_lld_reconfigure(uint8_t new_mask);
+
+#if defined(HAL_ADC_NISR) || defined(__DOXYGEN__)
+/** ADC periodic
+ */
+void adc_lld_loop(void);
 #endif
 
-#endif // ADC_DRIVER_H
+#endif // ADCLLD_H
+
