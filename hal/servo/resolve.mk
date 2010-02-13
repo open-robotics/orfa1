@@ -6,7 +6,7 @@ else
 	HAL_SERVO_CMD = yes
 endif
 
-ifeq ($(HAL_SERVO_CMD),"yes")
+ifeq ($(HAL_SERVO_CMD),yes)
 	DEFINES += -DHAL_WITH_SERVO_CMD
 	INCLUDE_DIRS += -I${ORFA}/hal/servo
 	SRC += ${ORFA}/hal/servo/servo_cmd_lld.c

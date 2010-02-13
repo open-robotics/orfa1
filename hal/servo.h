@@ -55,7 +55,7 @@
 #if defined(HAL_WITH_SERVO_CMD) || defined(__DOXYGEN__)
 #include "servo_cmd_lld.h"
 
-#undef servo_init()
+#undef servo_init
 #define servo_init()      \
 	servo_lld_init();     \
 	servo_lld_cmd_init()
