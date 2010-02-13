@@ -63,8 +63,7 @@ servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 		return GR_INVALID_DATA;
 	}
 	while (data_len) {
-		uint16_t pos = data[2] + (data[1] << 8);
-		servo_set_position(*data, pos);
+		servo_set_position(*data, (data[1]<<8)|data[2]);
 		data += 3;
 		data_len -= 3;
 		if (data_len < 3 || data_len > 252) {
