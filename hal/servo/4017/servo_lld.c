@@ -21,21 +21,17 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** 4017 Servo driver
- * @file servo/4017_lld.c
+/** Servo 4017 low level driver
+ * @file servo/4017/servo_lld.c
  *
  * @author Andrey Demenev
  */
 
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include <stdbool.h>
 
-#ifndef NDEBUG
-#include <stdio.h>
-#endif
+#include "servo_lld.h"
 
 #define US2CLOCK(us) (((uint32_t)(us) * (uint32_t)(F_CPU / 8000000.0 * 0x10000UL)) >> 16)
 

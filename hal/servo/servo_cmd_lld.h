@@ -21,23 +21,31 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo GPIO low level driver header
- * @file gpio/servo_lld.h
+/** Servo command low level driver header
+ * @file servo/servo_cmd_lld.h
  *
- * @author Anton Botov <airsoft_ekb@mail.ru>
+ * @author Anton Botov
+ * @author Vladimir Ermokov
  */
 
-#ifndef SERVOGPIO_H
-#define SERVOGPIO_H
+#ifndef SERVOCMD_H
+#define SERVOCMD_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-#define SERVO_LEN   16
-#define SERVO_CHMAX 15
+/** Check that command is done
+ */
+bool servo_lld_is_done(void);
 
-void servo_lld_set_position(uint8_t n, uint32_t pos);
-void servo_lld_init(void);
+/** New command
+ */
+void servo_lld_command(uint16_t time,
+		uint16_t *_servo_target, uint16_t *_servo_maxspeed);
 
-#endif // SERVOGPIO_H
+/** Init servo command
+ */
+void servo_lld_cmd_init(void);
+
+#endif // SERVO4017_H
 

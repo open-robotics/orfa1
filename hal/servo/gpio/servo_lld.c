@@ -22,8 +22,8 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 // vim: set noet:
-/** Servo driver for GPIO ports
- * @file servo/gpio_lld.c
+/** Servo GPIO low level driver
+ * @file servo/gpio/servo_lld.c
  *
  * @author Anton Botov <airsoft_ekb@mail.ru>
  */

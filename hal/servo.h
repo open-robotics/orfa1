@@ -22,7 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** Servo driver
- * @file servo/servo.h
+ * @file hal/servo.h
  *
  * @author Vladimir Ermakov <vooon341@gmail.com>
  */
@@ -36,8 +36,7 @@
 #include "servo_lld.h"
 
 /**
- * @ingroup Hal
- * @defgroup Servo Servo
+ * @addtogroup HalServo
  * @{
  */
 
@@ -53,5 +52,28 @@
 #define servo_init() \
 	servo_lld_init()
 
-#endif // SERVOGPIO_H
+#if defined(HAL_WITH_SERVO_CMD) || defined(__DOXYGEN__)
+#include "servo_cmd_lld.h"
+
+#undef servo_init()
+#define servo_init()      \
+	servo_lld_init();     \
+	servo_lld_cmd_init()
+
+/** Check that command is done
+ */
+#define servo_is_done() \
+	servo_lld_is_done()
+
+/** New servo command
+ * @param[in] time
+ * @param[in] target
+ * @param[in] maxspeed
+ */
+#define servo_command(time, target, maxspeed) \
+	servo_lld_command(time, target, maxspeed)
+
+#endif
+
+#endif // SERVO_H
 

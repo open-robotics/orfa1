@@ -21,8 +21,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo/4017_lld.h
+/** Servo 4017 low level driver header
+ * @file 4017/servo_lld.h
  *
  * @author Andrey Demenev
  */
@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define SERVO_LEN   32
 #define SERVO_CHMAX 31
 
 void servo_lld_set_position(uint8_t n, uint16_t pos);
