@@ -21,48 +21,38 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo_driver.h
- *
- * @author Andrey Demenev
+/** RoboMD2 motor driver
+ * @file motor_lld.c
  * @author Vladimir Ermakov
- */
-
-#ifndef SERVO_DRIVER_H
-#define SERVO_DRIVER_H
-
-/**
- * @ingroup Drivers
- * @defgroup Servo Servo driver
  *
- * @{
+ * @todo use ATOMIC_BLOCK()
  */
-
-/// Servo config. NOT USED
-#define SERVO_CONF 0x00
-/// Servo control register
-#define SERVO 0x01
-
-#ifdef OR_AVR_M128_S
-
-#define SERVO_UID   0x30
-#define SERVO_MINOR 0
-
-#elif defined(OR_AVR_M32_D)
-
-#define SERVO_UID   0x31
-#define SERVO_MINOR 1
-
-#else
-#error Unsupported platform
-#endif
 
 #include <avr/io.h>
-#include "core/common.h"
-#include "core/driver.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "motor_lld.h"
 
-#include "hal/servo.h"
+void motor_lld_init(void)
+{
+	// init i/o lines
+	DIR_PORT &= ~DIR_MASK;
+	DIR_DDR |= DIR_MASK;
+	PWM_PORT &= ~PWM_MASK;
+	PWM_DDR |= PWM_MASK;
 
-#endif // SERVO_DRIVER_H
+	// clear pwm registers
+	PWM_OC0 = 0;
+	PWM_OC1 = 0;
+
+	// Timer/Counter-1 init
+	//
+	// COM1x1:COM1x0 = 1:0 => OC1x connected to output pin, reset on compare
+	// FOC1A:FOC1B = 0:0 => Don't force output compare event
+	// WGM13:WGM12:WGM11:WGM10 = 0:1:0:1 => Fast PWM 8-bit
+	// ICNC1 = 0 => Input Capture Noise Canceller disabled (because not needed)
+	// ICES1 = 0 => Input Capture Edge Select set to "falling" mode (no matter)
+	// CS12:CS11:CS10 = 0:1:0 => Timer "on", 1/8 prescaling (1 clock every 8 cpu tact)	// /8
+	TCNT1 = 0;
+	TCCR1A = (0<<WGM11)|(1<<WGM10);
+	TCCR1B = (0<<WGM13)|(1<<WGM12)|(0<<CS12)|(1<<CS11)|(0<<CS10);
+}
+

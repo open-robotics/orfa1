@@ -21,48 +21,48 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo_driver.h
+/** RoboMD2 Motor driver
+ * @file motor.h
  *
  * @author Andrey Demenev
- * @author Vladimir Ermakov
+ * @author Vladimir Ermakov <vooon341@gmail.com>
  */
 
-#ifndef SERVO_DRIVER_H
-#define SERVO_DRIVER_H
+#ifndef MOTOR_H
+#define MOTOR_H
 
-/**
- * @ingroup Drivers
- * @defgroup Servo Servo driver
- *
- * @{
+#include "motor_lld.h"
+
+/** Set motor direction
+ * @param[in] ch channel [0, 1]
+ * @param[in] value firward/backward [false/true]
  */
+#define motor_set_direction(ch, value) \
+	motor_lld_set_direction(ch, value)
 
-/// Servo config. NOT USED
-#define SERVO_CONF 0x00
-/// Servo control register
-#define SERVO 0x01
+/** Set motor PWM
+ * @param[in] ch channel [0, 1]
+ * @param[in] value PWM
+ */
+#define motor_set_pwm(ch, value) \
+	motor_lld_set_pwm(ch, value)
 
-#ifdef OR_AVR_M128_S
+/** Get motor direction
+ * @param[in] ch channel [0, 1]
+ */
+#define motor_get_direction(ch) \
+	motor_lld_get_direction(ch)
 
-#define SERVO_UID   0x30
-#define SERVO_MINOR 0
+/** Get motor PWM
+ * @param[in] ch channel [0, 1]
+ */
+#define motor_get_pwm(ch) \
+	motor_lld_get_pwm(ch)
 
-#elif defined(OR_AVR_M32_D)
+/** Init motor driver
+ */
+#define motor_init() \
+	motor_lld_init()
 
-#define SERVO_UID   0x31
-#define SERVO_MINOR 1
+#endif // MOTOR_H
 
-#else
-#error Unsupported platform
-#endif
-
-#include <avr/io.h>
-#include "core/common.h"
-#include "core/driver.h"
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "hal/servo.h"
-
-#endif // SERVO_DRIVER_H

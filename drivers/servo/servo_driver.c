@@ -24,6 +24,7 @@
 /** Servo driver
  * @file servo_driver.c
  *
+ * @author Andrey Demenev
  * @author Vladimir Ermakov
  */
 
