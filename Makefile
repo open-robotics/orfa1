@@ -25,10 +25,10 @@ SIZE = $(CROSS_COMPILE_BIN)size
 INCLUDES = 
 INCLUDE_DIRS = 
 
-CFLAGS = -std=gnu99 -I. $(INCLUDE_DIRS) -Wall -Os -Wstrict-prototypes  -Werror $(MCU_FLAGS) -g \
+CFLAGS = -std=gnu99 -I${ORFA} $(INCLUDE_DIRS) -Wall -Os -Wstrict-prototypes  -Werror $(MCU_FLAGS) -g \
 		 -funsigned-char -funsigned-bitfields -ffunction-sections -fdata-sections \
 		 -fmerge-all-constants -fstrict-aliasing -fpack-struct -fshort-enums -ffreestanding
-ASFLAGS = -I. $(INCLUDE_DIRS) $(MCU_FLAGS) -xassembler-with-cpp
+ASFLAGS = -I${ORFA} $(INCLUDE_DIRS) $(MCU_FLAGS) -xassembler-with-cpp
 LDFLAGS = -Wl,--relax -Wl,--gc-sections
 
 COFFCONVERT=$(OBJCOPY) --debugging -O coff-ext-avr \

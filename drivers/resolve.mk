@@ -1,4 +1,4 @@
 # -*- Makefile -*-
 
-include $(foreach driver,$(DRIVERS), drivers/$(driver)/resolve.mk)
+include $(foreach driver,$(sort $(DRIVERS)), drivers/$(driver)/resolve.mk)
 

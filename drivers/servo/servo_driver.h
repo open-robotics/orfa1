@@ -46,13 +46,11 @@
 
 #define SERVO_UID   0x30
 #define SERVO_MINOR 0
-#define SERVO_MAX   31
 
 #elif defined(OR_AVR_M32_D)
 
 #define SERVO_UID   0x31
 #define SERVO_MINOR 1
-#define SERVO_MAX   15
 
 #else
 #error Unsupported platform

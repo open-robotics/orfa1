@@ -30,11 +30,10 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 #include <util/delay.h>
 
+#include "servo_lld.h"
 
 #define delay_us(x) _delay_us(x)
 
@@ -43,8 +42,6 @@
 #define MAXSERVO            (F_CPU/ 400/RESOLUTION_IN_TICKS)
 #define MINSERVO            (F_CPU/2000/RESOLUTION_IN_TICKS)
 #define WORKSPACE           (MAXSERVO+1)
-
-#define CHMAX 15
 
 // -- driver module data --
 
@@ -318,7 +315,7 @@ static void servo_set_enable(uint8_t n, bool enable)
 
 void servo_lld_set_position(uint8_t n, uint32_t pos)
 {
-	if (n > CHMAX)
+	if (n > SERVO_CHMAX)
 		return;
 
 	if (pos == 0) {

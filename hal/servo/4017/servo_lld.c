@@ -108,9 +108,12 @@ ISR(SIG_OUTPUT_COMPARE1C) {
 
 void servo_lld_set_position(uint8_t n, uint16_t pos)
 {
-	if (n > 31) return;
-	if (pos < 500) pos = 500;
-	else if (pos > 2500) pos = 2500;
+	if (n > SERVO_CHMAX)
+		return;
+	if (pos < 500)
+		pos = 500;
+	else if (pos > 2500)
+		pos = 2500;
 	uint8_t idx = pgm_read_byte(pin_map+n);
 	uint8_t block = n >> 3;
 	pos = US2CLOCK(pos);

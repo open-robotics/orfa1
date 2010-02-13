@@ -46,7 +46,7 @@
  * @param[in] position   servo position in usec
  */
 #define servo_set_position(servo, position) \
-	servo_lld_set_position(servo, position);
+	servo_lld_set_position(servo, position)
 
 /** Init servo subsystem
  */

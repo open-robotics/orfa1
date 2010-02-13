@@ -33,6 +33,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define SERVO_CHMAX 31
+
 void servo_lld_set_position(uint8_t n, uint16_t pos);
 void servo_lld_init(void);
 
