@@ -22,40 +22,19 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 // vim: set noet:
-/** Servo driver for GPIO ports
- * @file servo_gpio_driver.h
+/** Servo GPIO low level driver
+ * @file servo/gpio/servo_lld.c
  *
  * @author Anton Botov <airsoft_ekb@mail.ru>
  */
 
-/**
- * @ingroup Drivers
- * @defgroup Servo_GPIO Servo GPIO driver
- *
- * UID: 0x0031
- * Note: if motor driver exists we can't use channels 14 and 15
- * 
- * @{
- */
-
-/// Servo config. NOT USED
-#define SERVO_CONF 0x00
-/// Servo control register
-#define SERVO 0x01
-
-#ifndef OR_AVR_M32_D
-#error servoGPIO: unsupported platform
-#endif
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "core/common.h"
-#include "core/driver.h"
-#include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
-
 #include <util/delay.h>
+
+#include "servo_lld.h"
+
 #define delay_us(x) _delay_us(x)
 
 #define RESOLUTION_IN_TICKS 32
@@ -63,22 +42,6 @@
 #define MAXSERVO            (F_CPU/ 400/RESOLUTION_IN_TICKS)
 #define MINSERVO            (F_CPU/2000/RESOLUTION_IN_TICKS)
 #define WORKSPACE           (MAXSERVO+1)
-
-#define CHMAX 15
-
-//static GATE_RESULT
-//servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT
-servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
-
-static GATE_DRIVER servo_driver = {
-	.uid = 0x0031,
-	.major_version = 1,
-	.minor_version = 1,
-//	.read = servo_driver_read,  // not used
-	.write = servo_driver_write,
-	.num_registers = 2,
-};
 
 // -- driver module data --
 
@@ -162,7 +125,7 @@ portHandlers(processD,  PORTD, processB,  35);
 
 // -- [re]generate parameters --
 
-static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
+static void generateParams(const uint8_t port_id, const uint8_t param_id)
 {
 	uint8_t maskX0=0,
 			maskX1=0;
@@ -266,18 +229,6 @@ static inline void generateParams(const uint8_t port_id, const uint8_t param_id)
 	}
 }
 
-static inline void generateParameters(void)
-{
-	generateParams(0,  0);
-	generateParams(2,  5);
-	generateParams(4,  10);
-	generateParams(6,  15);
-	generateParams(8,  20);
-	generateParams(10, 25);
-	generateParams(12, 30);
-	generateParams(14, 35);
-}
-
 static inline void generateParametersFor(uint8_t n)
 {
 	switch (n) {
@@ -335,15 +286,9 @@ static inline void generateParametersFor(uint8_t n)
 		ddr &= ~(1<<pin); \
 	}
 
-static inline void set_enable(uint8_t n, bool enable)
-{
-	if (n > CHMAX) {
-		return;
-	}
-	
-	debug("# servo_gpio::set_enable(%i, %i)\n", n, enable);
-	
-	gpio_servo_enb[n] = (enable > 0) ? true : false;
+static void servo_set_enable(uint8_t n, bool enable)
+{	
+	gpio_servo_enb[n] = enable;
 
 	enablePin(0,  DDRA, 0);
 	enablePin(1,  DDRA, 1);
@@ -364,22 +309,19 @@ static inline void set_enable(uint8_t n, bool enable)
 
 	// copy previous enable state
 	memcpy(gpio_servo_enb_prev, gpio_servo_enb, 16);
-
-	// not needed
-	//generateParametersFor(n);
 }
 
-static inline void set_position(uint8_t n, uint32_t pos)
-{
-	debug("# servo_gpio::set_position(%i, %i)\n", n, pos);
+// -- api --
 
-	if (n > CHMAX)
+void servo_lld_set_position(uint8_t n, uint32_t pos)
+{
+	if (n > SERVO_CHMAX)
 		return;
 
 	if (pos == 0) {
-		set_enable(n, false);
+		servo_set_enable(n, false);
 	} else if (!gpio_servo_enb[n]) {
-		set_enable(n, true);
+		servo_set_enable(n, true);
 	}
 
 	pos = pos * RESOLUTION_TIME/1000000;
@@ -393,53 +335,16 @@ static inline void set_position(uint8_t n, uint32_t pos)
 	generateParametersFor(n);
 }
 
-// -- driver --
-
-#if 0 // not used
-static GATE_RESULT
-servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+void servo_lld_init(void)
 {
-	*data_len = 0;
-	return GR_OK;
-}
-#endif
-
-static GATE_RESULT
-servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
-{
-	debug("# servo_gpio->write(0x%02X, buf, %i)\n", reg, data_len);
-	
-	if (reg > 1) {
-		return GR_NO_ACCESS;
-	}
-
-	if (reg == 0) {
-		debug("# :: reg=0, (data_len != 2) == %i\n", (data_len != 2));
-		return GR_OK;
-	}
-
-	if (data_len < 3 || data_len > 252) {
-		return GR_INVALID_DATA;
-	}
-
-	while (data_len) {
-		set_position(*data, (data[1]<<8)|data[2]);
-		data += 3;
-		data_len -= 3;
-
-		if (data_len < 3) {
-			return GR_INVALID_DATA;
-		}
-	}
-
-	return GR_OK;
-}
-
-// -- init --
-
-MODULE_INIT(servo_driver)
-{
-	generateParameters();
+	generateParams(0,  0);
+	generateParams(2,  5);
+	generateParams(4,  10);
+	generateParams(6,  15);
+	generateParams(8,  20);
+	generateParams(10, 25);
+	generateParams(12, 30);
+	generateParams(14, 35);
 
 	// Prepare TIMER2
 	// 1/32 F clk, Normal mode
@@ -447,7 +352,5 @@ MODULE_INIT(servo_driver)
 	TCCR2 = (0<<CS22)|(1<<CS21)|(1<<CS20);
 	TCNT2 = 0;
 	TIMSK |= (1<<OCIE2);
-
-	gate_driver_register(&servo_driver);
 }
 

@@ -21,29 +21,23 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo4017.h
+/** Servo 4017 low level driver header
+ * @file 4017/servo_lld.h
  *
  * @author Andrey Demenev
  */
 
-#ifndef SERVO417_H
-#define SERVO417_H
+#ifndef SERVO4017_H
+#define SERVO4017_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-extern uint16_t calc_ocr[4][9];
-extern uint16_t* table_ptr[4];
+#define SERVO_LEN   32
+#define SERVO_CHMAX 31
 
-void s4017_set_position(uint8_t n, uint16_t pos);
-void s4017_init(void);
+void servo_lld_set_position(uint8_t n, uint16_t pos);
+void servo_lld_init(void);
 
-#ifdef USE_EEPROM
-void s4017_save_positions(bool load_flag);
-void s4017_load_positions(void);
-#endif
+#endif // SERVO4017_H
 
-
-
-#endif // SERVO417_H

@@ -29,8 +29,7 @@ BAUD = B_AUTO
 #DRIVERS := $(filter-out spi,$(DRIVERS))
 #DRIVERS := $(filter-out ports,$(DRIVERS))
 #DRIVERS := $(filter-out motor,$(DRIVERS))
-#DRIVERS := $(filter-out servo_gpio,$(DRIVERS))
-#DRIVERS := $(filter-out servo4017,$(DRIVERS))
+#DRIVERS := $(filter-out servo,$(DRIVERS))
 
 #DRIVERS += cannon
 #DRIVERS += turret

@@ -1,0 +1,50 @@
+* 2010-02-13 Ermakov Vladimir <vooon341@gmail.com>
+	- Ported servo command from ORC-32
+	- HAL ADC
+
+* 2010-02-12 Ermakov Vladimir <vooon341@gmail.com>
+	- HAL Servo
+
+* 2010-01-26  Ermakov Vladimir <vooon341@gmail.com>
+	- Use SerialGate protocol version 1.1 by default
+
+* 2009-11-22 Ermakov Vladimir <vooon341@gmail.com>
+	- Release 0.7.5
+
+* 2009-11-21 Andrey Demenev
+	- Baudrate autodetection
+
+* 2009-11-17 Andrey Demenev
+	- I2C slave mode
+
+* 2009-10-21 Andrey Demenev
+	- Don't use ADC interrupts with OR-AVR-M32-D
+
+* 2009-10-08 Vladimir Ermakov <vooon341@gmail.com>
+	- Ports driver version 1.1 (masked write)
+
+* 2009-09-22 Vladimir Ermakov <vooon341@gmail.com>
+	- Release 0.7.4
+
+* 2009-09-21 Vladimir Ermakov <vooon341@gmail.com>
+	- Module autoload
+
+* 2009-09-20 Vladimir Ermakov <vooon341@gmail.com>
+	- Release 0.7.3
+
+* 2009-08-21 Vladimir Ermakov <vooon341@gmail.com>
+	- Release 0.7.2
+	- Rename OR-AVR-M64-S to OR-AVR-M128-S
+	- Fix ADC
+
+* 2009-08-14 Vladimir Ermakov <vooon341@gmail.com>
+	- Release 0.7.1
+	- Set all motor registers at one request
+	- Doxygen
+
+* 2009-07-22 Vladimir Ermakov <vooon341@gmail.com>
+	- SerialGate protocol version 1.1
+
+* 2009-07-06 Anton Botov <airsoft_ekb@mail.ru>
+	- Release 0.7.0
+	- GPIO servo driver
