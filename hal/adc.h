@@ -70,8 +70,8 @@
 #if defined(HAL_ADC_NISR) || defined(__DOXYGEN__)
 /** ADC periodic
  */
-#define adc_loop() \
-	adc_lld_loop()
+#define adc_loop \
+	adc_lld_loop
 #endif
 
 #endif // ADC_H
