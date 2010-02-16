@@ -21,48 +21,26 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo_driver.h
+/** ADC I2C adapter
+ * @file adc_i2c.h
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov
  */
 
-#ifndef SERVO_DRIVER_H
-#define SERVO_DRIVER_H
+#ifndef ADC_DRIVER_H
+#define ADC_DRIVER_H
 
-/**
- * @ingroup Drivers
- * @defgroup Servo Servo driver
- *
- * @{
- */
+#include "core/common.h"
 
-/// Servo config. NOT USED
-#define SERVO_CONF 0x00
-/// Servo control register
-#define SERVO 0x01
-
-#ifdef OR_AVR_M128_S
-
-#define SERVO_UID   0x30
-#define SERVO_MINOR 0
-
-#elif defined(OR_AVR_M32_D)
-
-#define SERVO_UID   0x31
-#define SERVO_MINOR 1
-
-#else
-#error Unsupported platform
+#ifdef OR_AVR_M32_D
+	#define GATE_ADC_DDR DDRA
+	#define GATE_ADC_PORT_NUMBER 0
 #endif
 
-#include <avr/io.h>
-#include "core/common.h"
-#include "core/driver.h"
-#include <stdint.h>
-#include <stdbool.h>
+#ifdef OR_AVR_M128_S
+	#define GATE_ADC_DDR DDRF
+	#define GATE_ADC_PORT_NUMBER 3
+#endif
 
-#include "hal/servo.h"
-
-#endif // SERVO_DRIVER_H
+#endif // ADC_DRIVER_H

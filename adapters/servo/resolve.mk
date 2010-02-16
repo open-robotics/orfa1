@@ -1,9 +1,9 @@
 # -*- Makefile -*-
 
 DEFINES += -DHAVE_SERVO
-INCLUDE_DIRS += -I${ORFA}/drivers/servo
+INCLUDE_DIRS += -I${ORFA}/adapters/servo
 
 HAL += servo
 
-SRC += ${ORFA}/drivers/servo/servo_driver.c
-	   
+SRC += ${ORFA}/adapters/servo/servo_i2c.c
+

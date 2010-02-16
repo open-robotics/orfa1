@@ -1,5 +1,5 @@
 # -*- Makefile -*-
 
 DEFINES += -DHAVE_PORTS
-INCLUDE_DIRS += -Idrivers/ports
-SRC += drivers/ports/ports_driver.c
+INCLUDE_DIRS += -Iadapters/ports
+SRC += adapters/ports/ports_i2c.c

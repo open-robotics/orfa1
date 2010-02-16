@@ -26,7 +26,8 @@
 #include "core/ports.h"
 #include "core/driver.h"
 #include <avr/io.h>
-#include "ports_driver.h"
+
+#include "ports_i2c.h"
 
 static GATE_RESULT
 ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);

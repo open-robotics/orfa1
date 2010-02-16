@@ -21,26 +21,45 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** ADC driver
- * @file adc_driver.h
+/** RoboGPIO Digital I2C adapter
+ * @file ports_i2c.h
  *
  * @author Andrey Demenev
- * @author Vladimir Ermakov
+ * @author Vladimir Ermakov <vooon341@gmail.com>
  */
 
-#ifndef ADC_DRIVER_H
-#define ADC_DRIVER_H
+#ifndef PORTS_DRIVER_H
+#define PORTS_DRIVER_H
 
 #include "core/common.h"
 
 #ifdef OR_AVR_M32_D
-	#define GATE_ADC_DDR DDRA
-	#define GATE_ADC_PORT_NUMBER 0
+	#define GATE_NUM_PORTS 4
+	#define GATE_PORT_MASK_A 0
+	#define	GATE_PORT_MASK_B 0xE3
+	#define	GATE_PORT_MASK_C 0x03
+	#define	GATE_PORT_MASK_D 0x33
+	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(B), GATE_PORT_SPEC(C), GATE_PORT_SPEC(D)
+	#define GATE_PORT_UID 0x0020
 #endif
 
 #ifdef OR_AVR_M128_S
-	#define GATE_ADC_DDR DDRF
-	#define GATE_ADC_PORT_NUMBER 3
+	#define GATE_NUM_PORTS 4
+	#define GATE_PORT_MASK_A 0
+	#define	GATE_PORT_MASK_B 0xFE
+	#define GATE_PORT_MASK_E 0x3F
+	#define	GATE_PORT_MASK_F 0
+	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(F), GATE_PORT_SPEC(B), GATE_PORT_SPEC(E)
+	#define GATE_PORT_UID 0x0021
 #endif
 
-#endif // ADC_DRIVER_H
+#define GATE_PORT_SPEC(p) \
+	{\
+		.PORT = (void*)_SFR_MEM_ADDR(PORT ## p),				\
+		.PIN = (void*)_SFR_MEM_ADDR(PIN ## p),					\
+		.DDR = (void*)_SFR_MEM_ADDR(DDR ## p ),					\
+		.default_busy_mask = GATE_PORT_MASK_ ## p,				\
+	}
+
+#endif
+

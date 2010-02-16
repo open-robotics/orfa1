@@ -21,8 +21,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** ORFA ADC driver
- * @file adc_driver.c
+/** ADC I2C adapter
+ * @file adc_i2c.c
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov
@@ -35,12 +35,13 @@
 #include "core/driver.h"
 #include "core/ports.h"
 #include "core/scheduler.h"
-#include "adc_driver.h"
+
+#include "adc_i2c.h"
 
 #include "hal/adc.h"
 
 /**
- * @addtogroup ADCDrv
+ * @addtogroup ADCAdapter
  * @{
  */
 

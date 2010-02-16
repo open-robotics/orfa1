@@ -21,8 +21,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** RoboMD2 Motor driver
- * @file motor_driver.h
+/** RoboMD2 Motor I2C adapter
+ * @file motor_i2c.h
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov <vooon341@gmail.com>

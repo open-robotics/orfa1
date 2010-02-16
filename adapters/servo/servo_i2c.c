@@ -21,14 +21,14 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Servo driver
- * @file servo_driver.c
+/** Servo I2C adapter
+ * @file servo_i2c.c
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov
  */
 
-#include "servo_driver.h"
+#include "servo_i2c.h"
 
 static GATE_RESULT
 servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);

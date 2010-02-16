@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** RoboMD2 motor driver
+/** RoboMD2 Motor I2C adapter
  * @file motor_driver.c
  * @author Vladimir Ermakov
  *
@@ -32,11 +32,7 @@
  */
 
 /**
- * @ingroup Drivers
- * @defgroup Motor Motor driver
- *
- * UID: 0x0060
- *
+ * @ingroup MotorAdapter
  * @{
  */
 
