@@ -25,14 +25,14 @@ BAUD = B_AUTO
 # Drivers
 # Here you can enable or disable driver modules
 
-#DRIVERS := $(filter-out adc,$(DRIVERS))
-#DRIVERS := $(filter-out spi,$(DRIVERS))
-#DRIVERS := $(filter-out ports,$(DRIVERS))
-#DRIVERS := $(filter-out motor,$(DRIVERS))
-#DRIVERS := $(filter-out servo,$(DRIVERS))
+#ADAPTERS := $(filter-out adc,$(DRIVERS))
+#ADAPTERS := $(filter-out spi,$(DRIVERS))
+#ADAPTERS := $(filter-out ports,$(DRIVERS))
+#ADAPTERS := $(filter-out motor,$(DRIVERS))
+#ADAPTERS := $(filter-out servo,$(DRIVERS))
 
-#DRIVERS += cannon
-#DRIVERS += turret
+#ADAPTERS += cannon
+#ADAPTERS += turret
 
 #------------------------------------------------
 # Defines
