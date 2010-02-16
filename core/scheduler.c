@@ -52,9 +52,7 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task)
 
 void gate_scheduler_loop(void)
 {
-#ifndef SG_DISABLE_IRQ
 	wdt_enable(WDTO_1S);
-#endif
 
 	if (supertask) {
 		for (;;) {
@@ -79,7 +77,9 @@ void gate_scheduler_loop(void)
 	for (;;) {
 		// catch errors
 		// for watchdog timer
-		// puts("Error");
+		//puts("ERROR scheduler corruption!");
+		//ELED_PORT ^= _BV(ERROR_LED);
+		//delay_ms(500);
 	}
 }
 

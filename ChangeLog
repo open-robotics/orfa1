@@ -1,3 +1,7 @@
+* 2010-02-16 Ermakov Vladimir <vooon341@gmail.com>
+	- Rename drivers -> adapters
+	* core/driver.h: rename to i2cadapter.h
+
 * 2010-02-13 Ermakov Vladimir <vooon341@gmail.com>
 	- Ported servo command from ORC-32
 	- HAL ADC

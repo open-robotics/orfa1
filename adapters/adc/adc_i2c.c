@@ -32,7 +32,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#include "core/driver.h"
+#include "core/i2cadapter.h"
 #include "core/ports.h"
 #include "core/scheduler.h"
 
@@ -67,7 +67,7 @@ static uint8_t read_channel;
 static GATE_RESULT adc_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT adc_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER adc_i2cadapter = {
+static GATE_I2CADAPTER adc_i2cadapter = {
 	.uid = 0x0040,
 	.major_version = 1,
 	.minor_version = 0,
@@ -153,11 +153,11 @@ static GATE_RESULT adc_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data
 }
 
 // module autoload
-MODULE_INIT(adc_i2cadapter)
+I2C_MODULE_INIT(adc_adapter)
 {
 #ifdef HAL_ADC_NISR
 	gate_task_register(&adc_task);
 #endif
-	gate_driver_register(&adc_i2cadapter);
+	gate_i2cadapter_register(&adc_i2cadapter);
 }
 

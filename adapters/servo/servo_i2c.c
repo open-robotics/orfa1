@@ -35,7 +35,7 @@ servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT
 servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER servo_i2cadapter = {
+static GATE_I2CADAPTER servo_i2cadapter = {
 	.uid = SERVO_UID,
 	.major_version = SERVO_MAJOR,
 	.minor_version = SERVO_MINOR,
@@ -74,9 +74,9 @@ servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
-MODULE_INIT(servo_i2cadapter)
+I2C_MODULE_INIT(servo_adapter)
 {
 	servo_init();
-	gate_driver_register(&servo_i2cadapter);
+	gate_i2cadapter_register(&servo_i2cadapter);
 }
 

@@ -31,6 +31,9 @@
 #ifndef GR_COMMON_H
 #define GR_COMMON_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #define NUM_ELEMENTS(array) (sizeof(array) / sizeof(*(array)))
 
 // debug print
@@ -43,12 +46,17 @@
 	#endif
 #endif
 
-
 #define MODULE_INIT(name) \
 	void init_ ## name ## _module(void) \
-	__attribute__((section (".init8"))) \
 	__attribute__((naked)); \
+	__attribute__((section (".init8"))) \
 	void init_ ## name ## _module(void)
+
+#define I2C_MODULE_INIT(name) \
+	MODULE_INIT(i2c_ ## name)
+
+#define PARSER_MODULE_INIT(name) \
+	MODULE_INIT(parser_ ## name)
 
 #define SYSTEM_INIT() void init_system(void) \
 	__attribute__ ((naked)) \

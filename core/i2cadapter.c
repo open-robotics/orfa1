@@ -22,25 +22,24 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#include "driver.h"
-#include "common.h"
+#include "i2cadapter.h"
 #include <stdint.h>
 
 #define RESERVED_REGISTERS 2
 
 static uint8_t free_register = RESERVED_REGISTERS;
-static GATE_DRIVER* drivers;
+static GATE_I2CADAPTER* i2cadapters;
 
-static GATE_DRIVER* find_driver(uint8_t reg)
+static GATE_I2CADAPTER* find_adapter(uint8_t reg)
 {
-	GATE_DRIVER* driver = drivers;
-	while (driver) {
-		uint8_t num = driver->num_registers;
-		uint8_t start = driver->start_register;
+	GATE_I2CADAPTER* adapter = i2cadapters;
+	while (adapter) {
+		uint8_t num = adapter->num_registers;
+		uint8_t start = adapter->start_register;
 		if ((reg >= start) && (reg < start+num)) {
-			return driver;
+			return adapter;
 		}
-		driver = driver->next;
+		adapter = adapter->next;
 	}
 	return 0;
 }
@@ -61,35 +60,35 @@ static uint8_t gate_allocate_registers(uint8_t count)
 
 GATE_RESULT gate_register_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
-	GATE_DRIVER* driver = find_driver(reg);
-	if (driver) {
-		if (!driver->read) {
+	GATE_I2CADAPTER* adapter = find_adapter(reg);
+	if (adapter) {
+		if (!adapter->read) {
 			return GR_NO_ACCESS;
 		}
-		return driver->read((reg-driver->start_register), data, data_len);
+		return adapter->read((reg - adapter->start_register), data, data_len);
 	}
 	return GR_INVALID_REGISTER;
 }
 
 GATE_RESULT gate_register_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	GATE_DRIVER* driver = find_driver(reg);
-	if (driver) {
-		if (!driver->write) {
+	GATE_I2CADAPTER* adapter = find_adapter(reg);
+	if (adapter) {
+		if (!adapter->write) {
 			return GR_NO_ACCESS;
 		}
-		return driver->write((reg-driver->start_register), data, data_len);
+		return adapter->write((reg - adapter->start_register), data, data_len);
 	}
 	return GR_INVALID_REGISTER;
 }
 
-GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
+GATE_RESULT gate_i2cadapter_register(GATE_I2CADAPTER* adapter)
 {
-	uint8_t num = driver->num_registers;
+	uint8_t num = adapter->num_registers;
 	uint8_t reg = 0x00;
 	GATE_RESULT res = GR_OK;
 
-	if (driver->uid) {
+	if (adapter->uid) {
 		// if not introspection UID
 		// allocate registers
 		reg = gate_allocate_registers(num);
@@ -97,75 +96,68 @@ GATE_RESULT gate_driver_register(GATE_DRIVER* driver)
 			return GR_ALLOCATE_REGISTER;
 		}
 	}
-	driver->start_register = reg;
-	if (driver->init) {
-		res = driver->init();
-	}
-	if (res == GR_OK) {
-		driver->next = drivers;
-		drivers = driver;
-	}
+	adapter->start_register = reg;
+	adapter->next = i2cadapters;
+	i2cadapters = adapter;
 	return res;
 }
 
 // -- introspection driver --
 
-static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT intro_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT intro_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER idriver = {
+static GATE_I2CADAPTER intro_i2cadapter = {
 	.uid = 0x0000, // introspection id
 	.major_version = 1,
 	.minor_version = 0,
-	.read = idriver_read,
-	.write = idriver_write,
+	.read = intro_read,
+	.write = intro_write,
 	.num_registers = 1,
 };
 
-static uint8_t idriver_num = 0;
-static uint8_t idriver_len = 0;
+static uint8_t intro_num = 0;
+static uint8_t intro_len = 0;
 
-static GATE_RESULT idriver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT intro_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	(void)reg;
 	if (!*data_len) {
 		return GR_OK;
 	}
 
-	if (idriver_num > idriver_len) {
-		idriver_num = 1;
+	if (intro_num > intro_len) {
+		intro_num = 1;
 	}
 
-	if (idriver_num == 0) {
+	if (intro_num == 0) {
 		*data_len = 1;
-		*data = idriver_len;
+		*data = intro_len;
 		return GR_OK;
 	}
 
 	*data_len = 6;
-	GATE_DRIVER* driver = drivers;
-	uint8_t i=idriver_num;
+	GATE_I2CADAPTER* adapter = i2cadapters;
+	uint8_t i=intro_num;
 	while (--i) {
-		driver = driver->next;
+		adapter = adapter->next;
 	}
 
-	if (driver) {
-		uint16_t uid = driver->uid;
-		data[0] = (uint8_t) (uid >> 8);
-		data[1] = (uint8_t) uid;
-		data[2] = driver->major_version;
-		data[3] = driver->minor_version;
-		data[4] = driver->start_register;
-		data[5] = driver->num_registers;
-	}
+	uint16_t uid = adapter->uid;
+	data[0] = (uint8_t) (uid >> 8);
+	data[1] = (uint8_t) uid;
+	data[2] = adapter->major_version;
+	data[3] = adapter->minor_version;
+	data[4] = adapter->start_register;
+	data[5] = adapter->num_registers;
 
 	// next read — next driver
-	++idriver_num;
+	++intro_num;
 
 	return GR_OK;
 }
 
-static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT intro_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	(void)reg;
 	if (data_len != 1) {
@@ -173,25 +165,25 @@ static GATE_RESULT idriver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	}
 
 	if (*data == 0) {
-		GATE_DRIVER* driver = drivers;
-		idriver_len = 0;
-		while (driver) {
-			++idriver_len;
-			driver = driver->next;
+		GATE_I2CADAPTER* adapter = i2cadapters;
+		intro_len = 0;
+		while (adapter) {
+			++intro_len;
+			adapter = adapter->next;
 		}
 	}
 
-	if (*data > idriver_len) {
+	if (*data > intro_len) {
 		return GR_INVALID_ARG;
 	}
 
-	idriver_num = *data;
+	intro_num = *data;
 
 	return GR_OK;
 }
 
 void gate_init_introspection(void)
 {
-	gate_driver_register(&idriver);
+	gate_i2cadapter_register(&intro_i2cadapter);
 }
 

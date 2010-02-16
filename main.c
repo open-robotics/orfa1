@@ -30,17 +30,16 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "core/driver.h"
+#include "core/i2cadapter.h"
 #include "core/scheduler.h"
 
 // -- virtual slave --
 
 #define BUF_LEN 65
 
-static enum {
-	GET_REGISTER,
-	GET_DATA,
-} state_i2c = GET_REGISTER;
+#define GET_REGISTER true
+#define GET_DATA     false
+static bool state_i2c = GET_REGISTER;
 
 static uint8_t register_addr = 0x00;
 static uint8_t buf[BUF_LEN];
@@ -57,12 +56,11 @@ static GATE_RESULT result = GR_OK;
  * @param[in] flag Write/Read flag
  * @return true if success (always)
  */
-bool cmd_start(uint8_t flag)
+bool i2c_start_handler(uint8_t flag)
 {
-	debug("# > cmd_start(0x%02x, %i)\n", 0, flag);
+	debug("# > i2c_start_handler(0x%02x, %i)\n", 0, flag);
 
-	if (is_restart && !is_read && data_len > 0)
-	{
+	if (is_restart && !is_read && data_len > 0) {
 		debug("# `-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 		data_len = 0;
@@ -88,13 +86,12 @@ bool cmd_start(uint8_t flag)
 
 /** Handle I2C Stop event
  */
-void cmd_stop(void)
+void i2c_stop_handler(void)
 {
-	debug("# > cmd_stop()\n");
+	debug("# > i2c_stop_handler()\n");
 
 	is_restart = false;
-	if (!is_read)
-	{
+	if (!is_read) {
 		debug("# `-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 		data_len = 0;
@@ -105,25 +102,22 @@ void cmd_stop(void)
  * @param[in] c writed byte
  * @return true if success
  */
-bool cmd_txc(uint8_t c)
+bool i2c_txc_handler(uint8_t c)
 {
-	switch (state_i2c)
-	{
-		case GET_REGISTER:
-			read_always = c & 0x80;
-			register_addr = c & ~0x80;
-			state_i2c = GET_DATA;
-			break;
+	if (state_i2c) {
+		// Get register
+		read_always = c & 0x80;
+		register_addr = c & ~0x80;
+		state_i2c = GET_DATA;
+	} else {
+		// Get data
+		if ((++data_len) < BUF_LEN)
+			buf[data_len] = c;
+		else
+			data_len = BUF_LEN - 1;
+	}
 
-		case GET_DATA:
-			if ((++data_len) < BUF_LEN)
-				buf[data_len] = c;
-			else
-				data_len = BUF_LEN - 1;
-			break;
-	};
-
-	debug("# > cmd_txc(0x%02x)\n", c);
+	debug("# > i2c_txc_handler(0x%02x)\n", c);
 	return true;
 }
 
@@ -132,27 +126,23 @@ bool cmd_txc(uint8_t c)
  * @param[in] ack ack/nack
  * @return true if success
  */
-bool cmd_rxc(uint8_t *c, bool *ack)
+bool i2c_rxc_handler(uint8_t *c, bool *ack)
 {
-	if(!data_len)
-	{
+	if (!data_len) {
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
 		result = gate_register_read(register_addr, buf, &data_len);
 		debug("# ,-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 	}
 
-	if(data_len > 0)
-	{
+	if (data_len > 0) {
 		*c = *read_ptr++;
 		--data_len;
-	}
-	else
-	{
+	} else {
 		*c = 0;
 	}
 
-	debug("# > cmd_rxc(0x%02x, %i)\n", *c, *ack);
+	debug("# > i2c_rxc_handler(0x%02x, %i)\n", *c, *ack);
 	return true;
 }
 
@@ -161,7 +151,8 @@ bool cmd_rxc(uint8_t *c, bool *ack)
 SYSTEM_INIT()
 {
 	// Set I2C
-	i2c_set_handlers(cmd_start, cmd_stop, cmd_txc, cmd_rxc);
+	i2c_set_handlers(i2c_start_handler, i2c_stop_handler,
+			i2c_txc_handler, i2c_rxc_handler);
 	// register supertask
 	gate_supertask_register(gate_supertask);
 	// register introspection driver

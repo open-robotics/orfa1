@@ -21,21 +21,20 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Driver core
- * @file driver.h
+/** I2C adapter core
+ * @file i2cadapter.h
  *
  * @author Andrey Demenev
  * @author Vladimir Ermakov <vooon341@gmail.com>
  */
 
-#ifndef DRIVER_H
-#define DRIVER_H
+#ifndef I2CADAPTER_H
+#define I2CADAPTER_H
 
-#include <stdint.h>
 #include "common.h"
 
 /**
- * @defgroup Drivers Интерфейс драйверов устройств
+ * @defgroup I2CAdapters Интерфейс I2C адаптеров устройств
  *
  * Драйвер устройства состоит из структуры GATE_DRIVER, функций чтения и/или
  * записи в регистр, и (необязательно) функции инициализации драйвера.
@@ -54,17 +53,17 @@
 
 /**@{*/
 
-/**
- * Прототип функции чтения данных из драйвера. Драйвер, реализующий чтение из
+/** Прототип функции чтения данных из драйвера.
+ * Драйвер, реализующий чтение из
  * регистров, должен предоставлять функцию типа GATE_READ. Прочитанные данные
  * помещаются в буфер data. Количество байт для чтения задается переменной,
  * указатель на которую содержится в data_len. В эту же переменную помещается
  * количество фактически прочитанных байтов.
  *
- * @param reg Номер регистра.
- * @param data Указатель на буфер данных
- * @param data_len Указатель на переменную, значение которй задает количество
- *                 байт для чтения.
+ * @param[in]  reg Номер регистра.
+ * @param[out] data Указатель на буфер данных
+ * @param[out] data_len Указатель на переменную, значение которй
+ *                      задает количество байт для чтения.
  *
  * @return GR_OK - если данные успешно прочитаны. Иначе - код ошибки. Функция
  * должна возвращать GR_NO_ACCESS, если чтение из запрошенного регистра не
@@ -72,14 +71,13 @@
  */
 typedef GATE_RESULT (*GATE_READ)(uint8_t reg, uint8_t* data, uint8_t* data_len);
 
-/**
- * Прототип функции записи данных в драйвер.
+/** Прототип функции записи данных в драйвер.
  * Драйвер, реализующий запись в регистры, должен предоставлять функцию типа
  * GATE_READ.
  *
- * @param reg Номер регистра.
- * @param data Указатель на массив с данными.
- * @param data_len Количество байт для записи.
+ * @param[in] reg Номер регистра.
+ * @param[in] data Указатель на массив с данными.
+ * @param[in] data_len Количество байт для записи.
  *
  * @return GR_OK - если данные успешно записаны. Иначе - код ошибки. Функция
  *         должна возвращать GR_NO_ACCESS, если запись в запрошенный регистр
@@ -87,46 +85,35 @@ typedef GATE_RESULT (*GATE_READ)(uint8_t reg, uint8_t* data, uint8_t* data_len);
  */
 typedef GATE_RESULT (*GATE_WRITE)(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-/**
- * Прототип функции инициализации драйвера.
- * Функция инициализации драйвера вызывается при регистрации драйвера.
- *
- * @return Функция должна возвращать GR_OK при успешной инициализации, иначе -
- *         код ошибки
+/** Конфигурация драйвера устройств.
  */
-typedef GATE_RESULT (*GATE_INIT)(void);
+typedef struct GATE_I2CADAPTER_ GATE_I2CADAPTER;
+struct GATE_I2CADAPTER_ {
+	uint16_t uid;            /**< Идентификатор драйвера (для интроспекции) */
+	uint8_t major_version;   /**< Major version */
+	uint8_t minor_version;   /**< Minor version */
+	GATE_READ read;          /**< Функция чтения */
+	GATE_WRITE write;        /**< Функция записи */
+	uint8_t start_register;  /**< Начальный регистр, из диапазона регистров обслуживаемых драйвером */
+	uint8_t  num_registers;  /**< Количество регистров */
 
-/**
- * Конфигурация драйвера устройств.
- */
-typedef struct GATE_DRIVER_ {
-	uint8_t start_register; /**< Начальный регистр, из диапазона регистров обслуживаемых драйвером */
-	uint8_t  num_registers; /**< Количество регистров */
-	uint16_t uid; /**< Идентификатор драйвера (для интроспекции) */
-	uint8_t major_version;
-	uint8_t minor_version;
-	struct GATE_DRIVER_* next; /*<< Указатель на следующий драйвер в списке */
-	GATE_READ read; /**< Функция чтения */
-	GATE_WRITE write; /**< Функция записи */
-	GATE_INIT init; /**< Функция инициализации драйвера */
-} GATE_DRIVER;
+	struct GATE_I2CADAPTER_* next; /*<< Указатель на следующий драйвер в списке */
+};
 
-/**
- * Регистрирует драйвер устройства.
- * @param driver Указатель на структуру с описанием драйвера
+/** Регистрирует драйвер устройства.
+ * @param[in] driver Указатель на структуру с описанием драйвера
  * @return GR_OK, если драйвер был успешно добавлен. GR_DUPLICATE_REGISTER,
  *         если один из регистров уже используется другим драйвером.Если 
  *         драйвер предоставляетт функцию инициализации, возможны и другие
  *         значения. Любое значение, отличное от GR_OK, означает, что драйвер
  *         не был добавлен, и использовать его регистры невозможно.
  */
-GATE_RESULT gate_driver_register(GATE_DRIVER* driver);
+GATE_RESULT gate_i2cadapter_register(GATE_I2CADAPTER* adapter);
 
-/**
- * Чтение из регистра.
- * @param reg Номер регистра
- * @param data Указатель на буфер данных
- * @param data_len Указатель на переменную, значение которй задает количество байт для чтения.
+/** Чтение из регистра.
+ * @param[in]  reg Номер регистра
+ * @param[out] data Указатель на буфер данных
+ * @param[out] data_len Указатель на переменную, значение которй задает количество байт для чтения.
  * @return GR_INVALID_REGISTER - если для указанного регистра нет
  *         зарегистрированного драйвера. GR_NO_ACCESS - если драйвер, связанный
  *         с регистром, не предоставляет функцию чтения или чтение из
@@ -137,11 +124,10 @@ GATE_RESULT gate_driver_register(GATE_DRIVER* driver);
  */
 GATE_RESULT gate_register_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 
-/**
- * Запись в регистр.
- * @param reg Номер регистра.
- * @param data Указатель на массив с данными.
- * @param data_len Количество байт для записи.
+/** Запись в регистр.
+ * @param[in] reg Номер регистра.
+ * @param[in] data Указатель на массив с данными.
+ * @param[in] data_len Количество байт для записи.
  *
  * @return GR_INVALID_REGISTER - если для указанного регистра нет
  *         зарегистрированного драйвера. GR_NO_ACCESS - если драйвер, связанный
@@ -155,8 +141,7 @@ GATE_RESULT gate_register_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 /**@}*/
 
-/**
- * Инициализация драйвера интроспекции
+/** Инициализация драйвера интроспекции
  */
 void gate_init_introspection(void);
 

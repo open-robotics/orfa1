@@ -36,8 +36,7 @@
  * @{
  */
 
-#include "core/common.h"
-#include "core/driver.h"
+#include "core/i2cadapter.h"
 
 #include "hal/motor.h"
 
@@ -55,7 +54,7 @@ motor_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 /// Direction register channel 1
 #define DIR_REG1   0x03
 
-static GATE_DRIVER motor_i2cadapter = {
+static GATE_I2CADAPTER motor_i2cadapter = {
 	.uid = 0x0060, // motor id
 	.major_version = 1,
 	.minor_version = 1,
@@ -131,9 +130,9 @@ static GATE_RESULT motor_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t da
 #undef SET_DIR
 
 // Autoinit
-MODULE_INIT(motor_i2cadapter)
+I2C_MODULE_INIT(motor_adapter)
 {
 	motor_init();
-	gate_driver_register(&motor_i2cadapter);
+	gate_i2cadapter_register(&motor_i2cadapter);
 }
 

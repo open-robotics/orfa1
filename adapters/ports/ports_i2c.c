@@ -22,9 +22,8 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#include "core/common.h"
 #include "core/ports.h"
-#include "core/driver.h"
+#include "core/i2cadapter.h"
 #include <avr/io.h>
 
 #include "ports_i2c.h"
@@ -38,7 +37,7 @@ static GATE_PORT ports[] = {
 	GATE_PORT_SPECS
 };
 
-static GATE_DRIVER ports_i2cadapter = {
+static GATE_I2CADAPTER ports_i2cadapter = {
 	.uid = GATE_PORT_UID,
 	.major_version = 1,
 	.minor_version = 1,
@@ -95,7 +94,7 @@ ports_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 }
 
 // Autoload
-MODULE_INIT(ports_i2cadapter)
+I2C_MODULE_INIT(ports_adapter)
 {
 	uint8_t i;
 	for (i = 0; i < GATE_NUM_PORTS; i++) {
@@ -103,6 +102,6 @@ MODULE_INIT(ports_i2cadapter)
 			return;
 	}
 
-	gate_driver_register(&ports_i2cadapter);
+	gate_i2cadapter_register(&ports_i2cadapter);
 }
 

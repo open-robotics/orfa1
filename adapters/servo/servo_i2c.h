@@ -60,10 +60,7 @@
 #endif
 
 #include <avr/io.h>
-#include "core/common.h"
-#include "core/driver.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "core/i2cadapter.h"
 
 #include "hal/servo.h"
 
