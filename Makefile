@@ -93,17 +93,18 @@ $(target).lss: $(target).elf
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
 
 local_config.mk:
-	cp ./doc/local_config.mk .
+	cp ${ORFA}/doc/local_config.mk ${ORFA}/
 
 clean:
-	rm -f $(shell find -name '*.o' -o -name '*.a')
-	rm -f ${target}.hex $(target).elf $(target).cof $(target).lss doxygen.log tags
+	rm -f $(shell find -name '*.o' -o -name '*.a') \
+		$(target).hex $(target).elf $(target).cof $(target).lss \
+		doxygen.log tags
 
 docs:
 	doxygen
 
 docs_pdf: docs
-	make -C ./doc/doxygen/latex
+	make -C ${ORFA}/doc/doxygen/latex
 
 force: clean all
 

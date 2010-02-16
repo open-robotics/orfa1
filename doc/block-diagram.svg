@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="28cm" height="14cm" viewBox="179 159 542 262" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="180" y="160" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="180" y="160" width="120" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="240" y="193.9">
+      <tspan x="240" y="193.9">UART Driver</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="340" y="160" width="220" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="340" y="160" width="220" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="450" y="193.9">
+      <tspan x="450" y="193.9">Parser</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="600" y="160" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="600" y="160" width="120" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="660" y="185.9">
+      <tspan x="660" y="185.9">I2C Master</tspan>
+      <tspan x="660" y="201.9">Driver</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="480" y="280" width="78.25" height="140"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="480" y="280" width="78.25" height="140"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="519.125" y="345.9">
+      <tspan x="519.125" y="345.9">I2C</tspan>
+      <tspan x="519.125" y="361.9">Dispatch</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="600" y="280" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="600" y="280" width="120" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="660" y="305.9">
+      <tspan x="660" y="305.9">I2C Master</tspan>
+      <tspan x="660" y="321.9">Slave</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="560" y1="190" x2="590.264" y2="190"/>
+    <polygon style="fill: #000000" points="597.764,190 587.764,195 590.264,190 587.764,185 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="597.764,190 587.764,195 590.264,190 587.764,185 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="600" y1="310" x2="567.917" y2="313.842"/>
+    <polygon style="fill: #000000" points="560.47,314.734 569.805,308.58 567.917,313.842 570.994,318.51 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="560.47,314.734 569.805,308.58 567.917,313.842 570.994,318.51 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="300" y1="190" x2="330.264" y2="190"/>
+    <polygon style="fill: #000000" points="337.764,190 327.764,195 330.264,190 327.764,185 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="337.764,190 327.764,195 330.264,190 327.764,185 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="320" y="360" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="320" y="360" width="120" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="380" y="385.9">
+      <tspan x="380" y="385.9">Introspection</tspan>
+      <tspan x="380" y="401.9">Driver</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="449.661" y1="388.792" x2="470.339" y2="386.208"/>
+    <polygon style="fill: #000000" points="442.219,389.723 451.521,383.521 449.661,388.792 452.762,393.444 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="442.219,389.723 451.521,383.521 449.661,388.792 452.762,393.444 "/>
+    <polygon style="fill: #000000" points="477.781,385.277 468.479,391.479 470.339,386.208 467.238,381.556 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="477.781,385.277 468.479,391.479 470.339,386.208 467.238,381.556 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="180" y="260" width="260" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="180" y="260" width="260" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="310" y="293.9">
+      <tspan x="310" y="293.9">ORFA Adapter</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="471.744" y1="309.84" x2="448.256" y2="295.16"/>
+    <polygon style="fill: #000000" points="478.104,313.815 466.974,312.755 471.744,309.84 472.274,304.275 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="478.104,313.815 466.974,312.755 471.744,309.84 472.274,304.275 "/>
+    <polygon style="fill: #000000" points="441.896,291.185 453.026,292.245 448.256,295.16 447.726,300.725 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="441.896,291.185 453.026,292.245 448.256,295.16 447.726,300.725 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="180" y="360" width="120" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="180" y="360" width="120" height="60"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:12.8;font-family:sanserif;font-style:normal;font-weight:normal" x="240" y="393.9">
+      <tspan x="240" y="393.9">HAL</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="473.804" y1="220.992" x2="513.195" y2="272.279"/>
+    <polygon style="fill: #000000" points="517.764,278.227 507.707,273.342 513.195,272.279 515.638,267.25 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="517.764,278.227 507.707,273.342 513.195,272.279 515.638,267.25 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="243.792" y1="329.661" x2="241.208" y2="350.339"/>
+    <polygon style="fill: #000000" points="244.723,322.219 248.444,332.762 243.792,329.661 238.521,331.521 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="244.723,322.219 248.444,332.762 243.792,329.661 238.521,331.521 "/>
+    <polygon style="fill: #000000" points="240.277,357.781 236.556,347.238 241.208,350.339 246.479,348.479 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="240.277,357.781 236.556,347.238 241.208,350.339 246.479,348.479 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="395" y1="220" x2="379.354" y2="251.292"/>
+    <polygon style="fill: #000000" points="376,258 376,246.82 379.354,251.292 384.944,251.292 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="376,258 376,246.82 379.354,251.292 384.944,251.292 "/>
+  </g>
+</svg>
