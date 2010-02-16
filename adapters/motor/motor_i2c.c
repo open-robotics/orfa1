@@ -22,7 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** RoboMD2 Motor I2C adapter
- * @file motor_driver.c
+ * @file motor_i2c.c
  * @author Vladimir Ermakov
  *
  * @todo use ATOMIC_BLOCK()
@@ -42,9 +42,9 @@
 #include "hal/motor.h"
 
 static GATE_RESULT
-motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+motor_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT
-motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+motor_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 /// PWM register channel 0
 #define PWM_REG0   0x00
@@ -55,12 +55,12 @@ motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 /// Direction register channel 1
 #define DIR_REG1   0x03
 
-static GATE_DRIVER motor_driver = {
+static GATE_DRIVER motor_i2cadapter = {
 	.uid = 0x0060, // motor id
 	.major_version = 1,
 	.minor_version = 1,
-	.read = motor_driver_read,
-	.write = motor_driver_write,
+	.read = motor_i2cadapter_read,
+	.write = motor_i2cadapter_write,
 	.num_registers = 4,
 };
 
@@ -70,7 +70,7 @@ static GATE_DRIVER motor_driver = {
 #define GET_DIR(ch) \
 	case DIR_REG##ch: *data = motor_get_direction(ch); break
 
-static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT motor_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (!*data_len) {
 		return GR_OK;
@@ -100,7 +100,7 @@ static GATE_RESULT motor_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_l
 #define SET_DIR(ch) \
 	case DIR_REG##ch: motor_set_direction(ch, *data); break
 
-static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT motor_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	if (!data_len)
 		return GR_INVALID_ARG;
@@ -131,9 +131,9 @@ static GATE_RESULT motor_driver_write(uint8_t reg, uint8_t* data, uint8_t data_l
 #undef SET_DIR
 
 // Autoinit
-MODULE_INIT(motor_driver)
+MODULE_INIT(motor_i2cadapter)
 {
 	motor_init();
-	gate_driver_register(&motor_driver);
+	gate_driver_register(&motor_i2cadapter);
 }
 

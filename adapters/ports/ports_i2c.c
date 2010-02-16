@@ -30,25 +30,25 @@
 #include "ports_i2c.h"
 
 static GATE_RESULT
-ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+ports_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT
-ports_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+ports_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
 static GATE_PORT ports[] = {
 	GATE_PORT_SPECS
 };
 
-static GATE_DRIVER ports_driver = {
+static GATE_DRIVER ports_i2cadapter = {
 	.uid = GATE_PORT_UID,
 	.major_version = 1,
 	.minor_version = 1,
-	.read = ports_driver_read,
-	.write = ports_driver_write,
+	.read = ports_i2cadapter_read,
+	.write = ports_i2cadapter_write,
 	.num_registers = GATE_NUM_PORTS * 2,
 };
 
 static GATE_RESULT
-ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+ports_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	if (reg >=  GATE_NUM_PORTS) {
 		return GR_NO_ACCESS;
@@ -65,7 +65,7 @@ ports_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 }
 
 static GATE_RESULT
-ports_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+ports_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	uint8_t mask=0xFF;
 	uint8_t port;
@@ -95,7 +95,7 @@ ports_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 }
 
 // Autoload
-MODULE_INIT(ports_driver)
+MODULE_INIT(ports_i2cadapter)
 {
 	uint8_t i;
 	for (i = 0; i < GATE_NUM_PORTS; i++) {
@@ -103,6 +103,6 @@ MODULE_INIT(ports_driver)
 			return;
 	}
 
-	gate_driver_register(&ports_driver);
+	gate_driver_register(&ports_i2cadapter);
 }
 

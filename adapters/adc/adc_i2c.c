@@ -61,18 +61,18 @@
 
 #define ADC_DATA_REG 1
 
-// driver data
+// i2cadapter data
 static uint8_t read_channel;
 
-static GATE_RESULT adc_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
-static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+static GATE_RESULT adc_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+static GATE_RESULT adc_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER adc_driver = {
+static GATE_DRIVER adc_i2cadapter = {
 	.uid = 0x0040,
 	.major_version = 1,
 	.minor_version = 0,
-	.read = adc_driver_read,
-	.write = adc_driver_write,
+	.read = adc_i2cadapter_read,
+	.write = adc_i2cadapter_write,
 	.num_registers = 2,
 };
 
@@ -82,7 +82,7 @@ static GATE_TASK adc_task = {
 };
 #endif
 
-static GATE_RESULT adc_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+static GATE_RESULT adc_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	debug("# adc->read(%i, buf, %i)\n", reg, *data_len);
 
@@ -113,7 +113,7 @@ static GATE_RESULT adc_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len
 	return GR_OK;
 }
 
-static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+static GATE_RESULT adc_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	debug("# adc->write(%i, buf, %i)\n", reg, data_len);
 
@@ -153,11 +153,11 @@ static GATE_RESULT adc_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len
 }
 
 // module autoload
-MODULE_INIT(adc_driver)
+MODULE_INIT(adc_i2cadapter)
 {
 #ifdef HAL_ADC_NISR
 	gate_task_register(&adc_task);
 #endif
-	gate_driver_register(&adc_driver);
+	gate_driver_register(&adc_i2cadapter);
 }
 

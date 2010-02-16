@@ -46,11 +46,13 @@
 #ifdef OR_AVR_M128_S
 
 #define SERVO_UID   0x30
+#define SERVO_MAJOR 1
 #define SERVO_MINOR 0
 
 #elif defined(OR_AVR_M32_D)
 
 #define SERVO_UID   0x31
+#define SERVO_MAJOR 1
 #define SERVO_MINOR 1
 
 #else

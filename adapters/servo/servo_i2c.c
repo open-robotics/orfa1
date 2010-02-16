@@ -31,28 +31,28 @@
 #include "servo_i2c.h"
 
 static GATE_RESULT
-servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT
-servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len);
+servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
-static GATE_DRIVER servo_driver = {
+static GATE_DRIVER servo_i2cadapter = {
 	.uid = SERVO_UID,
-	.major_version = 1,
+	.major_version = SERVO_MAJOR,
 	.minor_version = SERVO_MINOR,
-	.read = servo_driver_read,
-	.write = servo_driver_write,
+	.read = servo_i2cadapter_read,
+	.write = servo_i2cadapter_write,
 	.num_registers = 2,
 };
 
 static GATE_RESULT
-servo_driver_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
+servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	*data_len = 0;
 	return GR_OK;
 }
 
 static GATE_RESULT
-servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
+servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
 	if (reg > 1) {
 		return GR_NO_ACCESS;
@@ -74,9 +74,9 @@ servo_driver_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	return GR_OK;
 }
 
-MODULE_INIT(servo_driver)
+MODULE_INIT(servo_i2cadapter)
 {
 	servo_init();
-	gate_driver_register(&servo_driver);
+	gate_driver_register(&servo_i2cadapter);
 }
 
