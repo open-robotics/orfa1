@@ -10,6 +10,7 @@
 #
 PLATFORM = OR_AVR_M32_D
 #PLATFORM = OR_AVR_M128_S
+#PLATFORM = OR_AVR_M128_DS
 
 # Is debug build? (default nope)
 #DEBUG = 1

@@ -76,12 +76,8 @@ $(target).cof: $(target).elf
 $(target).lss: $(target).elf
 	$(OBJDUMP) -d $< > $@
 
-%.o : %.c
-
-%.o : %.cpp
-
-%.o : %.S
-
+ram_size: $(target).elf
+	readelf -s $< | grep OBJECT | awk '{ SUM += $$3 } END { print SUM }'
 
 %.o: %.c $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
