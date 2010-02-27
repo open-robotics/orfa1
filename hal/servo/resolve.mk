@@ -2,7 +2,11 @@
 ifeq ($(PLATFORM),OR_AVR_M32_D)
 	SLLD = gpio
 else
-	SLLD = 4017
+	ifeq ($(PLATFORM),OR_AVR_M128_DS)
+		SLLD = 4017_half
+	else
+		SLLD = 4017
+	endif
 	HAL_SERVO_CMD = yes
 endif
 
