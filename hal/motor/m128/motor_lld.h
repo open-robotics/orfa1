@@ -43,7 +43,7 @@
 
 #define DIR_PORT   PORTC
 #define DIR_DDR    DDRC
-#define DIR_MASK0  _BV(PC5)
+#define DIR_MASK0  _BV(PC7)
 #define DIR_MASK1  _BV(PC6)
 #define DIR_MASK   (DIR_MASK0|DIR_MASK1)
 
