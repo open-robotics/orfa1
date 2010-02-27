@@ -53,6 +53,16 @@
 	#define GATE_PORT_UID 0x0021
 #endif
 
+#ifdef OR_AVR_M128_DS
+	#define GATE_NUM_PORTS 4
+	#define GATE_PORT_MASK_A 0
+	#define	GATE_PORT_MASK_B 0xFE
+	#define GATE_PORT_MASK_E 0x3F
+	#define	GATE_PORT_MASK_F 0
+	#define GATE_PORT_SPECS GATE_PORT_SPEC(A), GATE_PORT_SPEC(F), GATE_PORT_SPEC(B), GATE_PORT_SPEC(E)
+	#define GATE_PORT_UID 0x0021
+#endif
+
 #define GATE_PORT_SPEC(p) \
 	{\
 		.PORT = (void*)_SFR_MEM_ADDR(PORT ## p),				\

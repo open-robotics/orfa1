@@ -55,6 +55,12 @@
 #define SERVO_MAJOR 1
 #define SERVO_MINOR 1
 
+#elif defined(OR_AVR_M128_DS)
+
+#define SERVO_UID   0x32
+#define SERVO_MAJOR 1
+#define SERVO_MINOR 0
+
 #else
 #error Unsupported platform
 #endif

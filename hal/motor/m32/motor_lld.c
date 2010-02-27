@@ -1,6 +1,5 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
- *  Based on Joerg Wunsch's UART lib (THE BEER-WARE LICENSE)
  *
  *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
@@ -22,43 +21,38 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-
-/** Platform-specific UART macros
- * @file usart_config.h
+/** RoboMD2 motor driver
+ * @file motor_lld.c
+ * @author Vladimir Ermakov
  *
- * @author Andrey Demenev
+ * @todo use ATOMIC_BLOCK()
  */
 
-#ifndef USART_CONFIG_H
-#define USART_CONFIG_H
-
 #include <avr/io.h>
+#include "motor_lld.h"
 
-#ifdef OR_AVR_M32_D
-	#define GATE_UDR UDR
-	#define GATE_UCSRA UCSRA
-	#define GATE_UCSRB UCSRB
-	#define GATE_UBRRL UBRRL
-	#define GATE_UBRRH UBRRH
-	#define GATE_RXC_vect USART_RXC_vect
+void motor_lld_init(void)
+{
+	// init i/o lines
+	DIR_PORT &= ~DIR_MASK;
+	DIR_DDR |= DIR_MASK;
+	PWM_PORT &= ~PWM_MASK;
+	PWM_DDR |= PWM_MASK;
 
-	#define USART_DDR DDRD
-	#define USART_PIN PIND
-	#define USART_RXD_BIT 0
-#endif
+	// clear pwm registers
+	PWM_OC0 = 0;
+	PWM_OC1 = 0;
 
-#if defined(OR_AVR_M128_S) || defined(OR_AVR_M128_DS)
-	#define GATE_UDR UDR1
-	#define GATE_UCSRA UCSR1A
-	#define GATE_UCSRB UCSR1B
-	#define GATE_UBRRL UBRR1L
-	#define GATE_UBRRH UBRR1H
-	#define GATE_RXC_vect USART1_RX_vect
-
-	#define USART_DDR PORTD
-	#define USART_PIN PIND
-	#define USART_RXD_BIT 2
-#endif
-
-#endif // USART_CONFIG_H
+	// Timer/Counter-1 init
+	//
+	// COM1x1:COM1x0 = 1:0 => OC1x connected to output pin, reset on compare
+	// FOC1A:FOC1B = 0:0 => Don't force output compare event
+	// WGM13:WGM12:WGM11:WGM10 = 0:1:0:1 => Fast PWM 8-bit
+	// ICNC1 = 0 => Input Capture Noise Canceller disabled (because not needed)
+	// ICES1 = 0 => Input Capture Edge Select set to "falling" mode (no matter)
+	// CS12:CS11:CS10 = 0:1:0 => Timer "on", 1/8 prescaling (1 clock every 8 cpu tact)	// /8
+	TCNT1 = 0;
+	TCCR1A = (0<<WGM11)|(1<<WGM10);
+	TCCR1B = (0<<WGM13)|(1<<WGM12)|(0<<CS12)|(1<<CS11)|(0<<CS10);
+}
 

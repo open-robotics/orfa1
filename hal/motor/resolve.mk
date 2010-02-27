@@ -1,6 +1,12 @@
 # -*- Makefile -*-
 
-INCLUDE_DIRS += -I${ORFA}/hal/motor
+ifeq ($(PLATFORM),OR_AVR_M32_D)
+	MLLD = m32
+else
+	MLLD = m128
+endif
 
-SRC += ${ORFA}/hal/motor/motor_lld.c
+INCLUDE_DIRS += -I${ORFA}/hal/motor/${MLLD}
+
+SRC += ${ORFA}/hal/motor/${MLLD}/motor_lld.c
 
