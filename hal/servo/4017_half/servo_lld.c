@@ -98,8 +98,7 @@ void servo_lld_set_position(uint8_t n, uint16_t pos)
 
 void servo_lld_init(void)
 {
-	DDRE = _BV(2) | _BV(3) | _BV(4) | _BV(5);
-	DDRB = _BV(7);
+	DDRE = _BV(2) | _BV(3) | _BV(5);
 
 	PORTE |= _BV(2);
 	
