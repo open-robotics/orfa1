@@ -2,7 +2,7 @@
 
 You need avr-gcc > 4.2, avr-libc > 1.6, binutils-avr.
 
-First configure youre local_config.mk.
+First configure youre local_config.mk (see example at doc/).
 See documentation at http://robofourm.ru/ORFA
 
 After that do this:
@@ -11,14 +11,3 @@ $ make
 
 Done
 
-### local_confog.mk examples
-
-For OR-AVR-M128-S at 115200:
-
-    PLATFORM = OR_AVR_M128_S
-    BAUD = B115200
-
-For OR-AVR-M32-D at 9600:
-
-    PLATFORM = OR_AVR_M32_D
-	BAUD = B9600
