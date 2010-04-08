@@ -30,6 +30,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/atomic.h>
 
 #include "servo_lld.h"
 
@@ -113,9 +114,20 @@ void servo_lld_set_position(uint8_t n, uint16_t pos)
 	uint8_t idx = pgm_read_byte(pin_map+n);
 	uint8_t block = n >> 3;
 	pos = US2CLOCK(pos);
-	calc_ocr[block][8] += calc_ocr[block][idx];
-	calc_ocr[block][8] -= pos;
-	calc_ocr[block][idx] = pos;
+
+	uint16_t* pause_p = calc_ocr[block]+8;
+	uint16_t* pulse_p = calc_ocr[block]+idx;
+
+	uint16_t pause = *pause_p;
+	uint16_t pulse = *pulse_p;
+
+	pause += pulse;
+	pause -= pos;
+	
+	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+		*pause_p = pause;
+		*pulse_p = pos;
+	}
 }
 
 void servo_lld_init(void)
