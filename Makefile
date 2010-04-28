@@ -15,7 +15,7 @@ CROSS_COMPILE_BIN =
 
 AS = $(CROSS_COMPILE_BIN)as
 CC = $(CROSS_COMPILE_GCC)gcc
-CPLUSPLUS = $(CROSS_COMPILE_GCC)g++
+CXX = $(CROSS_COMPILE_GCC)g++
 LD = $(CROSS_COMPILE_BIN)ld
 AR = $(CROSS_COMPILE_BIN)ar
 OBJCOPY = $(CROSS_COMPILE_BIN)objcopy
@@ -83,7 +83,7 @@ ram_size: $(target).elf
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
 %.o: %.cpp $(CONFIG_FILE) local_config.mk
-	$(CPLUSPLUS) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
+	$(CXX) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
 %.o: %.S $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
@@ -92,9 +92,15 @@ local_config.mk:
 	cp ${ORFA}/doc/local_config.mk ${ORFA}/
 
 clean:
+	rm -f $(LIBS) $(OBJS) \
+		$(target).hex $(target).elf $(target).cof $(target).lss \
+		doxygen.log tags
+
+deepclean:
 	rm -f $(shell find -name '*.o' -o -name '*.a') \
 		$(target).hex $(target).elf $(target).cof $(target).lss \
 		doxygen.log tags
+	rm -rf ${ORFA}/doc/doxygen/html ${ORFA}/doc/doxygen/latex
 
 docs:
 	doxygen

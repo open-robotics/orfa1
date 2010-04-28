@@ -5,7 +5,7 @@
 
 MCU = atmega128
 F_CPU = 7372800UL
-BAUD = B115200
+BAUD = B_AUTO
 
 ADAPTERS = ports adc servo
 

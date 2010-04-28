@@ -5,4 +5,4 @@ ifeq ($(PLATFORM),OR_AVR_M32_D)
 endif
 
 INCLUDE_DIRS += -I${ORFA}/hal/adc
-SRC += ${ORFA}/hal/adc/adc_lld.c
+HAL_SRC += ${ORFA}/hal/adc/adc_lld.c

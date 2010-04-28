@@ -8,5 +8,5 @@ endif
 
 INCLUDE_DIRS += -I${ORFA}/hal/motor/${MLLD}
 
-SRC += ${ORFA}/hal/motor/${MLLD}/motor_lld.c
+HAL_SRC += ${ORFA}/hal/motor/${MLLD}/motor_lld.c
 
