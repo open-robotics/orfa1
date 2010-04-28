@@ -25,7 +25,7 @@
  * @file servo/servo_cmd_lld.h
  *
  * @author Anton Botov
- * @author Vladimir Ermokov
+ * @author Vladimir Ermakov
  */
 
 #ifndef SERVOCMD_H

@@ -48,6 +48,8 @@
 	TCCRX |= FOC_MASK;									\
 }
 
+static uint16_t servo_pos[16];
+
 static uint8_t PROGMEM pin_map[16] = {
 	7, 3, 2, 6, 5, 1, 0, 4,
 	4, 0, 1, 5, 6, 2, 3, 7,
@@ -81,6 +83,13 @@ ISR(SIG_OUTPUT_COMPARE3C) {
 }
 
 
+uint16_t servo_lld_get_position(uint8_t n)
+{
+	if (n > SERVO_CHMAX)
+		return 0;
+	return servo_pos[n];
+}
+
 void servo_lld_set_position(uint8_t n, uint16_t pos)
 {
 	if (n > SERVO_CHMAX)
@@ -92,7 +101,8 @@ void servo_lld_set_position(uint8_t n, uint16_t pos)
 	uint8_t idx = pgm_read_byte(pin_map+n);
 	uint8_t block = n >> 3;
 	pos = US2CLOCK(pos);
-	
+
+	uint16_t* pos_p = servo_pos+n;
 	uint16_t* pause_p = calc_ocr[block]+8;
 	uint16_t* pulse_p = calc_ocr[block]+idx;
 
@@ -105,6 +115,7 @@ void servo_lld_set_position(uint8_t n, uint16_t pos)
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 		*pause_p = pause;
 		*pulse_p = pos;
+		*pos_p = pos;
 	}
 }
 

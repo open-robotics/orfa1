@@ -37,6 +37,7 @@
 #define SERVO_CHMAX 15
 
 void servo_lld_set_position(uint8_t n, uint32_t pos);
+uint16_t servo_lld_get_position(uint8_t n);
 void servo_lld_init(void);
 
 #endif // SERVOGPIO_H

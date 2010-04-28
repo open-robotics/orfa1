@@ -45,10 +45,10 @@
 
 #define ITERATION_STEP 10
 
-static uint16_t servo_pos[SERVO_LEN];
 static uint16_t servo_start[SERVO_LEN];
 static uint16_t servo_target[SERVO_LEN];
-static uint16_t total_time, time_now;
+static uint16_t servo_total_time[32];
+static uint16_t servo_time_left[32];
 
 void servo_lld_cmd_init(void)
 {
@@ -62,76 +62,68 @@ void servo_lld_cmd_init(void)
 
 bool servo_lld_is_done(void)
 {
-	return (total_time == 0);
+	uint16_t total_time=0;
+	for (uint8_t i=0; i<SERVO_LEN; i++)
+		if (total_time < servo_time_left[i])
+			total_time = servo_time_left[i];
+	return total_time == 0;
 }
 
-ISR(SIG_OUTPUT_COMPARE2) {
-	if (total_time == 0)
-		return;
-
-	if (total_time != time_now && total_time-time_now < ITERATION_STEP)
-		total_time = time_now + ITERATION_STEP;
+ISR(SIG_OUTPUT_COMPARE2)
+{
+	int32_t tmp;
 
 	for (uint8_t i=0; i<SERVO_LEN; i++)
 		if (servo_target[i] != 0) {
-			int32_t tmp = servo_target[i];
-			tmp -= servo_start[i];
-			tmp *= time_now;
-			tmp /= total_time;
-			tmp += servo_start[i];
-			servo_pos[i] = tmp;
-			//debug("s4[%d]=%d\n",i,servo_pos[i]);
-			servo_set_position(i, servo_pos[i]);
-		}
-
-	time_now += ITERATION_STEP;
-	if (time_now > total_time) {
-		for (uint8_t i=0; i<SERVO_LEN; i++)
-			if (servo_target[i] != 0) {
-				servo_target[i] = 0;
+			if (servo_time_left[i] > 0) {
+				if (servo_time_left[i] < ITERATION_STEP)
+					servo_time_left[i] = 0;
+				else
+					servo_time_left[i] -= ITERATION_STEP;
+				tmp = servo_start[i];
+				tmp -= servo_target[i];
+				tmp *= servo_time_left[i];
+				tmp /= servo_total_time[i];
+				tmp += servo_target[i];
+				s4017_set_position(i, tmp);
 			}
-		total_time = 0;
-	}
+		}
 }
 
 void servo_lld_command(uint16_t time,
 		uint16_t *_servo_target,
 		uint16_t *_servo_maxspeed)
 {
-	// Stop current command
-	total_time = 0;
+	uint16_t maxTime = time;
 
-	debug("newcmd\n");
-
-	uint16_t maxTime=time;
-	uint32_t dx=0;
 	for (uint8_t i=0; i<SERVO_LEN; i++)
 		if (_servo_target[i] != 0 && _servo_maxspeed[i] !=0) {
-			if (_servo_target[i] > servo_pos[i]) {
-				dx = _servo_target[i] - servo_pos[i];
-			} else {
-				dx = servo_pos[i] - _servo_target[i];
-			}
+			uint32_t dx=0;
+			uint16_t pos=servo_get_position(i);
+			if (_servo_target[i] > pos)
+				dx = _servo_target[i] - pos;
+			else
+				dx = pos - _servo_target[i];
 			dx *= 1000;
 			dx /= _servo_maxspeed[i];
 			if (dx > maxTime)
-				maxTime=dx;
+				maxTime = dx;
 		}
 
-	debug("time2go=%d\n", maxTime);
+	if (maxTime < ITERATION_STEP)
+		maxTime = ITERATION_STEP;
 
-	// Load new cmd to iterator variables
-	for (uint8_t i=0; i<SERVO_LEN; i++) {
-		servo_start[i] = servo_pos[i];
-		servo_target[i] = _servo_target[i];
-		if (servo_target[i] != 0) {
-			debug("st[%d]=%d=>%d\n", i, servo_pos[i], servo_target[i]);
+	debug("# time2go=%d\n", maxTime);
+
+	//Load new cmd to iterator variables
+	for (uint8_t i=0; i<SERVO_LEN; i++)
+		if(_servo_target[i] != 0) {
+			uint16_t pos=servo_get_position(i);
+			debug("# st[%d]=%d->%d\n", i, pos, servo_target[i]);
+			servo_start[i] = pos;
+			servo_target[i] = _servo_target[i];
+			servo_total_time[i] = maxTime;
+			servo_time_left[i] = maxTime;
 		}
-	}
-
-	total_time = maxTime;
-	time_now = 0;
-	if (total_time == 0)
-		total_time = ITERATION_STEP;
 }
 

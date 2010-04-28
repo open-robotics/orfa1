@@ -47,6 +47,12 @@
 #define servo_set_position(servo, position) \
 	servo_lld_set_position(servo, position)
 
+/** Get servo position
+ * @param[in] servo     servo number
+ */
+#define servo_get_position(servo) \
+	servo_lld_get_position(servo)
+
 /** Init servo subsystem
  */
 #define servo_init() \

@@ -313,6 +313,13 @@ static void servo_set_enable(uint8_t n, bool enable)
 
 // -- api --
 
+uint16_t servo_lld_get_position(uint8_t n)
+{
+	if (n > SERVO_CHMAX)
+		return 0;
+	return gpio_servo_pos[n];
+}
+
 void servo_lld_set_position(uint8_t n, uint32_t pos)
 {
 	if (n > SERVO_CHMAX)
