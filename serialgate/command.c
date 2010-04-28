@@ -31,6 +31,7 @@
 
 #include "i2c.h"
 #include "command.h"
+#include "lib/hex.h"
 
 #ifndef PROTOCOL_VERSION_STRING
 # ifdef SG_PROTOCOL_V1_0
@@ -40,25 +41,6 @@
 # endif
 #endif
 
-/**
- * Convert a 4-bit integer value to its ASCII representation.
- *
- * @param c the value to convert.
- * @return the converted value or 'X' on error.
- */
-static char itox(uint8_t c)
-{
-	char ret;
-
-	if (c <= 0x09) {
-		ret = '0' + c;
-	} else if (c <= 0x0f) {
-		ret = 'A' + c - 10;
-	} else {
-		ret = 'X';
-	}
-	return ret;
-}
 
 void print_error(error_code_t error_code)
 {

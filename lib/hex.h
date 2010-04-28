@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2010 Vladimir Ermakov, Andrey Demenev
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,53 +21,28 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** HEX converters
+ * @file hex.h
+ *
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
-#include "orc32.h"
-#include "common.h"
-#include "hal/serial.h"
-#include "lib/hex.h"
-#include "parser.h"
+#ifndef HEX_H
+#define HEX_H
 
 #include <stdint.h>
-#include <stdio.h>
 
-//! error state
-static error_code_t error_code=NO_ERROR;
+/** Convert a 4-bit integer value to its ASCII representation.
+ *
+ * @param c the value to convert.
+ * @return the converted value or 'X' on error.
+ */
+char itox(uint8_t c);
 
-void print_error(error_code_t error_code)
-{
-	putchar('E');
-	putchar('R');
-	putchar('R');
-	putchar('O');
-	putchar('R');
-	putchar(' ');
-	putchar(itox(error_code >> 4));
-	putchar(itox(error_code & 0x0f));
-	putchar('\n');
-}
+/** Convert hex to int8 (0 — 15)
+ * @param[in] c 0 — 9, A — F
+ * @return -1 if fail
+ */
+int8_t xtoi(uint8_t c);
 
-
-void orc32_init(void)
-{
-
-	serial_init(BAUD);
-	stdin = stdout = stderr = &serial_fdev;
-}
-
-void orc32_supertask(void)
-{
-	if(serial_isempty())
-		return;
-
-	uint8_t c = getchar();
-
-	parse_cmd(c, &error_code);
-
-	if(error_code != NO_ERROR)
-	{
-		print_error(error_code);
-		error_code = NO_ERROR;
-	}
-}
-
+#endif // !defined HEX_H

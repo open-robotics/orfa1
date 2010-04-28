@@ -24,22 +24,8 @@
 
 #include <ctype.h>
 #include "parser.h"
+#include "lib/hex.h"
 
-/**
- * Convert hex to int8 (0 — 15)
- * @param[in] c 0 — 9, A — F
- * @return -1 if fail
- */
-static inline int8_t xtoi(uint8_t c)
-{
-	if ((c >= '0')&&(c <= '9')) {
-		return c - '0';
-	} else if ((c >= 'A')&&(c <= 'F')) {
-		return c - 'A' + 10;
-	} else {
-		return -1;
-	}
-}
 
 /**
  * Get one byte state machine
