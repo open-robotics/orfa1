@@ -47,8 +47,8 @@
 
 static uint16_t servo_start[SERVO_LEN];
 static uint16_t servo_target[SERVO_LEN];
-static uint16_t servo_total_time[32];
-static uint16_t servo_time_left[32];
+static uint16_t servo_total_time[SERVO_LEN];
+static uint16_t servo_time_left[SERVO_LEN];
 
 void servo_lld_cmd_init(void)
 {
