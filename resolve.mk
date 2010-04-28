@@ -16,13 +16,17 @@ ifeq ($(DEBUG),2)
 endif
 
 ifeq "$(I2C_SLAVE)" ""
-include serialgate/resolve.mk
+	ifeq "$(ORC32)" ""
+		include serialgate/resolve.mk
+	else
+		include orc32/resolve.mk
+	endif
 else
-include i2c_slave/resolve.mk
+	include i2c_slave/resolve.mk
 endif
 
 include core/resolve.mk
-include lib/resolve.mk
 include adapters/resolve.mk
 include hal/resolve.mk
+include lib/resolve.mk
 

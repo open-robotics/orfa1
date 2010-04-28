@@ -43,7 +43,6 @@ DEFINES = -D$(PLATFORM)
 LIBS = 
 LIBS_RULES = 
 SRC = main.c
-DEFINES += -DI2C_SLAVE
 
 PROGRAMMER = dragon_isp
 PROGRAMMER_PORT = usb
@@ -97,8 +96,9 @@ clean:
 		doxygen.log tags
 
 deepclean:
-	rm -f $(shell find -name '*.o' -o -name '*.a') \
-		$(target).hex $(target).elf $(target).cof $(target).lss \
+	rm -f $(shell find -name '*.o' -o -name '*.a' \
+		-o -name '*.hex' -o -name '*.elf' \
+		-o -name '*.cof' -o -name '*.lss') \
 		doxygen.log tags
 	rm -rf ${ORFA}/doc/doxygen/html ${ORFA}/doc/doxygen/latex
 

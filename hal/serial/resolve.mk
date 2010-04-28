@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-INCLUDE_DIRS += -I${ORFA}/hal/serial/avr
+INCLUDE_DIRS += -I${ORFA}/hal/serial
 
-HAL_SRC += ${ORFA}/hal/serial/avr/serial_lld.c
+HAL_SRC += ${ORFA}/hal/serial/serial_lld.c
 
