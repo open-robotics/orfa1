@@ -1,5 +1,6 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
+ *  Based on Joerg Wunsch's UART lib (THE BEER-WARE LICENSE)
  *
  *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
@@ -21,61 +22,43 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** Platform-specific serial macroses
+ * @file avr/serial_lld_config.h
+ *
+ * @author Andrey Demenev
+ */
 
-#include "serialgate.h"
-#include "common.h"
-#include "i2c.h"
-#include "lib/cbuf.h"
-#include "hal/serial.h"
-#include "parser.h"
-#include "command.h"
+#ifndef SERIAL_LLD_CONFIG_H
+#define SERIAL_LLD_CONFIG_H
 
-#include <stdint.h>
-#include <stdio.h>
+#include <avr/io.h>
 
-//! command buffer
-static cbf_t cmd_buf, tx_buf;
+#ifdef OR_AVR_M32_D
+	#define SERIAL_UDR       UDR
+	#define SERIAL_UCSRA     UCSRA
+	#define SERIAL_UCSRB     UCSRB
+	#define SERIAL_UBRRL     UBRRL
+	#define SERIAL_UBRRH     UBRRH
+	#define SERIAL_RXC_vect  USART_RXC_vect
 
-//! error state
-static error_code_t error_code=NO_ERROR;
+	#define SERIAL_DDR       DDRD
+	#define SERIAL_PIN       PIND
+	#define SERIAL_RXD_BIT   0
+#endif
 
-void serialgate_init(void)
-{
+#if defined(OR_AVR_M128_S) || \
+	defined(OR_AVR_M128_DS)
+	#define SERIAL_UDR       UDR1
+	#define SERIAL_UCSRA     UCSR1A
+	#define SERIAL_UCSRB     UCSR1B
+	#define SERIAL_UBRRL     UBRR1L
+	#define SERIAL_UBRRH     UBRR1H
+	#define SERIAL_RXC_vect  USART1_RX_vect
 
-	cbf_init(&cmd_buf);
-	cbf_init(&tx_buf);
+	#define SERIAL_DDR       PORTD
+	#define SERIAL_PIN       PIND
+	#define SERIAL_RXD_BIT   2
+#endif
 
-	#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
-	serial_init(BAUD);
-	stdin = stdout = stderr = &serial_fdev;
-	#endif
-
-	i2c_init();
-}
-
-void serialgate_supertask(void)
-{
-	if(serial_isempty())
-		return;
-
-	uint8_t c = getchar();
-
-	if(parse_cmd(c, &cmd_buf, &error_code))
-	{
-		if(exec_cmd(&cmd_buf, &tx_buf, &error_code))
-		{
-			while(!cbf_isempty(&tx_buf))
-			{
-				putchar(cbf_get(&tx_buf));
-			}
-		}
-	}
-
-	if(error_code != NO_ERROR)
-	{
-		print_error(error_code);
-		cbf_init(&tx_buf);
-		error_code = NO_ERROR;
-	}
-}
+#endif // SERIAL_LLD_CONFIG_H
 

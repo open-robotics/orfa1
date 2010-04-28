@@ -22,29 +22,26 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** USART file device
- * @file usart.h
+/** SERIAL file device
+ * @file avr/serial_lld.h
  *
  * @code
  * #include <stdio.h>
- * #include "usart.h"
- * stdin = stdout = &usart_fdev;
+ * #include "hal/serial.h"
+ * stdin = stdout = &serial_fdev;
  * @endcode
  *
  * @author Joerg Wunsch
  * @author Vladimir Ermakov <vooon341@gmail.com>
  */
 
-#ifndef USART_H
-#define USART_H
-#ifdef AVR_IO
+#ifndef SERIAL_LLD_H
+#define SERIAL_LLD_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <avr/io.h>
-
-#include "usart_config.h"
 
 /**
  * Use the following macros to determine the 'baud' parameter values
@@ -52,22 +49,25 @@
  * @warning 'baud' SHOULD ALWAYS BE A CONSTANT or a lot of code
  * will be generated.
  */
-#define USART_BAUD(baud) ((uint16_t)((F_CPU / (16.0 * (baud))) + 0.5) - 1)
+#define SERIAL_BAUD(baud) ((uint16_t)((F_CPU / (16.0 * (baud))) + 0.5) - 1)
 
-/**
- * Some typical baud rates
- * Confirm the cpu clock rate will support the desired baud rate
+/** Typical baud rates
+ * @note Confirm the cpu clock rate will support the desired baud rate
+ * @{
  */
-#define B115200 (USART_BAUD(115200L))
-#define B76800  (USART_BAUD(76800UL))
-#define B57600  (USART_BAUD(57600UL))
-#define B38400  (USART_BAUD(38400UL))
-#define B28800  (USART_BAUD(28800U))
-#define B19200  (USART_BAUD(19200U))
-#define B14400  (USART_BAUD(14400))
-#define B9600   (USART_BAUD(9600))
-#define B4800   (USART_BAUD(4800))
-#define B2400   (USART_BAUD(2400))
+#define B115200 (SERIAL_BAUD(115200L))
+#define B76800  (SERIAL_BAUD(76800UL))
+#define B57600  (SERIAL_BAUD(57600UL))
+#define B38400  (SERIAL_BAUD(38400UL))
+#define B28800  (SERIAL_BAUD(28800U))
+#define B19200  (SERIAL_BAUD(19200U))
+#define B14400  (SERIAL_BAUD(14400))
+#define B9600   (SERIAL_BAUD(9600))
+#define B4800   (SERIAL_BAUD(4800))
+#define B2400   (SERIAL_BAUD(2400))
+///@}
+
+/// Use baud rate autodetection
 #define B_AUTO  0
 
 /**
@@ -79,61 +79,68 @@
  * will be generated.
  */
 #define DOUBLE_SPEED_BIT (1<<15)
-#define USART_2x_BAUD(baud) \
+#define SERIAL_2x_BAUD(baud) \
    (((uint16_t)((F_CPU / (8.0 * (baud))) + 0.5) - 1) | DOUBLE_SPEED_BIT)
 
-/**
- * Some typical baud rates
- * Confirm the cpu clock rate will support the desired baud rate
+/** Typical 2x baud rates
+ * @note Confirm the cpu clock rate will support the desired baud rate
+ * @{
  */
-#define B2x115200 (USART_2x_BAUD(115200L))
-#define B2x76800  (USART_2x_BAUD(76800UL))
-#define B2x57600  (USART_2x_BAUD(57600UL))
-#define B2x38400  (USART_2x_BAUD(38400UL))
-#define B2x28800  (USART_2x_BAUD(28800U))
-#define B2x19200  (USART_2x_BAUD(19200U))
-#define B2x14400  (USART_2x_BAUD(14400))
-#define B2x9600   (USART_2x_BAUD(9600))
-#define B2x4800   (USART_2x_BAUD(4800))
-#define B2x2400   (USART_2x_BAUD(2400))
+#define B2x115200 (SERIAL_2x_BAUD(115200L))
+#define B2x76800  (SERIAL_2x_BAUD(76800UL))
+#define B2x57600  (SERIAL_2x_BAUD(57600UL))
+#define B2x38400  (SERIAL_2x_BAUD(38400UL))
+#define B2x28800  (SERIAL_2x_BAUD(28800U))
+#define B2x19200  (SERIAL_2x_BAUD(19200U))
+#define B2x14400  (SERIAL_2x_BAUD(14400))
+#define B2x9600   (SERIAL_2x_BAUD(9600))
+#define B2x4800   (SERIAL_2x_BAUD(4800))
+#define B2x2400   (SERIAL_2x_BAUD(2400))
+///@}
 
-/// USART file device
-extern FILE usart_fdev;
+// indicate fdev
+#define HAL_HAVE_SERIAL_FILE_DEVICE
 
-/**
- * This function initializes the USART
+/// Serial file device
+extern FILE serial_lld_fdev;
+
+/** This function initializes the serial device
  *
  * @param baud baudrate divisor
  * @return void
  *
  * Example
  * @code
- * usart_init(B9600);
+ * serial_lld_init(B9600);
  * // or
- * usart_init(USART_BAUD(9600));
+ * serial_lld_init(SERIAL_BAUD(9600));
  * @endcode
  */
-void usart_init(uint16_t baud);
+void serial_lld_init(uint16_t baud);
 
-/**
- * Send one character to the UART.
+/** Send one character
  */
-int usart_putchar(char c, FILE *stream);
-int usart_putchar0(char c, FILE *stream);
+#define serial_lld_putchar(c) \
+	serial_lld_fputchar(c, (FILE*)0)
 
-/**
- * Receive one character from the UART.
+/** Send one character to the UART.
+ * @note for file device
  */
-int usart_getchar(FILE *stream);
-int usart_getchar0(FILE *stream);
+int serial_lld_fputchar(char c, FILE *stream);
 
-#endif // AVR_IO
+/** Receive one character
+ */
+#define serial_lld_getchar() \
+	serial_lld_fgetchar((FILE*)0)
 
-#if defined(SG_DISABLE_IRQ) || !defined(AVR_IO)
-# define usart_isempty() false
-#else
-bool usart_isempty(void);
-#endif
+/** Receive one character from the UART.
+ * @note for file device
+ */
+int serial_lld_fgetchar(FILE *stream);
 
-#endif // USART_H
+/** Check rxc buffer
+ */
+bool serial_lld_isempty(void);
+
+#endif // SERIAL_LLD_H
 

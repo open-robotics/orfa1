@@ -15,12 +15,14 @@ ifeq ($(DEBUG),2)
     CROSS_COMPILE_BIN =
 endif
 
-include core/resolve.mk
-include adapters/resolve.mk
-include hal/resolve.mk
 ifeq "$(I2C_SLAVE)" ""
 include serialgate/resolve.mk
 else
 include i2c_slave/resolve.mk
 endif
+
+include core/resolve.mk
+include lib/resolve.mk
+include adapters/resolve.mk
+include hal/resolve.mk
 

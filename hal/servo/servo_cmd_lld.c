@@ -85,7 +85,7 @@ ISR(SIG_OUTPUT_COMPARE2)
 				tmp *= servo_time_left[i];
 				tmp /= servo_total_time[i];
 				tmp += servo_target[i];
-				s4017_set_position(i, tmp);
+				servo_set_position(i, tmp);
 			}
 		}
 }

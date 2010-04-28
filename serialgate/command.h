@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "cbuf.h"
+#include "lib/cbuf.h"
 #include "common.h"
 
 /**

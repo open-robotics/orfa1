@@ -10,3 +10,4 @@ DEFINES += -DBAUD=$(BAUD)
 
 INCLUDES += -includeserialgate/i2c.h -includeserialgate/serialgate.h
 
+HAL += serial

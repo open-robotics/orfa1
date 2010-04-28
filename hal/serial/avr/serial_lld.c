@@ -23,22 +23,16 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-#ifdef AVR_IO
-
-#include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
-#include "usart.h"
+#include "serial_lld.h"
+#include "serial_lld_config.h"
 
-#ifndef SG_DISABLE_IRQ
 #include <avr/interrupt.h>
 #include <util/atomic.h>
-#include "cbuf.h"
-#endif
+#include "lib/cbuf.h"
 
 
 PROGMEM int16_t baud_cycles[] = {
@@ -55,11 +49,11 @@ PROGMEM int16_t baud_cycles[] = {
 	0,
 };
 
-#ifndef SG_DISABLE_IRQ
+#ifndef HAL_SERIAL_NISR
 // static volatile give compilation errors :(
 static cbf_t rx_cbf;
 
-bool usart_isempty(void)
+bool serial_lld_isempty(void)
 {
 	bool ret;
 
@@ -69,22 +63,27 @@ bool usart_isempty(void)
 	return ret;
 }
 
-ISR(GATE_RXC_vect)
+ISR(SERIAL_RXC_vect)
 {
-	uint8_t c=GATE_UDR;
+	uint8_t c=SERIAL_UDR;
 	cbf_put(&rx_cbf, c);
+}
+#else
+bool serial_lld_isempty(void)
+{
+	return bit_is_clear(SERIAL_UCSRA, RXC);
 }
 #endif
 
 // autodetecting baud rate
 // need send "\x0d\x0d\x0d\x0d\x0d\x0d\x0d\x0d"
-uint16_t detect_baud_rate(void)
+static uint16_t detect_baud_rate(void)
 {
 	uint16_t min;
 	int16_t baud;
 	uint8_t count;
 
-	USART_DDR &= ~_BV(USART_RXD_BIT);
+	SERIAL_DDR &= ~_BV(SERIAL_RXD_BIT);
 	asm volatile("\
 		ldi %[count], 8				\n\
 		in __tmp_reg__, 0x3F		\n\
@@ -110,8 +109,8 @@ uint16_t detect_baud_rate(void)
 		out 0x3F, __tmp_reg__		\n\
 	"
         : [min] "=&w" (min), [baud] "=&w" (baud), [count] "=&r" (count)
-        : [bit] "I" (USART_RXD_BIT), 
-          [port] "I" (_SFR_IO_ADDR(USART_PIN))
+        : [bit] "I" (SERIAL_RXD_BIT), 
+          [port] "I" (_SFR_IO_ADDR(SERIAL_PIN))
     );
 
 	baud = min * 6;
@@ -149,44 +148,44 @@ uint16_t detect_baud_rate(void)
 	  [delay1] "M" ((INACTIVITY_DELAY >> 8) & 0xFFU),
 	  [delay2] "M" ((INACTIVITY_DELAY >> 16) & 0xFFU),
 	  [delay3] "M" ((INACTIVITY_DELAY >> 24) & 0xFFU),
-	  [bit] "I" (USART_RXD_BIT), [count] "r" (count),
-      [port] "I" (_SFR_IO_ADDR(USART_PIN))
+	  [bit] "I" (SERIAL_RXD_BIT), [count] "r" (count),
+      [port] "I" (_SFR_IO_ADDR(SERIAL_PIN))
 	: "r24","r25","r20","r21","r19"
 	);
 
 	return min / 16 - 1;
 }
 
-// usart file device
-FILE usart_fdev = FDEV_SETUP_STREAM(usart_putchar, usart_getchar, _FDEV_SETUP_RW);
+// serial_lld file device
+FILE serial_lld_fdev = FDEV_SETUP_STREAM(serial_lld_fputchar, serial_lld_fgetchar, _FDEV_SETUP_RW);
 
-// This function initializes the USART
-void usart_init(uint16_t baud)
+// This function initializes the SERIAL
+void serial_lld_init(uint16_t baud)
 {
-	// disable the USART
-	GATE_UCSRB = 0x00;
-	GATE_UCSRA = 0x00;
+	// disable the SERIAL
+	SERIAL_UCSRB = 0x00;
+	SERIAL_UCSRA = 0x00;
     if (!baud) {
         baud = detect_baud_rate();
     }
 
 	if ( baud & DOUBLE_SPEED_BIT )
-		GATE_UCSRA |= (1 << U2X);
+		SERIAL_UCSRA |= (1 << U2X);
 
 	// load the baudrate divisor register
-	GATE_UBRRL = baud;
+	SERIAL_UBRRL = baud;
 
 	// output the upper four bits of the baudrate divisor
-	GATE_UBRRH = (baud >> 8) & 0x0F;
+	SERIAL_UBRRH = (baud >> 8) & 0x0F;
 
-#ifndef SG_DISABLE_IRQ
+#ifndef HAL_SERIAL_NISR
 	// init rx buffer
 	cbf_init(&rx_cbf);
-	// enable the USART0 transmitter & receiver & receiver interrupt
-	GATE_UCSRB = (1 << RXCIE) | (1 << TXEN) | (1 << RXEN);
+	// enable the SERIAL0 transmitter & receiver & receiver interrupt
+	SERIAL_UCSRB = (1 << RXCIE) | (1 << TXEN) | (1 << RXEN);
 #else
-	// enable the USART0 transmitter & receiver
-	GATE_UCSRB = (1 << TXEN) | (1 << RXEN);
+	// enable the SERIAL0 transmitter & receiver
+	SERIAL_UCSRB = (1 << TXEN) | (1 << RXEN);
 #endif
 }
 
@@ -194,33 +193,25 @@ void usart_init(uint16_t baud)
  * Send character c down the UART Tx, wait until tx holding register
  * is empty.
  */
-int usart_putchar(char c, FILE *stream)
+int serial_lld_fputchar(char c, FILE *stream)
 {
 	(void)stream;
 	if ( c == '\n' )
-		usart_putchar('\r', stream);
-	loop_until_bit_is_set(GATE_UCSRA, UDRE);
-	GATE_UDR = c;
+		serial_lld_fputchar('\r', stream);
+	loop_until_bit_is_set(SERIAL_UCSRA, UDRE);
+	SERIAL_UDR = c;
 
 	return 0;
 }
 
-int usart_putchar0(char c, FILE *stream)
-{
-	(void)stream;
-	loop_until_bit_is_set(GATE_UCSRA, UDRE);
-	GATE_UDR = c;
-	return 0;
-}
-
-int usart_getchar(FILE *stream)
+int serial_lld_fgetchar(FILE *stream)
 {	
 	uint8_t c;
 	(void)stream;
 
-#ifdef SG_DISABLE_IRQ
-	loop_until_bit_is_set(GATE_UCSRA, RXC);
-	c = GATE_UDR;
+#ifdef HAL_SERIAL_NISR
+	loop_until_bit_is_set(SERIAL_UCSRA, RXC);
+	c = SERIAL_UDR;
 #else
 	ATOMIC_BLOCK(ATOMIC_FORCEON) {
 		c = cbf_get(&rx_cbf);
@@ -229,14 +220,4 @@ int usart_getchar(FILE *stream)
 
 	return c;
 }
-
-int usart_getchar0(FILE *stream)
-{
-	uint8_t c;
-	(void)stream;
-	loop_until_bit_is_set(GATE_UCSRA, RXC);
-	c = GATE_UDR;
-	return c;
-}
-#endif // AVR_IO
 

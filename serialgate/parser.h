@@ -34,7 +34,7 @@
 #include <stdbool.h>
 
 #include "common.h"
-#include "cbuf.h"
+#include "lib/cbuf.h"
 
 typedef enum {
 	CMD_INIT,				///< clear cmd buffer

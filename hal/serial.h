@@ -1,6 +1,5 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
- *  Based on Joerg Wunsch's UART lib (THE BEER-WARE LICENSE)
  *
  *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
@@ -22,43 +21,51 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-
-/** Platform-specific UART macros
- * @file usart_config.h
+/** Serial driver
+ * @file serial.h
  *
- * @author Andrey Demenev
+ * @author Vladimir Ermakov <vooon341@gmail.com>
  */
 
-#ifndef USART_CONFIG_H
-#define USART_CONFIG_H
+#ifndef SERIAL_H
+#define SERIAL_H
 
-#include <avr/io.h>
+#include "serial_lld.h"
 
-#ifdef OR_AVR_M32_D
-	#define GATE_UDR UDR
-	#define GATE_UCSRA UCSRA
-	#define GATE_UCSRB UCSRB
-	#define GATE_UBRRL UBRRL
-	#define GATE_UBRRH UBRRH
-	#define GATE_RXC_vect USART_RXC_vect
-
-	#define USART_DDR DDRD
-	#define USART_PIN PIND
-	#define USART_RXD_BIT 0
+#if defined(HAL_HAVE_SERIAL_FILE_DEVICE) || \
+	defined(__DOXYGEN__)
+/** Serial FILE device
+ * Example:
+ * @code
+ * serial_init(B9600);
+ * stdin = stdout = &serial_fdev;
+ * @endcode
+ */
+#define serial_fdev \
+	serial_lld_fdev
 #endif
 
-#if defined(OR_AVR_M128_S) || defined(OR_AVR_M128_DS)
-	#define GATE_UDR UDR1
-	#define GATE_UCSRA UCSR1A
-	#define GATE_UCSRB UCSR1B
-	#define GATE_UBRRL UBRR1L
-	#define GATE_UBRRH UBRR1H
-	#define GATE_RXC_vect USART1_RX_vect
+/** Send one character
+ * @param[in] c character
+ */
+#define serial_putchar(c) \
+	serial_lld_putchar(c)
 
-	#define USART_DDR PORTD
-	#define USART_PIN PIND
-	#define USART_RXD_BIT 2
-#endif
+/** Receive one character
+ */
+#define serial_getchar() \
+	serial_lld_getchar()
 
-#endif // USART_CONFIG_H
+/** Check Rxc buffer
+ */
+#define serial_isempty() \
+	serial_lld_isempty()
+
+/** Init serial
+ * @param[in] baud baud rate (for example: B115200)
+ */
+#define serial_init(baud) \
+	serial_lld_init(baud)
+
+#endif // SERIAL_H
 
