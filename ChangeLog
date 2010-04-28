@@ -1,3 +1,17 @@
+* 2010-04-28 Ermakov Vladimir <vooon341@gmail.com>
+	* hal/serial.h: New serial HAL
+	- Port ORC-32 parser as build target
+	* lib/cbuf.h: cbf_*()
+	* lib/hex.h: itox(), xtoi()
+	- Release 0.8.1
+
+* 2010-04-08 Andrey Doxygen
+	* hal/servo/4017/servo_lld.c: Atomic write
+	* hal/servo/4017_half/servo_lld.c: Atomic write
+
+* 2010-03-08 Ermakov Vladimir <vooon341@gmail.com>
+	- Release 0.8.0
+
 * 2010-02-16 Ermakov Vladimir <vooon341@gmail.com>
 	- Rename drivers -> adapters
 	* core/driver.h: rename to i2cadapter.h
