@@ -73,20 +73,22 @@ ISR(SIG_OUTPUT_COMPARE2)
 {
 	int32_t tmp;
 
+	asm volatile ("sei"); // XXX: Warning!
+
 	for (uint8_t i=0; i<SERVO_LEN; i++)
-		if (servo_target[i] != 0) {
-			if (servo_time_left[i] > 0) {
-				if (servo_time_left[i] < ITERATION_STEP)
-					servo_time_left[i] = 0;
-				else
-					servo_time_left[i] -= ITERATION_STEP;
+		if (servo_time_left[i] > 0) {
+			if (servo_time_left[i] <= ITERATION_STEP) {
+				servo_time_left[i] = 0;
+				tmp = servo_target[i];
+			} else {
+				servo_time_left[i] -= ITERATION_STEP;
 				tmp = servo_start[i];
 				tmp -= servo_target[i];
 				tmp *= servo_time_left[i];
 				tmp /= servo_total_time[i];
 				tmp += servo_target[i];
-				servo_set_position(i, tmp);
 			}
+			servo_set_position(i, tmp);
 		}
 }
 
@@ -119,7 +121,7 @@ void servo_lld_command(uint16_t time,
 	for (uint8_t i=0; i<SERVO_LEN; i++)
 		if(_servo_target[i] != 0) {
 			uint16_t pos=servo_get_position(i);
-			debug("# st[%d]=%d->%d\n", i, pos, servo_target[i]);
+			debug("# st[%d]=%d->%d\n", i, pos, _servo_target[i]);
 			servo_start[i] = pos;
 			servo_target[i] = _servo_target[i];
 			servo_total_time[i] = maxTime;
