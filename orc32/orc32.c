@@ -25,6 +25,7 @@
 #include "orc32.h"
 #include "common.h"
 #include "hal/serial.h"
+#include "hal/servo.h"
 #include "lib/hex.h"
 #include "parser.h"
 
@@ -50,9 +51,9 @@ void print_error(error_code_t error_code)
 
 void orc32_init(void)
 {
-
 	serial_init(BAUD);
 	stdin = stdout = stderr = &serial_fdev;
+	servo_init();
 }
 
 void orc32_supertask(void)
