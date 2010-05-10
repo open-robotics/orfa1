@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-COMMONLIB_TARGET = lib/libcommon.a
+COMMONLIB_TARGET = ${ORFA}/lib/libcommon.a
 COMMONLIB_SRC = $(wildcard ${ORFA}/lib/*.c)
 COMMONLIB_OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(COMMONLIB_SRC))))
 

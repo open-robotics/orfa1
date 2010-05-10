@@ -44,8 +44,8 @@ LIBS =
 LIBS_RULES = 
 SRC = main.c
 
-PROGRAMMER = dragon_isp
-PROGRAMMER_PORT = usb
+PROGRAMMER = avr109 -b115200
+PROGRAMMER_PORT = /dev/ttyUSB0
 
 include $(CONFIG_FILE)
 -include local_config.mk

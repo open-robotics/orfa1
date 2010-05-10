@@ -75,6 +75,6 @@ BAUD = B_AUTO
 
 ##- Bootloader
 ##  AVR910 compatible w/ 115200 baud rate
-#PROGRAMMER = avr910 -b115200
+#PROGRAMMER = avr109 -b115200
 #PROGRAMMER_PORT = /dev/ttyUSB0
 

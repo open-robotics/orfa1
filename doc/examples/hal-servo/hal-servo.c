@@ -9,9 +9,9 @@
 
 #include "hal/servo.h"
 
-#define STEP 30
-#define SMIN 650
-#define SMAX 2200
+#define STEP 10
+#define SMIN 500
+#define SMAX 2500
 #define SCH  12
 
 /** Main
