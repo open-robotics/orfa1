@@ -1,3 +1,8 @@
+* 2010-05-10 Ermakov Vladimir <vooon341@gmail.com>
+	* orc32/orc32.c: Added missing servo_init()
+	- Update ORC-32 port (now it works!)
+	- Bug fix release 0.8.2
+
 * 2010-04-28 Ermakov Vladimir <vooon341@gmail.com>
 	* hal/serial.h: New serial HAL
 	- Port ORC-32 parser as build target
@@ -5,7 +10,7 @@
 	* lib/hex.h: itox(), xtoi()
 	- Release 0.8.1
 
-* 2010-04-08 Andrey Doxygen
+* 2010-04-08 Andrey Demenev
 	* hal/servo/4017/servo_lld.c: Atomic write
 	* hal/servo/4017_half/servo_lld.c: Atomic write
 
