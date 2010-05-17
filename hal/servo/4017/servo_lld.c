@@ -34,6 +34,14 @@
 
 #include "servo_lld.h"
 
+/// Debug print
+#ifndef NDEBUG
+#include <stdio.h>
+#define debug(...) printf(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
+
 #define US2CLOCK(us) (((uint32_t)(us) * (uint32_t)(F_CPU / 8000000.0 * 0x10000UL)) >> 16)
 
 #define process_timer(OCRX, TCCRX, block, FOC_MASK) {	\
@@ -49,6 +57,7 @@
 }
 
 static uint16_t servo_pos[32];
+static uint16_t servo_pos_buf[32];
 
 static uint8_t PROGMEM pin_map[32] = {
 	7, 3, 2, 6, 5, 1, 0, 4,
@@ -109,20 +118,28 @@ uint16_t servo_lld_get_position(uint8_t n)
 {
 	if (n > SERVO_CHMAX)
 		return 0;
-	return servo_pos[n];
+	return servo_pos_buf[n];
 }
 
 void servo_lld_set_position(uint8_t n, uint16_t pos)
 {
 	if (n > SERVO_CHMAX)
 		return;
+	
+	debug("sp %d %d\n",n,pos);
+
 	if (pos < 500)
 		pos = 500;
 	else if (pos > 2500)
 		pos = 2500;
+	
+	servo_pos_buf[n]=pos;
+	
 	uint8_t idx = pgm_read_byte(pin_map+n);
 	uint8_t block = n >> 3;
 	pos = US2CLOCK(pos);
+
+	debug("#s=%d p=%d\n", n, pos);
 
 	uint16_t* pos_p = servo_pos+n;
 	uint16_t* pause_p = calc_ocr[block]+8;
