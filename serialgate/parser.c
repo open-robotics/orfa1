@@ -132,7 +132,7 @@ bool parse_cmd(uint8_t co, cbf_t *cmd_buf, error_code_t *error_code)
 				case '\n':
 					break;
 
-				case '#':
+				case '%':
 					// is comment?
 					state_cmd = COMMENT_OR_ERROR_EOL;
 					break;

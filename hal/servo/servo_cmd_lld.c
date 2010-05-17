@@ -58,6 +58,7 @@ void servo_lld_cmd_init(void)
 	OCR2 = 72;
 	TCCR2 = _BV(WGM21) | _BV(CS22) | _BV(CS20);
 	TIMSK |= _BV(OCIE2);
+	for(int i=0; i<SERVO_LEN; i++) servo_set_position(i, 1500);
 }
 
 bool servo_lld_is_done(void)
@@ -80,6 +81,7 @@ ISR(SIG_OUTPUT_COMPARE2)
 			if (servo_time_left[i] <= ITERATION_STEP) {
 				servo_time_left[i] = 0;
 				tmp = servo_target[i];
+				debug("fs %d %d\n",i,tmp);
 			} else {
 				servo_time_left[i] -= ITERATION_STEP;
 				tmp = servo_start[i];
