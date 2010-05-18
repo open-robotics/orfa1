@@ -54,19 +54,19 @@ servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 static GATE_RESULT
 servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	debug("i2c-servo-adapter\n");
-	
+	debug("#i2c-servo-adapter\n");
+
 	if (reg > 1) {
 		return GR_NO_ACCESS;
 	}
 
-	debug("lev-1\n");
+	debug("#lev-1\n");
 
 	if (!reg) {
 		return GR_OK;
 	}
 
-	debug("lev-2\n");
+	debug("#lev-2\n");
 
 	if (data_len < 3) {
 		return GR_INVALID_DATA;
@@ -77,28 +77,35 @@ servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 	uint16_t _servo_target[32];
 	uint16_t _servo_maxspeed[32];
 	uint16_t _max_time=0;
-	for(int i=0; i<32; i++){
-		_servo_target[i]=0;
-		_servo_maxspeed[i]=0;
-	};
+
+	for (int i=0; i < 32; i++) {
+		_servo_target[i] = 0;
+		_servo_maxspeed[i] = 0;
+	}
+
 	while (data_len) {
-		uint16_t val=(data[1]<<8)|data[2];
-		uint8_t id=data[0];
-		if(id<128){	_servo_target[id]=val; } else
-		if(id<255){ _servo_maxspeed[id-128]=val; }else
-		if(id==255){ _max_time=val; };
+		uint16_t val = (data[1]<<8)|data[2];
+		uint8_t id = data[0];
+		if (id < 128) {
+			_servo_target[id] = val;
+		} else if (id < 255) {
+			_servo_maxspeed[id-128] = val;
+		} else if (id == 255) {
+			_max_time = val;
+		}
 		data += 3;
 		data_len -= 3;
-		if (data_len>0) if (data_len < 3 || data_len > 252) {
-			return GR_INVALID_DATA;
-		};
-	};
+		if (data_len > 0)
+			if (data_len < 3 || data_len > 252) {
+				return GR_INVALID_DATA;
+			}
+	}
 
-	debug("lev-4\n");
+	debug("#lev-4\n");
 
-	servo_command(_max_time,_servo_target,_servo_maxspeed);
+	servo_command(_max_time, _servo_target, _servo_maxspeed);
 
-	debug("lev-5\n");
+	debug("#lev-5\n");
 
 	return GR_OK;
 }

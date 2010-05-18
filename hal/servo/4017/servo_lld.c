@@ -57,7 +57,6 @@
 }
 
 static uint16_t servo_pos[32];
-static uint16_t servo_pos_buf[32];
 
 static uint8_t PROGMEM pin_map[32] = {
 	7, 3, 2, 6, 5, 1, 0, 4,
@@ -118,28 +117,26 @@ uint16_t servo_lld_get_position(uint8_t n)
 {
 	if (n > SERVO_CHMAX)
 		return 0;
-	return servo_pos_buf[n];
+	return servo_pos[n];
 }
 
 void servo_lld_set_position(uint8_t n, uint16_t pos)
 {
 	if (n > SERVO_CHMAX)
 		return;
-	
-	debug("sp %d %d\n",n,pos);
+
+	debug("#sp %d %d\n", n, pos);
 
 	if (pos < 500)
 		pos = 500;
 	else if (pos > 2500)
 		pos = 2500;
-	
-	servo_pos_buf[n]=pos;
-	
+
 	uint8_t idx = pgm_read_byte(pin_map+n);
 	uint8_t block = n >> 3;
-	pos = US2CLOCK(pos);
+	uint16_t uspos = US2CLOCK(pos);
 
-	debug("#s=%d p=%d\n", n, pos);
+	debug("#s=%d p=%d\n", n, uspos);
 
 	uint16_t* pos_p = servo_pos+n;
 	uint16_t* pause_p = calc_ocr[block]+8;
@@ -149,11 +146,11 @@ void servo_lld_set_position(uint8_t n, uint16_t pos)
 	uint16_t pulse = *pulse_p;
 
 	pause += pulse;
-	pause -= pos;
+	pause -= uspos;
 	
 	ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
 		*pause_p = pause;
-		*pulse_p = pos;
+		*pulse_p = uspos;
 		*pos_p = pos;
 	}
 }
