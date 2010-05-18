@@ -49,6 +49,7 @@
 }
 
 static uint16_t servo_pos[16];
+static uint16_t servo_pos_buf[16];
 
 static uint8_t PROGMEM pin_map[16] = {
 	7, 3, 2, 6, 5, 1, 0, 4,
@@ -87,7 +88,7 @@ uint16_t servo_lld_get_position(uint8_t n)
 {
 	if (n > SERVO_CHMAX)
 		return 0;
-	return servo_pos[n];
+	return servo_pos_buf[n];
 }
 
 void servo_lld_set_position(uint8_t n, uint16_t pos)
@@ -99,6 +100,8 @@ void servo_lld_set_position(uint8_t n, uint16_t pos)
 		pos = 500;
 	else if (pos > 2500)
 		pos = 2500;
+
+	servo_pos_buf[n]=pos;
 
 	uint8_t idx = pgm_read_byte(pin_map+n);
 	uint8_t block = n >> 3;
