@@ -1,6 +1,7 @@
 * 2010-05-20 Vladimir Ermakov <vooon341@gmail.com>
 	* hal/servo/4017/servo_lld.c: Fix servo_ld_get_position()
 	* hal/servo/4017_half/servo_lld.c: Fix servo_ld_get_position()
+	* main.c: Move gate_init() from SYSTEM_INIT() to main()
 
 * 2010-05-17 Anton Botov
 	* adapters/servo/servo_i2c.c: Speed control
