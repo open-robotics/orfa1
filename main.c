@@ -157,13 +157,14 @@ SYSTEM_INIT()
 	gate_supertask_register(gate_supertask);
 	// register introspection driver
 	gate_init_introspection();
+	// init gate deivces
+	gate_init();
 }
 
 /** Main
  */
 int main(void)
 {
-	gate_init();
 	asm volatile ("sei");
 	gate_scheduler_loop();
 	return 0;
