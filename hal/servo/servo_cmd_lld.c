@@ -52,13 +52,16 @@ static uint16_t servo_time_left[SERVO_LEN];
 
 void servo_lld_cmd_init(void)
 {
+#ifndef HAL_SERVO_NTIM2
 	// Set timer 2 for iterator
 	// Frequency 100Hz (7372800/1024/72=100)
 	// CTC mode, Prescaler 1/1024
 	OCR2 = 72;
 	TCCR2 = _BV(WGM21) | _BV(CS22) | _BV(CS20);
 	TIMSK |= _BV(OCIE2);
-	for(int i=0; i<SERVO_LEN; i++) servo_set_position(i, 1500);
+#endif
+	for(int i=0; i<SERVO_LEN; i++)
+		servo_set_position(i, 1500);
 }
 
 bool servo_lld_is_done(void)
@@ -70,7 +73,11 @@ bool servo_lld_is_done(void)
 	return total_time == 0;
 }
 
+#ifndef HAL_SERVO_NTIM2
 ISR(SIG_OUTPUT_COMPARE2)
+#else
+void servo_lld_loop(void)
+#endif
 {
 	int32_t tmp;
 

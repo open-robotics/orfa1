@@ -47,7 +47,7 @@
 
 #define SERVO_UID   0x30
 #define SERVO_MAJOR 1
-#define SERVO_MINOR 0
+#define SERVO_MINOR 2
 
 #elif defined(OR_AVR_M32_D)
 
@@ -59,7 +59,7 @@
 
 #define SERVO_UID   0x32
 #define SERVO_MAJOR 1
-#define SERVO_MINOR 0
+#define SERVO_MINOR 2
 
 #else
 #error Unsupported platform

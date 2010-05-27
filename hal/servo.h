@@ -79,6 +79,12 @@
 #define servo_command(time, target, maxspeed) \
 	servo_lld_command(time, target, maxspeed)
 
+#if defined(HAL_SERVO_NTIM2) || defined(__DOXYGEN__)
+/** Servo command periodic
+ */
+#define servo_loop \
+	servo_lld_loop
+#endif
 #endif
 
 #endif // SERVO_H

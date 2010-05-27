@@ -47,5 +47,11 @@ void servo_lld_command(uint16_t time,
  */
 void servo_lld_cmd_init(void);
 
+#if defined(HAL_SEVRO_NTIM2) || defined(__DOXYGEN__)
+/** Servo commnad periodic
+ */
+void servo_lld_loop(void);
+#endif
+
 #endif // SERVO4017_H
 
