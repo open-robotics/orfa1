@@ -31,6 +31,11 @@ BAUD = B_AUTO
 ## I2C slave firmware
 #I2C_SLAVE = 1
 
+## I2C slave address (default 0x7F)
+## NOTE: 0x7F corresponds to 0xFE when writing and OxFF when reading
+## (0x7F * 2 = 0xFE)
+#I2C_SLAVE_ADDRESS = 0x77
+
 ## SSC-32 compatible firmware
 #ORC32 = 1
 

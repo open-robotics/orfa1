@@ -391,5 +391,8 @@ void i2c_gate_supertask(void)
 
 void i2c_gate_init(void)
 {
+#ifdef I2C_SLAVE
+	i2c_init_slave(I2C_SLAVE_ADDRESS);
+#endif
 }
 
