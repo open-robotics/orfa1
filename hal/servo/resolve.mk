@@ -4,7 +4,7 @@ HAL_SERVO_CMD = yes
 
 ifeq ($(PLATFORM),OR_AVR_M32_D)
 	SLLD = gpio
-	HAL_SERVO_NTIM2 = yes
+	HAL_SERVO_TIM0 = yes
 else
 	ifeq ($(PLATFORM),OR_AVR_M128_DS)
 		SLLD = 4017_half
@@ -19,8 +19,8 @@ ifeq ($(HAL_SERVO_CMD),yes)
 	HAL_SRC += ${ORFA}/hal/servo/servo_cmd_lld.c
 endif
 
-ifeq ($(HAL_SERVO_NTIM2),yes)
-	DEFINES += -DHAL_SERVO_NTIM2
+ifeq ($(HAL_SERVO_TIM0),yes)
+	DEFINES += -DHAL_SERVO_TIM0
 endif
 
 INCLUDE_DIRS += -I${ORFA}/hal/servo/${SLLD}

@@ -47,8 +47,9 @@ void servo_lld_command(uint16_t time,
  */
 void servo_lld_cmd_init(void);
 
-#if defined(HAL_SEVRO_NTIM2) || defined(__DOXYGEN__)
+#if defined(HAL_SEVRO_NTIM) || defined(__DOXYGEN__)
 /** Servo commnad periodic
+ * @note Call freq 100 Hz
  */
 void servo_lld_loop(void);
 #endif

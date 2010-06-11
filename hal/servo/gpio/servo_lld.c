@@ -325,6 +325,8 @@ void servo_lld_set_position(uint8_t n, uint32_t pos)
 	if (n > SERVO_CHMAX)
 		return;
 
+	gpio_servo_pos[n] = pos;
+
 	if (pos == 0) {
 		servo_set_enable(n, false);
 	} else if (!gpio_servo_enb[n]) {
@@ -338,7 +340,6 @@ void servo_lld_set_position(uint8_t n, uint32_t pos)
 	else if (pos > MAXSERVO)
 		pos = MAXSERVO;
 
-	gpio_servo_pos[n] = pos;
 	generateParametersFor(n);
 }
 

@@ -30,8 +30,8 @@
 
 #include "servo_i2c.h"
 
-static GATE_RESULT
-servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
+//static GATE_RESULT
+//servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len);
 static GATE_RESULT
 servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len);
 
@@ -39,40 +39,42 @@ static GATE_I2CADAPTER servo_i2cadapter = {
 	.uid = SERVO_UID,
 	.major_version = SERVO_MAJOR,
 	.minor_version = SERVO_MINOR,
-	.read = servo_i2cadapter_read,
+//	.read = servo_i2cadapter_read,
 	.write = servo_i2cadapter_write,
 	.num_registers = 2,
 };
 
+#if 0
 static GATE_RESULT
 servo_i2cadapter_read(uint8_t reg, uint8_t* data, uint8_t* data_len)
 {
 	*data_len = 0;
 	return GR_OK;
 }
+#endif
 
 static GATE_RESULT
 servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 {
-	debug("#i2c-servo-adapter\n");
+	debug("# i2c-servo-adapter\n");
 
 	if (reg > 1) {
 		return GR_NO_ACCESS;
 	}
 
-	debug("#lev-1\n");
+	debug("# lev-1\n");
 
 	if (!reg) {
 		return GR_OK;
 	}
 
-	debug("#lev-2\n");
+	debug("# lev-2\n");
 
 	if (data_len < 3) {
 		return GR_INVALID_DATA;
 	}
 
-	debug("lev-3\n");
+	debug("# lev-3\n");
 
 	uint16_t _servo_target[32];
 	uint16_t _servo_maxspeed[32];
@@ -101,11 +103,11 @@ servo_i2cadapter_write(uint8_t reg, uint8_t* data, uint8_t data_len)
 			}
 	}
 
-	debug("#lev-4\n");
+	debug("# lev-4\n");
 
 	servo_command(_max_time, _servo_target, _servo_maxspeed);
 
-	debug("#lev-5\n");
+	debug("# lev-5\n");
 
 	return GR_OK;
 }

@@ -52,16 +52,23 @@ static uint16_t servo_time_left[SERVO_LEN];
 
 void servo_lld_cmd_init(void)
 {
-#ifndef HAL_SERVO_NTIM2
+#ifndef HAL_SERVO_NTIM
+	#ifndef HAL_SERVO_TIM0
 	// Set timer 2 for iterator
 	// Frequency 100Hz (7372800/1024/72=100)
 	// CTC mode, Prescaler 1/1024
 	OCR2 = 72;
 	TCCR2 = _BV(WGM21) | _BV(CS22) | _BV(CS20);
 	TIMSK |= _BV(OCIE2);
+	#else
+	// Set timer 0 for iteraror
+	// Frequency 100 Hz (7372800/1024/72=100)
+	// CTC mode, Prescaler 1/1024
+	OCR0 = 72;
+	TCCR0 = _BV(WGM01) | _BV(CS02) | _BV(CS00);
+	TIMSK |= _BV(OCIE0);
+	#endif
 #endif
-	for(int i=0; i<SERVO_LEN; i++)
-		servo_set_position(i, 1500);
 }
 
 bool servo_lld_is_done(void)
@@ -73,8 +80,12 @@ bool servo_lld_is_done(void)
 	return total_time == 0;
 }
 
-#ifndef HAL_SERVO_NTIM2
+#ifndef HAL_SERVO_NTIM
+	#ifndef HAL_SERVO_TIM0
 ISR(SIG_OUTPUT_COMPARE2)
+	#else
+ISR(SIG_OUTPUT_COMPARE0)
+	#endif
 #else
 void servo_lld_loop(void)
 #endif
@@ -88,7 +99,7 @@ void servo_lld_loop(void)
 			if (servo_time_left[i] <= ITERATION_STEP) {
 				servo_time_left[i] = 0;
 				tmp = servo_target[i];
-				debug("fs %d %d\n",i,tmp);
+				debug("# fs %d %d\n", i, tmp);
 			} else {
 				servo_time_left[i] -= ITERATION_STEP;
 				tmp = servo_start[i];
