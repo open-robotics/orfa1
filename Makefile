@@ -67,7 +67,7 @@ $(target).hex: $(target).elf
 	chmod -x $(target).hex $(target).elf
 
 $(target).elf: $(OBJS) $(LIBS_RULES)
-	$(CC) $(CFLAGS) -o $(target).elf $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $(target).elf $(OBJS) $(LIBS)
 
 $(target).cof: $(target).elf
 	$(COFFCONVERT) -O coff-ext-avr $< $(target).cof
