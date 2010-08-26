@@ -30,8 +30,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "eterm/eterm_main.h"
 #include "core/i2cadapter.h"
 #include "core/scheduler.h"
+#include "hal/i2c.h"
 
 // -- virtual slave --
 
@@ -151,8 +153,8 @@ bool i2c_rxc_handler(uint8_t *c, bool *ack)
 SYSTEM_INIT()
 {
 	// Set I2C
-	i2c_set_handlers(i2c_start_handler, i2c_stop_handler,
-			i2c_txc_handler, i2c_rxc_handler);
+	i2c_set_evt_handlers(i2c_start_handler, i2c_stop_handler);
+	i2c_set_slave_handlers(i2c_txc_handler, i2c_rxc_handler);
 	// register supertask
 	gate_supertask_register(gate_supertask);
 	// register introspection driver
@@ -169,3 +171,4 @@ int main(void)
 	gate_scheduler_loop();
 	return 0;
 }
+

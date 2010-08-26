@@ -22,56 +22,35 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 
-/** Serial-to-I2C gate
- * @file serialgate.h
- *
- * @p Read i2c regex
- * <aa> — i2c address & 0xFE
- * <ll> — read count
- * @code
- * S[0-9a-fA-F]{2}<aa>[0-9a-fA-F]{2}<ll>
- * @endcode
- *
- * @p Write i2c regex
- * <aa> — i2c address | 0x01
- * <dd> — write data
- * @code
- * S[0-9a-fA-F]{2}<aa>((\\.|[0-9a-fA-F]{2})<dd>)+
- * @endcode
- *
- * @p I2C regex
- * <read-i2c-regex> — see read i2c regex
- * <write-i2c-regex> — see write i2c regex
- * @code
- * (<read-i2c-regex>|<write-i2c-regex>)+P
- * @endcode
- *
- * @p Read register regex
- * <aa> — device address
- * <rr> — register
- * <ll> — read count
- * @code
- * R[0-9a-fA-F]{2}<aa>[0-9a-fA-F]{2}<rr>([0-9a-fA-F]{2}<ll>){0,1}
- * @endcode
- *
- * @p Write register regex
- * <aa> — device address
- * <rr> — register
- * <dd> — write data
- * @code
- * W[0-9a-fA-F]{2}<aa>[0-9a-fA-F]{2}<rr>((\\.|[0-9a-fA-F]{2})<dd>)+
- * @endcode
- */
-// vim:set ts=4 sw=4 et:
+#include "eterm_main.h"
+#include "i2c.h"
+#include "hal/serial.h"
+#include "eterm.h"
 
-#ifndef SERAILGATE_H
-#define SERAILGATE_H
 
-void serialgate_init(void);
-void serialgate_supertask(void);
+void register_serialgate(void);
+void register_orc32(void);
 
-#define gate_supertask serialgate_supertask
-#define gate_init serialgate_init
 
-#endif // SERAILGATE_H
+void eterm_init(void) {
+	register_serialgate();
+	register_orc32();
+	register_help();
+
+	#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
+	serial_init(BAUD);
+	stdin = stdout = stderr = &serial_fdev;
+	#endif
+
+	i2c_init();
+}
+
+void eterm_supertask(void) {
+	if(serial_isempty())
+		return;
+
+	uint8_t c = getchar();
+	
+	parse_command(c, false);
+}
 

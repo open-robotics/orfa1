@@ -21,36 +21,20 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Serial gate common defines
- * @file common.h
- *
- * @author Vladimir Ermakov <vooon341@gmail.com>
+
+/** Serial embedded terminal
+ * @file eterm_main.h
  */
+// vim:set ts=4 sw=4 et:
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef ETERM_M_H
+#define ETERM_M_H
 
-#include <stdint.h>
-#include <stdbool.h>
+void eterm_init(void);
+void eterm_supertask(void);
 
-/// Debug print
-#ifndef NDEBUG
-#include <stdio.h>
-#define debug(...) printf(__VA_ARGS__)
-#else
-#define debug(...)
-#endif
+#define gate_supertask eterm_supertask
+#define gate_init eterm_init
 
-/// error codes
-typedef enum {
-	NO_ERROR=0,      //!< no error
-	INTERNAL_ERROR,	 //!< internal parser error
-	INVALID_COMMAND, //!< unknown command
-	INVALID_XDIGIT,	 //!< non hex character
-	INVALID_DATA,    //!< invalid data
-	P_EXPECTED,      //!< 'P' expected (i2c)
-	NACK_ADDRESS,    //!< NAck adress
-	NACK_BYTE,       //!< NAck byte
-} error_code_t;
+#endif // ETERM_M_H
 
-#endif // COMMON_H
