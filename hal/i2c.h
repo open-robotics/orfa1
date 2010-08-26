@@ -43,6 +43,10 @@
  */
 #define i2c_request  i2c_lld_request
 
+/** Clear bus
+ */
+#define i2c_clearbus i2c_lld_clearbus
+
 #ifdef I2C_NO_ISR
 /** I2C controller task
  */

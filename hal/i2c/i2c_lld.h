@@ -37,8 +37,14 @@ void i2c_lld_set_freq(uint16_t freq);
  */
 uint16_t i2c_lld_get_freq(void);
 
+/** Set self slave address
+ */
 void i2c_lld_set_local(uint8_t addr);
 uint8_t i2c_lld_get_local(void);
+
+/** Reset I2C controller and bus
+ */
+void i2c_lld_clearbus(void);
 
 uint8_t i2c_lld_start_transmission(uint8_t);
 uint8_t i2c_lld_request(uint8_t);

@@ -442,3 +442,8 @@ uint8_t i2c_lld_get_local(void)
 }
 #endif
 
+void i2c_lld_clearbus(void)
+{
+	// TODO
+}
+

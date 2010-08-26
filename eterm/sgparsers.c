@@ -10,13 +10,22 @@
  */
 
 #include "eterm.h"
+#include "lib/cbuf.h"
 #include "lib/hex.h"
+#include "hal/i2c.h"
+#include <util/atomic.h>
 
 #define PROTOCOL_VERION_STRING "V1.2"
-#define BUFF_SIZE 65
-#define ARRAY_SIZE(arr)  (sizeof(arr)/sizeof(arr[0]))
+#define ARRAY_SIZE(arr)  (sizeof(arr) / sizeof(arr[0]))
 #define is_i2c_read(addr) ((addr)&0x01)
 
+// -- common --
+
+static uint8_t byte;
+static uint8_t addr;
+static uint8_t count;
+static uint8_t read_count;
+static cbf_t iobuff;
 
 static bool get_xbyte(char c, uint8_t *ret, bool reinit) {
 	static bool step;
@@ -41,6 +50,21 @@ static bool get_xbyte(char c, uint8_t *ret, bool reinit) {
 	}
 }
 
+static bool master_rx_handler(uint8_t c) {
+	cbf_put(&iobuff, c);
+	count++;
+	return count < read_count;
+}
+
+static bool master_tx_handler(uint8_t *c, bool *ack) {
+	bool ack_ = !cbf_isempty(&iobuff);
+	*c = cbf_get(&iobuff);
+	count++;
+	return ack_;
+}
+
+// -- parsers --
+
 bool comment_parser(char c, bool reinit) {
 	return c == '\n';
 }
@@ -55,7 +79,7 @@ bool version_parser(char c, bool reinit) {
 
 bool clearbus_parser(char c, bool reinit) {
 	if (c == '\n') {
-		puts("%% i2c clear bus called");
+		i2c_clearbus();
 		puts("X");
 		return true;
 	}
@@ -63,26 +87,28 @@ bool clearbus_parser(char c, bool reinit) {
 }
 
 bool local_parser(char c, bool reinit) {
-	static uint8_t addr;
 	if (reinit) {
-		get_xbyte(c, &addr, true);
+		get_xbyte(c, &byte, true);
 		return false;
 	}
 
-	if (get_xbyte(c, &addr, false)) {
-		addr &= 0xfe;
-		printf("%% set local 0x%02X\n", addr);
+	if (get_xbyte(c, &byte, false)) {
+		byte >>= 1;
+		i2c_set_local(byte);
 	}
 
 	if (c == '\n') {
-		printf("L%02X\n", addr);
+		byte = i2c_get_local() << 1;
+		putchar('L');
+		putchar(itox(byte >> 4));
+		putchar(itox(byte & 0xf));
+		putchar('\n');
 		return true;
 	}
 	return false;
 }
 
 bool speed_parser(char c, bool reinit) {
-	static uint8_t byte;
 	static uint16_t speed;
 	if (reinit) {
 		speed = 0;
@@ -96,20 +122,26 @@ bool speed_parser(char c, bool reinit) {
 	}
 
 	if (c == '\n') {
-		printf("C%04X\n", speed);
+		if (speed > 10 && speed < 600) {
+			i2c_set_freq(speed);
+		}
+
+		speed = i2c_get_freq();
+		putchar('C');
+		putchar(itox((speed >> 12)));
+		putchar(itox((speed >> 8) & 0xf));
+		putchar(itox((speed >> 4) & 0xf));
+		putchar(itox((speed) & 0xf));
+		putchar('\n');
 		return true;
 	}
 	return false;
 }
 
 bool i2c_parser(char c, bool reinit) {
-	static uint8_t byte;
-	static uint8_t addr;
-	static uint8_t buff[BUFF_SIZE];
-	static uint8_t count;
 
 	if (reinit) {
-		count = 0;
+		cbf_init(&iobuff);
 		get_xbyte(c, &byte, true);
 		return false;
 	}
@@ -121,45 +153,52 @@ bool i2c_parser(char c, bool reinit) {
 	}
 
 	if (get_xbyte(c, &byte, false)) {
-		if (count == 0) {
-			addr = byte;
-		}
-		buff[count++] = byte;
-		if (count > BUFF_SIZE-1) {
-			count = BUFF_SIZE-1;
-		}
+		cbf_put(&iobuff, byte);
 	}
 
 	if (c == '\n' || c == 'S') {
+		addr = cbf_get(&iobuff);
 		if (is_i2c_read(addr)) {
-			byte = buff[1];
-			printf("i2c_read 0x%02X 0x%02X\n", addr, byte); // here read
+			read_count = cbf_get(&iobuff);
 
-			printf("SR");
-			for (int i=0; i < count; i++)
-				printf("%02X", buff[i]);
+			// flush
+			count = 0;
+			cbf_init(&iobuff);
+
+			i2c_request(addr >> 1);
+
+			putchar('S');
+			putchar('R');
+			while (!cbf_isempty(&iobuff)) {
+				byte = cbf_get(&iobuff);
+				putchar(itox(byte >> 4));
+				putchar(itox(byte & 0xf));
+			}
 		} else {
-			printf("i2c_write 0x%02X", addr);
-			for (int i=1; i <= count-1; i++)
-				printf(" %02X", buff[i]);
-			printf("\n");
-			printf("SW");
-			for (int i=1; i <= count; i++)
+			// flush
+			count = 0;
+
+			i2c_start_transmission(addr >> 1);
+			
+			putchar('S');
+			putchar('W');
+			for (int i=0; i < count; i++)
 				putchar('A');
 		}
 		
 		// reset
-		count = 0;
 		get_xbyte(c, &byte, true);
 
 		if (c == '\n') {
-			printf("P\n");
+			puts("P");
 			return true;
 		}
 	}
 
 	return false;
 }
+
+// -- table --
 
 parser_t sgparsers[] = {
 	PARSER_INIT('%', "comment", comment_parser),
@@ -171,6 +210,7 @@ parser_t sgparsers[] = {
 };
 
 void register_serialgate(void) {
+	i2c_set_master_handlers(master_rx_handler, master_tx_handler);
 	parser_t *it = sgparsers;
 	for (int i=0; i < ARRAY_SIZE(sgparsers); i++, it++) {
 		register_parser(it);
