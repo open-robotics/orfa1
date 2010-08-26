@@ -35,6 +35,7 @@
 #include <avr/interrupt.h>
 #include <util/twi.h>
 #include <stdint.h>
+#include <string.h>
 #include "i2c_lld.h"
 
 
@@ -71,25 +72,19 @@ static volatile uint8_t inCallback = 0;
 #endif
 
 
-void i2c_lld_set_evt_handlers(
-		i2cStartHandler start,
-		i2cStartHandler stop)
+void i2c_lld_set_evt_handlers(i2cStartHandler start, i2cStopHandler stop)
 {
 	startHandler = start;
 	stopHandler = stop;
 }
 
-void i2c_lld_set_slave_handlers(
-		i2cRxHandler slave_rx,
-		i2cTxHandler slave_tx)
+void i2c_lld_set_slave_handlers(i2cRxHandler slave_rx, i2cTxHandler slave_tx)
 {
 	slaveRxHandler = slave_rx;
 	slaveTxHandler = slave_tx;
 }
 
-void i2c_lld_set_master_handlers(
-		i2cRxHandler master_rx,
-		i2cTxHandler master_tx)
+void i2c_lld_set_master_handlers(i2cRxHandler master_rx, i2cTxHandler master_tx)
 {
 	masterRxHandler = master_rx;
 	masterTxHandler = master_tx;
@@ -393,7 +388,7 @@ static inline uint8_t i2c_get_twbr(uint16_t freq, uint8_t twps)
 	return (((F_CPU / 2000) / freq) - 8) / (1 << (twps *2));
 }
 
-static void i2c_lld_set_freq(uint16_t freq)
+void i2c_lld_set_freq(uint16_t freq)
 {
 	uint8_t twps;
 
@@ -402,7 +397,7 @@ static void i2c_lld_set_freq(uint16_t freq)
 	TWSR = twps & 0x03;
 }
 
-static uint16_t i2c_lld_get_freq(void)
+uint16_t i2c_lld_get_freq(void)
 {
 	uint8_t twps = 1 << (2 * (TWSR & 0x03));
 	uint16_t freq = F_CPU / 1000UL;
@@ -432,7 +427,7 @@ void i2c_lld_init(void)
 void i2c_lld_init_slave(uint8_t addr)
 {
 	slave_addr = addr;
-	i2c_init();
+	i2c_lld_init();
 }
 
 void i2c_lld_set_local(uint8_t addr)

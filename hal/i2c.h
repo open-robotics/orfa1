@@ -1,5 +1,5 @@
-#ifndef I2C_H
-#define I2C_H
+#ifndef I2C_HAL_H
+#define I2C_HAL_H
 
 #include "i2c_lld.h"
 
@@ -49,5 +49,5 @@
 #define i2c_loop  i2c_lld_loop
 #endif
 
-#endif
+#endif // I2C_HAL_H
 

@@ -156,11 +156,11 @@ SYSTEM_INIT()
 	i2c_set_evt_handlers(i2c_start_handler, i2c_stop_handler);
 	i2c_set_slave_handlers(i2c_txc_handler, i2c_rxc_handler);
 	// register supertask
-	gate_supertask_register(gate_supertask);
+	gate_supertask_register(eterm_supertask);
 	// register introspection driver
 	gate_init_introspection();
 	// init gate deivces
-	gate_init();
+	eterm_init();
 }
 
 /** Main

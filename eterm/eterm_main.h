@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2010 Vladimir Ermakov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-
 /** Serial embedded terminal
  * @file eterm_main.h
+ * @author Ermakov Vladimir
  */
 // vim:set ts=4 sw=4 et:
 
@@ -32,9 +32,6 @@
 
 void eterm_init(void);
 void eterm_supertask(void);
-
-#define gate_supertask eterm_supertask
-#define gate_init eterm_init
 
 #endif // ETERM_M_H
 

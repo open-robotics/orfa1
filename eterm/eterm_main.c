@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2010 Vladimir Ermakov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,15 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** eTerm connector
+ *
+ * @author Ermakov Vladimir
+ */
 
-#include "eterm_main.h"
-#include "i2c.h"
-#include "hal/serial.h"
 #include "eterm.h"
+#include "eterm_main.h"
+#include "hal/i2c.h"
+#include "hal/serial.h"
 
 
 void register_serialgate(void);

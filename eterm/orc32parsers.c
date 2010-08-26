@@ -7,10 +7,10 @@
 #include "eterm.h"
 
 static bool servo_parser(char c, bool reinit) {
-	uint8_t servo;
-	uint16_t position;
-	uint16_t speed;
-	uint16_t time;
+//	uint8_t servo;
+//	uint16_t position;
+//	uint16_t speed;
+//	uint16_t time;
 
 	return c == '\n';
 }

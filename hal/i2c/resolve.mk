@@ -2,7 +2,7 @@
 
 DEFINES += -DI2C_SLAVE -DI2C_MASTER
 INCLUDE_DIRS += -I${ORFA}/hal/i2c
-HAL_SRC += ${ORFA}/i2c/i2c.c
+HAL_SRC += ${ORFA}/hal/i2c/i2c_lld.c
 
 ifeq "$(I2C_SLAVE_ADDRESS)" ""
     I2C_SLAVE_ADDRESS = 0x7F

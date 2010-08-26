@@ -10,23 +10,13 @@
  */
 
 #include "eterm.h"
+#include "lib/hex.h"
 
 #define PROTOCOL_VERION_STRING "V1.2"
-#define BUFF_SIZE 64
+#define BUFF_SIZE 65
 #define ARRAY_SIZE(arr)  (sizeof(arr)/sizeof(arr[0]))
 #define is_i2c_read(addr) ((addr)&0x01)
 
-
-static int8_t xtoi(char c) {
-	c = toupper(c);
-	if (c >= '0' && c <= '9') {
-		return c - '0';
-	} else if (c >= 'A' && c <= 'F') {
-		return c - 'A' + 10;
-	} else {
-		return -1;
-	}
-}
 
 static bool get_xbyte(char c, uint8_t *ret, bool reinit) {
 	static bool step;

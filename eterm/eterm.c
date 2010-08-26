@@ -18,7 +18,7 @@ static parser_t *find_parser(char command) {
 void register_parser(parser_t *parser) {
 	parser_t *alredy_added = find_parser(parser->command);
 	if (alredy_added) {
-		perror("parser alredy added");
+		//perror("parser alredy added");
 		return;
 	}
 	parser->next = rootparser;
@@ -45,7 +45,7 @@ bool parse_command(char c, bool reinit) {
 	if (!currparser) {
 		currparser = find_parser(c);
 		if (!currparser) {
-			perror("unknown command");
+			//perror("unknown command");
 			return false;
 		}
 		res = currparser->callback(c, true);
