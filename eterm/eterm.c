@@ -82,7 +82,7 @@ static bool help_parser(char c, bool reinit) {
 
 static parser_t helpparsers[] = {
 	PARSER_INIT('?', "short help", help_parser),
-	PARSER_INIT('h', "short help", help_parser)
+	PARSER_INIT('H', "short help", help_parser)
 };
 
 void register_help(void) {

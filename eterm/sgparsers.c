@@ -16,7 +16,6 @@
 #include <util/atomic.h>
 
 #define PROTOCOL_VERION_STRING "V1.2"
-#define ARRAY_SIZE(arr)  (sizeof(arr) / sizeof(arr[0]))
 #define is_i2c_read(addr) ((addr)&0x01)
 
 // -- common --
@@ -211,9 +210,8 @@ parser_t sgparsers[] = {
 
 void register_serialgate(void) {
 	i2c_set_master_handlers(master_rx_handler, master_tx_handler);
-	parser_t *it = sgparsers;
-	for (int i=0; i < ARRAY_SIZE(sgparsers); i++, it++) {
-		register_parser(it);
+	for (int i=0; i < ARRAY_SIZE(sgparsers); i++) {
+		register_parser(sgparsers + i);
 	}
 }
 
