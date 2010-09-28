@@ -30,6 +30,8 @@ static bool servo_move_parser(char c, bool reinit) {
 	static uint16_t _servo=0;
 	static uint16_t _num=0;
 	static uint8_t _cmd=' ';
+
+	//printf("smp c=%c init=%d state=%d\n",c,reinit,state_cmd);
 	
 	if(reinit)
 	{
@@ -43,7 +45,6 @@ static bool servo_move_parser(char c, bool reinit) {
 		_cmd=' ';
 		_servo=0;
 		_num=0;
-		return false;
 	};
 
 	switch(state_cmd) {
