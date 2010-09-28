@@ -76,7 +76,7 @@ $(target).lss: $(target).elf
 	$(OBJDUMP) -d $< > $@
 
 ram_size: $(target).elf
-	readelf -s $< | grep OBJECT | awk '{ SUM += $$3 } END { print SUM }'
+	readelf -s $< | awk '$$4 ~ /OBJECT/ { SUM += $$3 } END { print SUM }'
 
 %.o: %.c $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
