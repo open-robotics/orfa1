@@ -8,7 +8,10 @@
 
 /** Parser init
  */
-#define PARSER_INIT(_command, _help, _callback) { .command = _command, .help = _help, .callback = _callback }
+#define PARSER_INIT(_command, _help, _callback) \
+	{ .command = _command, .help = _help, .callback = _callback }
+
+#define ARRAY_SIZE(arr)  (sizeof(arr) / sizeof(arr[0]))
 
 /** Parser callback
  * @param *c      current char
@@ -36,7 +39,6 @@ bool parse_command(char c, bool reinit);
 /** register '?' and 'h' commands
  */
 void register_help(void);
-
 
 #endif // !ETERM_H
 
