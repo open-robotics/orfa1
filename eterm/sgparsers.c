@@ -15,6 +15,8 @@
 #include "hal/i2c.h"
 #include <util/atomic.h>
 
+#include <core/i2cadapter.h>
+
 #define PROTOCOL_VERION_STRING "V1.2"
 #define is_i2c_read(addr) ((addr)&0x01)
 
@@ -139,6 +141,9 @@ bool speed_parser(char c, bool reinit) {
 
 bool i2c_parser(char c, bool reinit) {
 
+	static uint8_t reg=0;
+	static uint8_t buffer[65];
+
 	if (reinit) {
 		cbf_init(&iobuff);
 		get_xbyte(c, &byte, true);
@@ -151,7 +156,12 @@ bool i2c_parser(char c, bool reinit) {
 		return false;
 	}
 
+	if (c == ' ') {
+		return false;
+	}
+
 	if (get_xbyte(c, &byte, false)) {
+		//printf("add buf %d\n",byte);
 		cbf_put(&iobuff, byte);
 	}
 
@@ -159,12 +169,21 @@ bool i2c_parser(char c, bool reinit) {
 		addr = cbf_get(&iobuff);
 		if (is_i2c_read(addr)) {
 			read_count = cbf_get(&iobuff);
+			//printf("len-read=%d\n",read_count);
 
 			// flush
 			count = 0;
 			cbf_init(&iobuff);
 
-			i2c_request(addr >> 1);
+			if( i2c_get_local() == addr >> 1 ){
+				//local request
+				gate_register_read(reg, buffer, &read_count);
+				//printf("len-readed=%d\n",read_count);
+				for(uint8_t i=0; i<read_count; i++) cbf_put(&iobuff,buffer[i]);
+			}else{
+				//i2c bus real request
+				i2c_request(addr >> 1);
+			};
 
 			putchar('S');
 			putchar('R');
@@ -177,7 +196,18 @@ bool i2c_parser(char c, bool reinit) {
 			// flush
 			count = 0;
 
-			i2c_start_transmission(addr >> 1);
+			if( i2c_get_local() == addr >> 1 ){
+				//local request
+				reg = cbf_get(&iobuff);
+				//printf("reg=%d\n",reg);
+				uint8_t i=0;
+				while (!cbf_isempty(&iobuff)) buffer[i++] = cbf_get(&iobuff);
+				//printf("len-write=%d\n",i);
+				gate_register_write(reg, buffer, i);
+			}else{
+				//i2c bus real request
+				i2c_start_transmission(addr >> 1);
+			};
 			
 			putchar('S');
 			putchar('W');
