@@ -60,10 +60,10 @@ static GATE_RESULT result = GR_OK;
  */
 bool i2c_start_handler(uint8_t flag)
 {
-	debug("# > i2c_start_handler(0x%02x, %i)\n", 0, flag);
+	debug("%% > i2c_start_handler(0x%02x, %i)\n", 0, flag);
 
 	if (is_restart && !is_read && data_len > 0) {
-		debug("# `-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
+		debug("%% `-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 		data_len = 0;
 	}
@@ -78,7 +78,7 @@ bool i2c_start_handler(uint8_t flag)
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
 		result = gate_register_read(register_addr, buf, &data_len);
-		debug("# `-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
+		debug("%% `-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 	}
 
 	prev_is_read = is_read;
@@ -90,11 +90,11 @@ bool i2c_start_handler(uint8_t flag)
  */
 void i2c_stop_handler(void)
 {
-	debug("# > i2c_stop_handler()\n");
+	debug("%% > i2c_stop_handler()\n");
 
 	is_restart = false;
 	if (!is_read) {
-		debug("# `-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
+		debug("%% `-> gate_register_write(0x%02X, buf, %d)\n", register_addr, data_len);
 		result = gate_register_write(register_addr, buf+1, data_len);
 		data_len = 0;
 	}
@@ -119,7 +119,7 @@ bool i2c_txc_handler(uint8_t c)
 			data_len = BUF_LEN - 1;
 	}
 
-	debug("# > i2c_txc_handler(0x%02x)\n", c);
+	debug("%% > i2c_txc_handler(0x%02x)\n", c);
 	return true;
 }
 
@@ -134,7 +134,7 @@ bool i2c_rxc_handler(uint8_t *c, bool *ack)
 		data_len = BUF_LEN - 1;
 		read_ptr = buf;
 		result = gate_register_read(register_addr, buf, &data_len);
-		debug("# ,-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
+		debug("%% ,-> gate_register_read(0x%02X, buf, %d)\n", register_addr, data_len);
 	}
 
 	if (data_len > 0) {
@@ -144,7 +144,7 @@ bool i2c_rxc_handler(uint8_t *c, bool *ack)
 		*c = 0;
 	}
 
-	debug("# > i2c_rxc_handler(0x%02x, %i)\n", *c, *ack);
+	debug("%% > i2c_rxc_handler(0x%02x, %i)\n", *c, *ack);
 	return true;
 }
 
