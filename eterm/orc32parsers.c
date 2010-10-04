@@ -30,8 +30,6 @@ static bool servo_move_parser(char c, bool reinit) {
 	static uint16_t _num=0;
 	static uint8_t _cmd=' ';
 
-	//debug("%% smp c=%c init=%d state=%d\n", c, reinit, state_cmd);
-	
 	if (reinit) {
 		// Clear machine
 		for (uint8_t i=0; i < SERVO_LEN; i++) {
@@ -44,6 +42,8 @@ static bool servo_move_parser(char c, bool reinit) {
 		_servo = 0;
 		_num = 0;
 	}
+
+	c = toupper(c);
 
 	switch (state_cmd) {
 		case SMP_PARSE_NUMBER:
