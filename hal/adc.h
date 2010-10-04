@@ -56,6 +56,12 @@
 #define adc_result \
 	adc_lld_result
 
+#define adc_get_result \
+	adc_lld_get_result
+
+#define adc_get_mask \
+	adc_lld_get_mask
+
 #define adc_is_8bit() \
 	adc_lld_is_8bit()
 

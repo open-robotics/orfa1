@@ -48,6 +48,17 @@ static ADC_VOLATILE uint8_t conversion_channel = 0xFF;
 static ADC_VOLATILE uint8_t conversion_mask;
 static ADC_VOLATILE uint8_t mask;
 
+uint16_t adc_lld_get_result(uint8_t channel)
+{
+	if(channel>7)return 0;
+	return adc_lld_result[channel];
+}
+
+uint8_t adc_lld_get_mask(void)
+{
+	return mask;
+}
+
 void adc_lld_reconfigure(uint8_t new_mask)
 {
 	if (new_mask) {
