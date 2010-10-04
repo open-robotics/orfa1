@@ -1,3 +1,7 @@
+* 2010-10-04 Anton Botov <airsoft_ekb@mail.ru>
+	* eterm/sgparsers.c: workaround for local i2c requests (/wo incremental read support)
+	* eterm/orc32parsers.c: fix # in lower case
+
 * 2010-09-28 Anton Botov <airsoft_ekb@mail.ru>
 	* eterm/orc32parsers.c: first version of # and Q parsers
 

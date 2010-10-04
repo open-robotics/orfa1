@@ -407,7 +407,7 @@ static bool servo_move_parser(char c, bool reinit) {
 		_num = 0;
 	}
 
-	//printf("%% smp c=%c init=%d state=%d\n", c, reinit, state_cmd);
+	c = toupper(c);
 
 	switch (state_cmd) {
 		case SMP_PARSE_NUMBER:
