@@ -41,7 +41,7 @@
 #endif
 
 // extern data
-ADC_VOLATILE uint8_t adc_lld_config=0x04;
+ADC_VOLATILE uint8_t adc_lld_config = 0x05; // 10 bit @ AVCC
 ADC_VOLATILE uint16_t adc_lld_result[ADC_LEN];
 // ISR data
 static ADC_VOLATILE uint8_t conversion_channel = 0xFF;
@@ -63,7 +63,7 @@ void adc_lld_reconfigure(uint8_t new_mask)
 {
 	if (new_mask) {
 		// ADC on
-		uint8_t admux = ADMUX & ~ (_BV(ADLAR) | (3 << REFS0));
+		uint8_t admux = ADMUX & ~ (_BV(ADLAR) | (0x03 << REFS0));
 		
 		admux |= (adc_lld_config & 0x03) << REFS0;
 		if (!(adc_lld_config & 0x04)) {
