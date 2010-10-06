@@ -179,7 +179,7 @@ static bool query_status_parser(char c, bool reinit) {
 
 static parser_t orc32parsers[] = {
 	PARSER_INIT('#', "SSC-32 servo move", servo_move_parser),
-	PARSER_INIT('Q', "SSC-32 query global status", query_status_parser),
+	PARSER_INIT('Q', "SSC-32 query global status", query_status_parser)
 };
 
 void register_orc32(void) {
