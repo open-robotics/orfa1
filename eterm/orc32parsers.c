@@ -17,6 +17,187 @@
 #define debug(...)
 #endif
 
+void adc_ref(uint8_t _ref)
+{
+	if(_ref=='E') adc_config = (adc_config & 0xFC) | 0x00; //External
+	if(_ref=='A') adc_config = (adc_config & 0xFC) | 0x01; //AVCC
+	if(_ref=='I') adc_config = (adc_config & 0xFC) | 0x10; //Internal
+	if(_ref=='E') printf("AdcRef=Ext\n");
+	if(_ref=='I') printf("AdcRef=Int\n");
+	if(_ref=='A') printf("AdcRef=AVCC\n");
+	adc_reconfigure(adc_get_mask());
+}
+
+void adc_bits(uint8_t _ref)
+{
+	if(_ref=='1') adc_config = (adc_config & 0xFB) | 0x04; //10 bit
+	if(_ref=='8') adc_config = (adc_config & 0xFB) | 0x00; //8 bit
+	if(_ref=='1') printf("AdcBits=10\n");
+	if(_ref=='8') printf("AdcBits=8\n");
+	adc_reconfigure(adc_get_mask());
+}
+
+typedef enum {
+	ACP_GET_COMMAND,			//0/< get command
+	ACP_GET_c,					//1/< get "c" in "Adc"
+	ACP_GET_f,					//2/< get "f" in "Ref"
+	ACP_GET_t,					//2/< get "t" in "Bits"
+	ACP_GET_s,					//2/< get "s" in "Bits"
+	ACP_GET_VALUE,				//3/< get value
+	ACP_WAIT_EOL,				//4/< skip all chars because command end, wait for '\r' or '\n'
+	ACP_ERROR					//5/< skip all chars because command error, wait for '\r' or '\n'
+} state_cmd_acp;
+
+static bool adc_config_parser(char c, bool reinit) {
+	static state_cmd_acp state_cmd;
+	static uint8_t _cmd=' ';
+	static uint8_t _value=' ';
+	
+	if (reinit) {
+		// Clear machine
+		state_cmd = ACP_GET_COMMAND;
+		_value = ' ';
+		_cmd=' ';
+		return false;
+	}
+
+	//printf("*pcp c%c init%d st%d cm%c pt%c pn%c vl%c\n", c, reinit, state_cmd, _cmd, _port, _pin, _value);
+
+	switch (state_cmd) {
+		case ACP_GET_COMMAND:
+			switch(c) {
+				case 'R':
+				case 'B':
+					_cmd = c;
+					state_cmd = ACP_GET_VALUE;
+					return false;
+				case 'd':
+					state_cmd = ACP_GET_c;
+					return false;
+				case '\n':
+					printf("ERR01 in A cmd - wrong command\n");
+					return true;
+				default:
+					state_cmd = ACP_ERROR;
+					return false;
+			}
+			break;
+
+		case ACP_GET_VALUE:
+			switch(c) {
+				case ' ':
+					return false;
+				case '=':
+					return false;
+				case '8':
+				case '1':
+					if(_cmd!='B'){
+						state_cmd = ACP_ERROR;
+						return false;
+					};
+					_value=c;
+					state_cmd = ACP_WAIT_EOL;
+					return false;
+				case 'I':
+				case 'E':
+				case 'A':
+					if(_cmd!='R'){
+						state_cmd = ACP_ERROR;
+						return false;
+					};
+					_value=c;
+					state_cmd = ACP_WAIT_EOL;
+					return false;
+				case 'e': //Ref?
+					state_cmd = ACP_GET_f;
+					return false;
+				case 'i': //Bits?
+					state_cmd = ACP_GET_t;
+					return false;
+				case '\n':
+					printf("ERR04 in A cmd - wrong value\n");
+					return true;
+				default:
+					state_cmd = ACP_ERROR;
+					return false;
+			}
+			break;
+
+		case ACP_WAIT_EOL:
+			switch(c) {
+				case ' ':
+					return false;
+				case '\n':
+					if(_cmd=='R'){
+						adc_ref(_value);
+						return true;
+					};
+					if(_cmd=='B'){
+						adc_bits(_value);
+						return true;
+					};
+					return true;
+				default:
+					state_cmd = ACP_ERROR;
+					return false;
+			}
+			break;
+
+		
+		case ACP_GET_f:
+			switch(c) {
+				case 'f':
+					state_cmd = ACP_GET_VALUE;
+					return false;
+				case '\n':
+					printf("ERR06 in AdcRef cmd\n");
+					return true;
+				default:
+					state_cmd = ACP_ERROR;
+					return false;
+			}
+			break;
+
+		case ACP_GET_t:
+			switch(c) {
+				case 't':
+					state_cmd = ACP_GET_s;
+					return false;
+				case '\n':
+					printf("ERR07 in AdcBits cmd\n");
+					return true;
+				default:
+					state_cmd = ACP_ERROR;
+					return false;
+			}
+			break;
+
+		case ACP_GET_s:
+			switch(c) {
+				case 's':
+					state_cmd = ACP_GET_VALUE;
+					return false;
+				case '\n':
+					printf("ERR08 in AdcBits cmd\n");
+					return true;
+				default:
+					state_cmd = ACP_ERROR;
+					return false;
+			}
+			break;
+
+		default:
+			state_cmd = ACP_ERROR;
+			break;
+		
+	}
+
+	if (c != '\n')
+		return false;
+	printf("ERR09 in A cmd\n");
+	return true;
+}
+
 uint8_t pcp_adc_port(void)
 {
 #ifdef OR_AVR_M32_D
@@ -544,7 +725,8 @@ static bool query_status_parser(char c, bool reinit) {
 static parser_t orc32parsers[] = {
 	PARSER_INIT('#', "SSC-32 servo move", servo_move_parser),
 	PARSER_INIT('Q', "SSC-32 query global status", query_status_parser),
-	PARSER_INIT('P', "Pin control", pin_control_parser)
+	PARSER_INIT('P', "Pin control", pin_control_parser),
+	PARSER_INIT('A', "ADC config", adc_config_parser)
 };
 
 void register_orc32(void) {
