@@ -1,3 +1,6 @@
+* 2010-10-06 Vladimir Ermakov <vooon341@gmail.com>
+	* eterm/portparsers.c: move port parser from orc32
+
 * 2010-10-04 Anton Botov <airsoft_ekb@mail.ru>
 	* eterm/sgparsers.c: workaround for local i2c requests (/wo incremental read support)
 	* eterm/orc32parsers.c: fix # in lower case

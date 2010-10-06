@@ -34,11 +34,13 @@
 
 void register_serialgate(void);
 void register_orc32(void);
+void register_port(void);
 
 
 void eterm_init(void) {
 	register_serialgate();
 	register_orc32();
+	register_port();
 	register_help();
 
 	#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
