@@ -122,19 +122,20 @@ void pcp_get(uint8_t _port, uint8_t _pin)
 		uint8_t adc_mask=adc_get_mask();
 		if(adc_mask&(1<<_pin)){
 			uint32_t value=adc_get_result(_pin);
+			uint32_t copy=value;
 			
 			value=330*value; //*3.3V*100
 
 			if( adc_is_10bit() ){
 				//10bit
-				value=value>>10;
+				value=value/1023;
 			}else{
 				//8bit
-				value=value>>8;
+				value=value/255;
 			};
 			uint8_t volts=value/100;
 			uint8_t centivolts=value%100;
-			printf("%c%d:%d.%02d\n",_port,_pin,volts,centivolts);
+			printf("%c%d:%d.%02d (0x%04X)\n",_port,_pin,volts,centivolts,copy);
 			return;
 		};
 	};

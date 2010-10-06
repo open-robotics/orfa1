@@ -41,7 +41,7 @@
 #endif
 
 // extern data
-ADC_VOLATILE uint8_t adc_lld_config;
+ADC_VOLATILE uint8_t adc_lld_config=0x04;
 ADC_VOLATILE uint16_t adc_lld_result[ADC_LEN];
 // ISR data
 static ADC_VOLATILE uint8_t conversion_channel = 0xFF;
