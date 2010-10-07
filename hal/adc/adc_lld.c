@@ -50,7 +50,8 @@ static ADC_VOLATILE uint8_t mask;
 
 uint16_t adc_lld_get_result(uint8_t channel)
 {
-	if(channel>7)return 0;
+	if (channel > 7)
+		return 0;
 	return adc_lld_result[channel];
 }
 
@@ -66,8 +67,8 @@ void adc_lld_reconfigure(uint8_t new_mask)
 		uint8_t admux = ADMUX & ~ (_BV(ADLAR) | (0x03 << REFS0));
 		
 		admux |= (adc_lld_config & 0x03) << REFS0;
-		if (!(adc_lld_config & 0x04)) {
-			// 10-bit
+		if (adc_lld_is_8bit()) {
+			// 8-bit
 			admux |= _BV(ADLAR);
 		}
 
@@ -100,7 +101,7 @@ void adc_lld_loop(void)
 	ADCSRA |= _BV(ADIF);
 #endif
 	if (conversion_channel != 0xFF) {
-		adc_lld_result[conversion_channel] = ADC;
+		adc_lld_result[conversion_channel] = adc_lld_is_10bit()? ADC : ADCH;
 		conversion_channel++;
 		conversion_channel &= 0x07;
 		conversion_mask <<= 1;
