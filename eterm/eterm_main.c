@@ -43,6 +43,10 @@ void eterm_init(void) {
 	register_port();
 	register_help();
 
+	#if defined(OR_AVR_M32_D) || defined(OR_AVR_M128_DS)
+		register_md2();
+	#endif
+
 	#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
 	serial_init(BAUD);
 	stdin = stdout = stderr = &serial_fdev;
