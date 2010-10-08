@@ -32,10 +32,10 @@ typedef enum {
 	MCP_GET_VALUE,				//3/< get left value
 	MCP_WAIT_EOL,				//4/< skip all chars because command end, wait for '\r' or '\n'
 	MCP_ERROR,					//5/< skip all chars because command error, wait for '\r' or '\n'
-} state_cmd_pcp;
+} state_cmd_mcp;
 
 static bool md2_control_parser(char c, bool reinit) {
-	static state_cmd_pcp state_cmd;
+	static state_cmd_mcp state_cmd;
 	static uint8_t _cmd=' ';
 	static int16_t val_L=0;
 	static int16_t val_R=0;
@@ -53,12 +53,14 @@ static bool md2_control_parser(char c, bool reinit) {
 		return false;
 	}
 
+	//printf("%% st%d c=%c\n", state_cmd, c);
+
 	switch (state_cmd) {
 		case MCP_GET_COMMAND:
 			switch (c) {
 				case 'L':
 					_cmd = c;
-					state_cmd = MCP_GET_VALUE;
+					state_cmd = MCP_GET_R;
 					return false;
 
 				case 'r':
@@ -97,10 +99,10 @@ static bool md2_control_parser(char c, bool reinit) {
 					return false;
 
 				case '\n':
-					if (val_R == 999)
+					if (val_L == 999)
 						printf("ERR03 in DrvLR cmd - not enough params\n");
-					if (val_R < 999)
-						md2_setspeed(val_L, val_R);
+					val_R = (minux_flag)? -value : value;
+					md2_setspeed(val_L, val_R);
 					return true;
 
 				case '-':
@@ -113,15 +115,31 @@ static bool md2_control_parser(char c, bool reinit) {
 						state_cmd = MCP_ERROR;
 						return false;
 					}
-					if (val_L == 999) {
+					if (val_L != 999) {
 						printf("ERR05 in DrvLR cmd - first param ommited\n");
 						state_cmd = MCP_ERROR;
 						return false;
 					}
-					val_R = (minux_flag)? -value : value;
+					val_L = (minux_flag)? -value : value;
 					value = 0;
 					minux_flag = false;
 					return false;
+
+				default:
+					state_cmd = MCP_ERROR;
+					return false;
+			}
+			break;
+
+		case MCP_GET_R:
+			switch (c) {
+				case 'R':
+					state_cmd = MCP_GET_VALUE;
+					return false;
+
+				case '\n':
+					printf("ERR06 in Drv cmd\n");
+					return true;
 
 				default:
 					state_cmd = MCP_ERROR;
@@ -144,6 +162,7 @@ static bool md2_control_parser(char c, bool reinit) {
 					return false;
 			}
 			break;
+
 
 		default:
 			state_cmd = MCP_ERROR;
