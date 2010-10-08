@@ -3,21 +3,24 @@
 #include "core/ports.h"
 #include "hal/motor.h"
 
+#include <stdlib.h>
+#include <math.h>
+
 #define ILLIGAL_PORT  100
 
 // -- helpers --
 
 static inline void md2_setspeed(int16_t left, int16_t right)
 {
-	if(abs(left)>100 || abs(right)>100){
+	if (abs(left) > 100 || abs(right) > 100) {
 		printf("ERR in DriveLR cmd - only -100..+100 values allowed\n");
 		return;
-	};
-	motor_set_direction(0, (left<0?1:0));
-	motor_set_direction(1, (right<0?1:0));
-	motor_set_pwm(0,abs(left)*100/255);
-	motor_set_pwm(1,abs(right)*100/255);
-	printf("Drv(%d,%d)\n",left,right);
+	}
+	motor_set_direction(0, left < 0);
+	motor_set_direction(1, right < 0);
+	motor_set_pwm(0, abs(left) * 100/255);
+	motor_set_pwm(1, abs(right) * 100/255);
+	printf("Drv(%d,%d)\n", left, right);
 }
 
 // -- parser --
@@ -34,28 +37,28 @@ typedef enum {
 static bool md2_control_parser(char c, bool reinit) {
 	static state_cmd_pcp state_cmd;
 	static uint8_t _cmd=' ';
-	static int16_t _valueL=0;
-	static int16_t _valueR=0;
-	static int16_t _value=0;
-	static uint8_t _minus=' ';
+	static int16_t val_L=0;
+	static int16_t val_R=0;
+	static int16_t value=0;
+	static bool minux_flag=false;
 	
 	if (reinit) {
 		// Clear machine
 		state_cmd = MCP_GET_COMMAND;
 		_cmd = ' ';
-		_valueL=999;
-		_valueR=999;
-		_value=0;
-		_minus=' ';
+		val_L = 999;
+		val_R = 999;
+		value = 0;
+		minux_flag = false;
 		return false;
 	}
 
 	switch (state_cmd) {
 		case MCP_GET_COMMAND:
-			switch(c) {
+			switch (c) {
 				case 'L':
 					_cmd = c;
-					state_cmd = MCP_GET_L_VALUE;
+					state_cmd = MCP_GET_VALUE;
 					return false;
 
 				case 'r':
@@ -84,37 +87,44 @@ static bool md2_control_parser(char c, bool reinit) {
 				case '7':
 				case '8':
 				case '9':
-					_value = _value*10+c-'0';
-					if(_value>100) state_cmd = MCP_ERROR;
+					value = value*10+c-'0';
+					if (value > 100)
+						state_cmd = MCP_ERROR;
 					return false;
+
 				case ' ':
 				case '=':
 					return false;
+
 				case '\n':
-					if(_value_R==999) printf("ERR03 in DrvLR cmd - not enough params\n");
-					if(_value_R<999) md2_setspeed(_value_L,_value_R);
+					if (val_R == 999)
+						printf("ERR03 in DrvLR cmd - not enough params\n");
+					if (val_R < 999)
+						md2_setspeed(val_L, val_R);
 					return true;
+
 				case '-':
-					_minus='-';
+					minux_flag = true;
 					return false;
+
 				case ',':
-					if(_value_R<999){
+					if (val_R < 999) {
 						printf("ERR04 in DrvLR cmd - to many params\n");
 						state_cmd = MCP_ERROR;
 						return false;
-					};
-					if(_value_L==999){
+					}
+					if (val_L == 999) {
 						printf("ERR05 in DrvLR cmd - first param ommited\n");
 						state_cmd = MCP_ERROR;
 						return false;
-					};
-					_value_R=_value;
-					if(_minus=='-') _value_R=-_value;
-					_value=0;
-					_minus=' ';
+					}
+					val_R = (minux_flag)? -value : value;
+					value = 0;
+					minux_flag = false;
 					return false;
+
 				default:
-					state_cmd = PCP_ERROR;
+					state_cmd = MCP_ERROR;
 					return false;
 			}
 			break;
@@ -149,13 +159,13 @@ static bool md2_control_parser(char c, bool reinit) {
 
 // -- object --
 
-static parser_t portparsers[] = {
+static parser_t md2parsers[] = {
 	PARSER_INIT('D', "Drive chassis control", md2_control_parser)
 };
 
-void register_port(void) {
-	for (uint8_t i=0; i < ARRAY_SIZE(portparsers); i++) {
-		register_parser(portparsers + i);
+void register_md2(void) {
+	for (uint8_t i=0; i < ARRAY_SIZE(md2parsers); i++) {
+		register_parser(md2parsers + i);
 	}
 }
 

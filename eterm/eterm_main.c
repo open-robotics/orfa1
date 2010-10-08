@@ -35,7 +35,9 @@
 void register_serialgate(void);
 void register_orc32(void);
 void register_port(void);
-
+#ifdef HAVE_MOTOR
+void register_md2(void);
+#endif
 
 void eterm_init(void) {
 	register_serialgate();
@@ -43,7 +45,7 @@ void eterm_init(void) {
 	register_port();
 	register_help();
 
-	#if defined(OR_AVR_M32_D) || defined(OR_AVR_M128_DS)
+	#ifdef HAVE_MOTOR
 		register_md2();
 	#endif
 

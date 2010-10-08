@@ -1,3 +1,7 @@
+* 2010-10-08 Vladimir Ermakov <vooon341@gmail.com>
+	* hal/adc/adc_lld.c: fix 8-bit mode
+	* eterm/md2parsers.c: fix build
+
 * 2010-10-06 Vladimir Ermakov <vooon341@gmail.com>
 	* eterm/portparsers.c: move port parser from orc32
 
