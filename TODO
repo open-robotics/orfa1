@@ -1,0 +1,12 @@
+For release 0.9.0:
+
+- Write support code OR-AVR-M32-D
+- Remove workaround for local requests
+
+Check list:
+- external I2C request (f.e. Devantech SFR)
+- internal I2C device
+- slave I2C
+- servo
+- ADC
+- GPIO
