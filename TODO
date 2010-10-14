@@ -1,6 +1,6 @@
 For release 0.9.0:
 
-- Write support code OR-AVR-M32-D
+- Write support code for OR-AVR-M32-D
 
 Check list:
 - external I2C request (f.e. Devantech SFR)
