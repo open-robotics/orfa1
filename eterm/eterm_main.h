@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2010 Vladimir Ermakov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,36 +21,17 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Serial gate common defines
- * @file common.h
- *
- * @author Vladimir Ermakov <vooon341@gmail.com>
+/** Serial embedded terminal
+ * @file eterm_main.h
+ * @author Ermakov Vladimir
  */
+// vim:set ts=4 sw=4 et:
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef ETERM_M_H
+#define ETERM_M_H
 
-#include <stdint.h>
-#include <stdbool.h>
+void eterm_init(void);
+void eterm_supertask(void);
 
-/// Debug print
-#ifndef NDEBUG
-#include <stdio.h>
-#define debug(...) printf(__VA_ARGS__)
-#else
-#define debug(...)
-#endif
+#endif // ETERM_M_H
 
-/// error codes
-typedef enum {
-	NO_ERROR=0,      //!< no error
-	INTERNAL_ERROR,	 //!< internal parser error
-	INVALID_COMMAND, //!< unknown command
-	INVALID_XDIGIT,	 //!< non hex character
-	INVALID_DATA,    //!< invalid data
-	P_EXPECTED,      //!< 'P' expected (i2c)
-	NACK_ADDRESS,    //!< NAck adress
-	NACK_BYTE,       //!< NAck byte
-} error_code_t;
-
-#endif // COMMON_H

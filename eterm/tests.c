@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2010 Vladimir Ermakov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,61 +21,27 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
+/** test for eTerm
+ * @file eterm/tests.c
+ *
+ * @author Vladimir Ermakov <vooon341@gmail.com>
+ */
 
-#include "serialgate.h"
-#include "common.h"
-#include "i2c.h"
-#include "lib/cbuf.h"
-#include "hal/serial.h"
-#include "parser.h"
-#include "command.h"
+#include "eterm.h"
 
-#include <stdint.h>
-#include <stdio.h>
+bool register_serialgate(void);
+bool register_orc32(void);
 
-//! command buffer
-static cbf_t cmd_buf, tx_buf;
+int main(int argv, char *argc[]) {
+	register_serialgate();
+	register_orc32();
+	register_help();
 
-//! error state
-static error_code_t error_code=NO_ERROR;
-
-void serialgate_init(void)
-{
-
-	cbf_init(&cmd_buf);
-	cbf_init(&tx_buf);
-
-	#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
-	serial_init(BAUD);
-	stdin = stdout = stderr = &serial_fdev;
-	#endif
-
-	i2c_init();
-}
-
-void serialgate_supertask(void)
-{
-	if(serial_isempty())
-		return;
-
-	uint8_t c = getchar();
-
-	if(parse_cmd(c, &cmd_buf, &error_code))
-	{
-		if(exec_cmd(&cmd_buf, &tx_buf, &error_code))
-		{
-			while(!cbf_isempty(&tx_buf))
-			{
-				putchar(cbf_get(&tx_buf));
-			}
-		}
+	while (true) {
+		char c = getchar();
+		bool res = parse_command(c, false);
 	}
 
-	if(error_code != NO_ERROR)
-	{
-		print_error(error_code);
-		cbf_init(&tx_buf);
-		error_code = NO_ERROR;
-	}
+	return 0;
 }
 

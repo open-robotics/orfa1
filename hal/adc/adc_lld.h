@@ -70,6 +70,12 @@ extern ADC_VOLATILE uint16_t adc_lld_result[ADC_LEN];
  */
 void adc_lld_reconfigure(uint8_t new_mask);
 
+/** Get ADC mask
+ */
+uint8_t adc_lld_get_mask(void);
+
+uint16_t adc_lld_get_result(uint8_t channel);
+
 #if defined(HAL_ADC_NISR) || defined(__DOXYGEN__)
 /** ADC periodic
  */

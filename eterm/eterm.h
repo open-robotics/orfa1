@@ -1,7 +1,7 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
  *
- *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
+ *  Copyright (c) 2010 Vladimir Ermakov
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,57 +21,53 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-
-/** Serial-to-I2C gate
- * @file serialgate.h
+/** eTerm main module
+ * @file eterm.h
  *
- * @p Read i2c regex
- * <aa> — i2c address & 0xFE
- * <ll> — read count
- * @code
- * S[0-9a-fA-F]{2}<aa>[0-9a-fA-F]{2}<ll>
- * @endcode
- *
- * @p Write i2c regex
- * <aa> — i2c address | 0x01
- * <dd> — write data
- * @code
- * S[0-9a-fA-F]{2}<aa>((\\.|[0-9a-fA-F]{2})<dd>)+
- * @endcode
- *
- * @p I2C regex
- * <read-i2c-regex> — see read i2c regex
- * <write-i2c-regex> — see write i2c regex
- * @code
- * (<read-i2c-regex>|<write-i2c-regex>)+P
- * @endcode
- *
- * @p Read register regex
- * <aa> — device address
- * <rr> — register
- * <ll> — read count
- * @code
- * R[0-9a-fA-F]{2}<aa>[0-9a-fA-F]{2}<rr>([0-9a-fA-F]{2}<ll>){0,1}
- * @endcode
- *
- * @p Write register regex
- * <aa> — device address
- * <rr> — register
- * <dd> — write data
- * @code
- * W[0-9a-fA-F]{2}<aa>[0-9a-fA-F]{2}<rr>((\\.|[0-9a-fA-F]{2})<dd>)+
- * @endcode
+ * @author Vladimir Ermakov <vooon341@gmail.com>
  */
-// vim:set ts=4 sw=4 et:
 
-#ifndef SERAILGATE_H
-#define SERAILGATE_H
+#ifndef ETERM_H
+#define ETERM_H
 
-void serialgate_init(void);
-void serialgate_supertask(void);
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <ctype.h>
 
-#define gate_supertask serialgate_supertask
-#define gate_init serialgate_init
+/** Parser init
+ */
+#define PARSER_INIT(_command, _help, _callback) \
+	{ .command = _command, .help = _help, .callback = _callback }
 
-#endif // SERAILGATE_H
+#define ARRAY_SIZE(arr)  (sizeof(arr) / sizeof(arr[0]))
+
+/** Parser callback
+ * @param *c      current char
+ * @param reinit  (re)initialize flag
+ */
+typedef bool (*parser_callback)(char c, bool reinit);
+
+typedef struct parser_s parser_t;
+struct parser_s {
+	char command;
+	char *help;
+	parser_callback callback;
+	struct parser_s *next;
+};
+
+/** Parser registration function
+ * @param *parser  filled parser 
+ */
+void register_parser(parser_t *parser);
+
+/** Parse the command
+ */
+bool parse_command(char c, bool reinit);
+
+/** register '?' and 'h' commands
+ */
+void register_help(void);
+
+#endif // !ETERM_H
 

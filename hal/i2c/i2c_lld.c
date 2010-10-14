@@ -21,10 +21,12 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** ORFA with I2C slave interface
+/** ORFA I2C master/slave
  * @file i2c.c
  *
  * @author Andrey Demenev
+ * @author Vladimir Ermakov
+ * @author Thomas Pircher <tehpeh@gmx.net>
  */
 
 // vim: set foldmethod=marker :
@@ -33,7 +35,8 @@
 #include <avr/interrupt.h>
 #include <util/twi.h>
 #include <stdint.h>
-#include "i2c.h"
+#include <string.h>
+#include "i2c_lld.h"
 
 
 #define I2C_IDLE	0
@@ -42,6 +45,12 @@
 #define I2C_STX		3
 #define I2C_SRX		4
 #define I2C_MSTART  4
+
+#ifndef I2C_NO_ISR
+#define TWCR_TWIE_IF_ISR  _BV(TWIE)
+#else
+#define TWCR_TWIE_IF_ISR  0
+#endif
 
 
 #ifdef I2C_MASTER
@@ -52,74 +61,60 @@ static i2cTxHandler masterTxHandler;
 static i2cRxHandler masterRxHandler;
 #endif
 
-static i2cStartHandler startHandler = 0;
-static i2cStopHandler stopHandler = 0;
+static i2cStartHandler startHandler = NULL;
+static i2cStopHandler stopHandler = NULL;
 
 #ifdef I2C_SLAVE
 static uint8_t slave_addr = 0;
-static i2cRxHandler slaveRxHandler = 0;
-static i2cTxHandler slaveTxHandler = 0;
+static i2cRxHandler slaveRxHandler = NULL;
+static i2cTxHandler slaveTxHandler = NULL;
 static volatile uint8_t inCallback = 0;
 #endif
 
-void i2c_init(void)/*{{{*/
+
+void i2c_lld_set_evt_handlers(i2cStartHandler start, i2cStopHandler stop)
 {
-	TWBR = 7;
-	TWSR = 1;
-#ifdef I2C_SLAVE
-	TWAR = slave_addr << 1;
-#else
-	TWAR = 0;
-#endif
-	TWCR = 
-			_BV(TWINT)
-		|	_BV(TWEA)
-		|	_BV(TWEN)
-#ifndef I2C_NO_ISR
-		|	_BV(TWIE)
-#endif
-        ;
+	startHandler = start;
+	stopHandler = stop;
+}
 
-}/*}}}*/
-
-#ifdef I2C_SLAVE
-void i2c_init_slave(uint8_t addr)/*{{{*/
+void i2c_lld_set_slave_handlers(i2cRxHandler slave_rx, i2cTxHandler slave_tx)
 {
-	slave_addr = addr;
-	i2c_init();
-}/*}}}*/
-#endif
+	slaveRxHandler = slave_rx;
+	slaveTxHandler = slave_tx;
+}
 
-static void reply(uint8_t ack)/*{{{*/
+void i2c_lld_set_master_handlers(i2cRxHandler master_rx, i2cTxHandler master_tx)
+{
+	masterRxHandler = master_rx;
+	masterTxHandler = master_tx;
+}
+
+
+static void reply(uint8_t ack)
 {
 	if (ack) {
 		TWCR =
 				_BV(TWEN)
-#ifndef I2C_NO_ISR
-			|	_BV(TWIE)
-#endif
+			|	TWCR_TWIE_IF_ISR
             |	_BV(TWINT)
 			|	_BV(TWEA)
 			;
 	} else {
 		TWCR =
 				_BV(TWEN)
-#ifndef I2C_NO_ISR
-			|	_BV(TWIE)
-#endif
+			|	TWCR_TWIE_IF_ISR
             |	_BV(TWINT)
             ;
 	}
-}/*}}}*/
+}
 
 #ifdef I2C_MASTER
-static void send_stop(void)/*{{{*/
+static void send_stop(void)
 {
 	TWCR = 
 			_BV(TWEN)
-#ifndef I2C_NO_ISR
-		|	_BV(TWIE)
-#endif
+		|	TWCR_TWIE_IF_ISR
         |	_BV(TWEA)
 		|	_BV(TWINT)
 		|	_BV(TWSTO)
@@ -127,40 +122,28 @@ static void send_stop(void)/*{{{*/
 	
 	//while(TWCR & _BV(TWSTO));
 	state = I2C_IDLE;
-}/*}}}*/
-
+}
 #endif
-static void release(void)/*{{{*/
+
+static void release(void)
 {
 	TWCR =
 			_BV(TWEN)
-#ifndef I2C_NO_ISR
-		|	_BV(TWIE)
-#endif
+		|	TWCR_TWIE_IF_ISR
         |	_BV(TWEA)
 		|	_BV(TWINT)
 		;
+
 #ifdef I2C_MASTER
 	state = I2C_IDLE;
 #endif
-}/*}}}*/
+}
 
-#ifdef I2C_SLAVE
-void i2c_onRX(i2cRxHandler callback)/*{{{*/
-{
-	slaveRxHandler = callback;
-}/*}}}*/
-
-void i2c_onRequest(i2cTxHandler callback)/*{{{*/
-{
-	slaveTxHandler = callback;
-}/*}}}*/
-#endif
 
 #ifdef I2C_NO_ISR
-void i2c_loop(void);
+void i2c_lld_loop(void);
 #else
-ISR(SIG_2WIRE_SERIAL)/*{{{*/
+ISR(SIG_2WIRE_SERIAL)
 #endif
 {
 	uint8_t status = TWSR & 0xF8;
@@ -168,24 +151,24 @@ ISR(SIG_2WIRE_SERIAL)/*{{{*/
 
 	switch (status) {
 #ifdef I2C_SLAVE
-		// slave receiver			/*{{{*/
-
+		// slave receiver
+		/*{{{*/
 		case TW_SR_ARB_LOST_SLA_ACK:
 		case TW_SR_SLA_ACK:
-#ifdef I2C_MASTER
+#  ifdef I2C_MASTER
 			state = I2C_SRX;
-#endif
+#  endif
             if (startHandler) {
 				reply(startHandler(0));
             } else {
                 reply(1);
             }
 
-#ifdef I2C_MASTER
+#  ifdef I2C_MASTER
 			if (status == TW_SR_ARB_LOST_SLA_ACK) {
 				error = I2C_E_ARB;
 			}
-#endif
+#  endif
 			break;
 			
 		case TW_SR_DATA_ACK:
@@ -204,23 +187,24 @@ ISR(SIG_2WIRE_SERIAL)/*{{{*/
             if (stopHandler) {
                 stopHandler();
             }
-#ifdef I2C_MASTER
+#  ifdef I2C_MASTER
 			state = I2C_IDLE;
-#endif
+#  endif
 			reply(1);
 			break;
 
 		/*}}}*/
 
-		// slave transmitter		/*{{{*/
+		// slave transmitter
+		/*{{{*/
 		case TW_ST_SLA_ACK:
 		case TW_ST_ARB_LOST_SLA_ACK:
-#ifdef I2C_MASTER
+#  ifdef I2C_MASTER
 			state = I2C_STX;
 			if (status == TW_ST_ARB_LOST_SLA_ACK) {
 				error = I2C_E_ARB;
 			}
-#endif
+#  endif
 			startHandler(1);
 			// fallback
 		case TW_ST_DATA_ACK:
@@ -239,15 +223,16 @@ ISR(SIG_2WIRE_SERIAL)/*{{{*/
 		case TW_ST_DATA_NACK:
 			reply(1);
 
-#ifdef I2C_MASTER
+#  ifdef I2C_MASTER
 			state = I2C_IDLE;
-#endif
+#  endif
 			break;
 		/*}}}*/
-#endif
+#endif // I2C_SLAVE
 
 #ifdef I2C_MASTER
-		// master transmitter/*{{{*/
+		// master transmitter
+		/*{{{*/
 		case TW_MT_SLA_ACK:
 		case TW_MT_DATA_ACK:
             if (masterTxHandler) {
@@ -280,8 +265,8 @@ ISR(SIG_2WIRE_SERIAL)/*{{{*/
 			break;
 		/*}}}*/
 
-		/*  master receiver   {{{*/
-
+		//  master receiver
+		/*{{{*/
 		case TW_MR_DATA_ACK:
             if (masterRxHandler) {
                 ack = masterRxHandler(TWDR);
@@ -300,15 +285,18 @@ ISR(SIG_2WIRE_SERIAL)/*{{{*/
 			break;
 		/*}}}*/
 
-		// master/*{{{*/
+		// master
+		/*{{{*/
 		case TW_START:
 		case TW_REP_START:
 			TWDR = slarw;
 			reply(1);
 			break;
 		/*}}}*/
-#endif
-		/*  common  {{{*/
+#endif // I2C_MASTER
+
+		//  common
+		/*{{{*/
 		case TW_NO_INFO:
 			break;
 		case TW_BUS_ERROR:
@@ -323,76 +311,162 @@ ISR(SIG_2WIRE_SERIAL)/*{{{*/
 		/*}}}*/
 
 	}
-}/*}}}*/
+}
+
 
 #ifdef I2C_MASTER
-uint8_t i2c_startTransmission(uint8_t addr)/*{{{*/
+uint8_t i2c_lld_start_transmission(uint8_t addr)
 {
-	while (state != I2C_IDLE) {
-#ifdef I2C_NO_ISR
-        i2c_loop();
-#endif
-    };
-	error = I2C_E_OK;
-	slarw = TW_WRITE | (addr << 1);
-    state = I2C_MSTART;
-	TWCR = 
-			_BV(TWINT)
-		|	_BV(TWSTA)
-		|	_BV(TWEN)
-#ifndef I2C_NO_ISR
-		|	_BV(TWIE)
-#endif
-		;
-	while (state != I2C_IDLE) {
-#ifdef I2C_NO_ISR
-        i2c_loop();
-#endif
-    };
+	if (i2c_lld_get_local() != addr) {
+		// real request
+		while (state != I2C_IDLE) {
+#  ifdef I2C_NO_ISR
+			i2c_lld_loop();
+#  endif
+		};
+
+		error = I2C_E_OK;
+		slarw = TW_WRITE | (addr << 1);
+		state = I2C_MSTART;
+		TWCR = 
+				_BV(TWINT)
+			|	_BV(TWSTA)
+			|	_BV(TWEN)
+			|	TWCR_TWIE_IF_ISR
+			;
+
+		while (state != I2C_IDLE) {
+#  ifdef I2C_NO_ISR
+			i2c_lld_loop();
+#  endif
+		};
+	} else {
+		uint8_t c;
+		// route local
+		startHandler(false);
+		while (masterTxHandler(&c, NULL)) { // NULL -- hack
+			slaveRxHandler(c);
+		}
+		stopHandler();
+	}
     return error;
-}/*}}}*/
+}
 
 
-uint8_t i2c_request(uint8_t addr)/*{{{*/
+uint8_t i2c_lld_request(uint8_t addr)
 {
-	slarw = TW_READ | (addr << 1);
+	if (i2c_lld_get_local() != addr) {
+		// real request
+		slarw = TW_READ | (addr << 1);
 
-	state = I2C_MRX;
-	error = I2C_E_OK;
+		state = I2C_MRX;
+		error = I2C_E_OK;
+		TWCR = 
+				_BV(TWINT)
+			|	_BV(TWSTA)
+			|	_BV(TWEN)
+			|	TWCR_TWIE_IF_ISR
+			;
+		while (state == I2C_MRX);
+	} else {
+		// route local
+		bool ack=true;
+		uint8_t c;
+		startHandler(true);
+		while (ack) {
+			slaveTxHandler(&c, NULL); // NULL -- hack
+			ack = masterRxHandler(c);
+		}
+		stopHandler();
+	}
+	return error;
+}
+#endif // I2C_MASTER
+
+
+/** Get the TWPS (prescaler) bits for the TWI
+ * @param freq I2C master frequency in kHz.
+ */
+static inline uint8_t i2c_get_twps(uint16_t freq) __attribute__((const));
+static inline uint8_t i2c_get_twps(uint16_t freq)
+{
+	uint8_t ps;
+	uint16_t val = F_CPU / (0xffUL * 2000UL);
+
+	ps = 0;
+	while (freq <= val) {
+		ps++;
+		val /= 4;
+	}
+	return ps;
+}
+
+/** Calculates the TWBR (baudrate) bits for the TWI
+ * @param freq I2C master frequency in kHz.
+ * @param twps the selected prescaler bits.
+ */
+static inline uint8_t i2c_get_twbr(uint16_t freq, uint8_t twps) __attribute__((const));
+static inline uint8_t i2c_get_twbr(uint16_t freq, uint8_t twps)
+{
+	return (((F_CPU / 2000) / freq) - 8) / (1 << (twps *2));
+}
+
+void i2c_lld_set_freq(uint16_t freq)
+{
+	uint8_t twps;
+
+	twps = i2c_get_twps(freq);
+	TWBR = i2c_get_twbr(freq, twps);
+	TWSR = twps & 0x03;
+}
+
+uint16_t i2c_lld_get_freq(void)
+{
+	uint8_t twps = 1 << (2 * (TWSR & 0x03));
+	uint16_t freq = F_CPU / 1000UL;
+	return freq / (16 + 2*TWBR * twps);
+}
+
+void i2c_lld_init(void)
+{
+	//TWBR = 7;
+	//TWSR = 1;
+	i2c_lld_set_freq(100);
+#ifdef I2C_SLAVE
+	TWAR = slave_addr << 1;
+#else
+	TWAR = 0;
+#endif
 	TWCR = 
 			_BV(TWINT)
-		|	_BV(TWSTA)
+		|	_BV(TWEA)
 		|	_BV(TWEN)
-#ifndef I2C_NO_ISR
-		|	_BV(TWIE)
-#endif
+		|	TWCR_TWIE_IF_ISR
         ;
-	while (state == I2C_MRX);
 
-	return error;
-}/*}}}*/
-#endif
-
-
-void i2c_set_handlers(i2cStartHandler start, i2cStopHandler stop, i2cRxHandler rx, i2cTxHandler tx)
-{
-    startHandler = start;
-    stopHandler = stop;
-    slaveTxHandler = tx;
-    slaveRxHandler = rx;
 }
 
-void i2c_gate_supertask(void)
-{
-#ifdef I2C_NO_ISR
-    i2c_loop();
-#endif
-}
-
-void i2c_gate_init(void)
-{
 #ifdef I2C_SLAVE
-	i2c_init_slave(I2C_SLAVE_ADDRESS);
+void i2c_lld_init_slave(uint8_t addr)
+{
+	slave_addr = addr;
+	i2c_lld_init();
+}
+
+void i2c_lld_set_local(uint8_t addr)
+{
+	slave_addr = addr;
+	TWAR = slave_addr << 1;
+}
+
+uint8_t i2c_lld_get_local(void)
+{
+	return slave_addr;
+}
 #endif
+
+void i2c_lld_clearbus(void)
+{
+	// TODO
 }
 

@@ -1,13 +1,27 @@
-## Compiling
+## Documentation
+See documentation at:
+- RU:
+  - WIKI: http://robofourm.ru/wiki/ORFA
+  - User Manual: http://hg.vehq.ru/orfa-manual (LaTeX source)
 
-You need avr-gcc > 4.2, avr-libc > 1.6, binutils-avr.
+## Requirements
+- avr-gcc > 4.2
+- avr-libc > 1.6
+- binutils-avr
+- avrdude (optional)
 
-First configure youre local_config.mk (see example at doc/).
-See documentation at http://robofourm.ru/ORFA
+## Installation
+First configure youre local_config.mk:
 
-After that do this:
+$ make config
+$ edit local_config.mk
+
+Compile:
 
 $ make
 
-Done
+You also can program this firmware into flash
+(see PROGRAMMER section of local_config.mk):
+
+$ make program
 
