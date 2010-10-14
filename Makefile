@@ -1,14 +1,15 @@
 target = orfa
 ORFA = .
+DEBUG = 0
 
 # $(PLATFORM) hack
 -include local_config.mk
 
 ifeq "$(PLATFORM)"  ""
-    PLATFORM = OR_AVR_M32_D
+    PLATFORM = OR_AVR_M128_S
 endif
 
-CONFIG_FILE = platform/$(PLATFORM).mk
+CONFIG_FILE = ${ORFA}/platform/$(PLATFORM).mk
 
 CROSS_COMPILE_GCC =
 CROSS_COMPILE_BIN =
@@ -37,25 +38,15 @@ COFFCONVERT=$(OBJCOPY) --debugging -O coff-ext-avr \
 	--change-section-address .noinit-0x800000 \
 	--change-section-address .eeprom-0x810000
 
-
 DEFINES = -D$(PLATFORM)
 
 LIBS = 
 LIBS_RULES = 
 SRC = main.c
 
-PROGRAMMER = avr109 -b115200
-PROGRAMMER_PORT = /dev/ttyUSB0
-
 include $(CONFIG_FILE)
 -include local_config.mk
 include resolve.mk
-
-ifeq "$(DEBUG)" ""
-    DEFINES += -DNDEBUG
-else
-    DEFINES += -DDEBUG=$(DEBUG)
-endif
 
 OBJS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(SRC))))
 
@@ -75,9 +66,6 @@ $(target).cof: $(target).elf
 $(target).lss: $(target).elf
 	$(OBJDUMP) -d $< > $@
 
-ram_size: $(target).elf
-	readelf -s $< | awk '$$4 ~ /OBJECT/ { SUM += $$3 } END { print SUM }'
-
 %.o: %.c $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(CFLAGS) -c -o $@ $<
 
@@ -87,8 +75,16 @@ ram_size: $(target).elf
 %.o: %.S $(CONFIG_FILE) local_config.mk
 	$(CC) $(DEFINES) $(INCLUDES) $(ASFLAGS) -c -o $@ $<
 
+ram_size: $(target).elf
+	readelf -s $< | awk '$$4 ~ /OBJECT/ { SUM += $$3 } END { print SUM }'
+
+config: local_config.mk
+
 local_config.mk:
 	cp ${ORFA}/doc/local_config.mk ${ORFA}/
+
+program: $(target).hex
+	avrdude -p $(MCU) -P $(PROGRAMMER_PORT) -c $(PROGRAMMER) -U flash:w:$<
 
 clean:
 	rm -f $(LIBS) $(OBJS) \
@@ -109,9 +105,6 @@ docs_pdf: docs
 	make -C ${ORFA}/doc/doxygen/latex
 
 force: clean all
-
-program: $(target).hex
-	avrdude -p $(MCU) -P $(PROGRAMMER_PORT) -c $(PROGRAMMER) -U flash:w:$<
 
 tags:
 	ctags -o $@ -R $(shell find -name '*.c' -o -name '*.h')
