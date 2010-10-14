@@ -1,3 +1,10 @@
+* 2010-10-14 Vladimir Ermakov <vooon341@gmail.com>
+	* eterm/sgparsers.c: remove workaround for local i2c
+	* hal/i2c/i2c_lld.c: local request routing
+	* Makefile: clean
+	* doc/local_config.mk: synchronize with current status
+	* platform/*.mk: add BOARD_NAME, select default PROGRAMMER
+
 * 2010-10-08 Vladimir Ermakov <vooon341@gmail.com>
 	* hal/adc/adc_lld.c: fix 8-bit mode
 	* eterm/md2parsers.c: fix build

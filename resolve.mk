@@ -5,9 +5,9 @@ CROSS_COMPILE_GCC = avr-
 CROSS_COMPILE_BIN = avr-
 
 ifeq ($(DEBUG),0)
-	DEBUG_ = -DNDEBUG
+	DEFINES += -DNDEBUG
 else
-	DEBUG_ = -DDEBUG=$(DEBUG)
+	DEFINES += -DDEBUG=$(DEBUG)
 endif
 ifeq ($(DEBUG),2)
     MCU_FLAGS =

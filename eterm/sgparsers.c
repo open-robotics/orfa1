@@ -141,9 +141,6 @@ bool speed_parser(char c, bool reinit) {
 
 bool i2c_parser(char c, bool reinit) {
 
-	static uint8_t reg=0;
-	static uint8_t buffer[65];
-
 	if (reinit) {
 		cbf_init(&iobuff);
 		get_xbyte(c, &byte, true);
@@ -173,15 +170,7 @@ bool i2c_parser(char c, bool reinit) {
 			count = 0;
 			cbf_init(&iobuff);
 
-			if (i2c_get_local() == addr >> 1) {
-				//local request
-				gate_register_read(reg, buffer, &read_count);
-				for (uint8_t i=0; i<read_count; i++)
-					cbf_put(&iobuff, buffer[i]);
-			} else {
-				//i2c bus real request
-				i2c_request(addr >> 1);
-			}
+			i2c_request(addr >> 1);
 
 			putchar('S');
 			putchar('R');
@@ -194,16 +183,7 @@ bool i2c_parser(char c, bool reinit) {
 			// flush
 			count = 0;
 
-			if (i2c_get_local() == addr >> 1) {
-				//local request
-				reg = cbf_get(&iobuff);
-				while (!cbf_isempty(&iobuff))
-					buffer[count++] = cbf_get(&iobuff);
-				gate_register_write(reg, buffer, count);
-			} else {
-				//i2c bus real request
-				i2c_start_transmission(addr >> 1);
-			}
+			i2c_start_transmission(addr >> 1);
 			
 			putchar('S');
 			putchar('W');

@@ -317,45 +317,68 @@ ISR(SIG_2WIRE_SERIAL)
 #ifdef I2C_MASTER
 uint8_t i2c_lld_start_transmission(uint8_t addr)
 {
-	while (state != I2C_IDLE) {
+	if (i2c_lld_get_local() != addr) {
+		// real request
+		while (state != I2C_IDLE) {
 #  ifdef I2C_NO_ISR
-        i2c_lld_loop();
+			i2c_lld_loop();
 #  endif
-    };
+		};
 
-	error = I2C_E_OK;
-	slarw = TW_WRITE | (addr << 1);
-    state = I2C_MSTART;
-	TWCR = 
-			_BV(TWINT)
-		|	_BV(TWSTA)
-		|	_BV(TWEN)
-		|	TWCR_TWIE_IF_ISR
-		;
+		error = I2C_E_OK;
+		slarw = TW_WRITE | (addr << 1);
+		state = I2C_MSTART;
+		TWCR = 
+				_BV(TWINT)
+			|	_BV(TWSTA)
+			|	_BV(TWEN)
+			|	TWCR_TWIE_IF_ISR
+			;
 
-	while (state != I2C_IDLE) {
+		while (state != I2C_IDLE) {
 #  ifdef I2C_NO_ISR
-        i2c_lld_loop();
+			i2c_lld_loop();
 #  endif
-    };
+		};
+	} else {
+		uint8_t c;
+		// route local
+		startHandler(false);
+		while (masterTxHandler(&c, NULL)) { // NULL -- hack
+			slaveRxHandler(c);
+		}
+		stopHandler();
+	}
     return error;
 }
 
 
 uint8_t i2c_lld_request(uint8_t addr)
 {
-	slarw = TW_READ | (addr << 1);
+	if (i2c_lld_get_local() != addr) {
+		// real request
+		slarw = TW_READ | (addr << 1);
 
-	state = I2C_MRX;
-	error = I2C_E_OK;
-	TWCR = 
-			_BV(TWINT)
-		|	_BV(TWSTA)
-		|	_BV(TWEN)
-		|	TWCR_TWIE_IF_ISR
-        ;
-	while (state == I2C_MRX);
-
+		state = I2C_MRX;
+		error = I2C_E_OK;
+		TWCR = 
+				_BV(TWINT)
+			|	_BV(TWSTA)
+			|	_BV(TWEN)
+			|	TWCR_TWIE_IF_ISR
+			;
+		while (state == I2C_MRX);
+	} else {
+		// route local
+		bool ack=true;
+		uint8_t c;
+		startHandler(true);
+		while (ack) {
+			slaveTxHandler(&c, NULL); // NULL -- hack
+			ack = masterRxHandler(c);
+		}
+		stopHandler();
+	}
 	return error;
 }
 #endif // I2C_MASTER
