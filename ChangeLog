@@ -4,6 +4,7 @@
 	* Makefile: clean
 	* doc/local_config.mk: synchronize with current status
 	* platform/*.mk: add BOARD_NAME, select default PROGRAMMER
+	- 1-st beta release 0.9.0-B1
 
 * 2010-10-08 Vladimir Ermakov <vooon341@gmail.com>
 	* hal/adc/adc_lld.c: fix 8-bit mode
