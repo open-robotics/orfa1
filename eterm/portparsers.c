@@ -129,7 +129,7 @@ static inline void pcp_mode(uint8_t _port, uint8_t _pin, uint8_t _mode)
 		gate_port_config(_port_num, 1<<_pin, 0);
 		printf("PinMode%c%d=In\n", _port, _pin);
 	} else if (_mode == 'O') {
-		gate_port_config(_port_num, 1<<_pin, 0xFF);		
+		gate_port_config(_port_num, 1<<_pin, 0xFF);
 		printf("PinMode%c%d=Out\n", _port, _pin);
 	}
 }
@@ -168,7 +168,7 @@ static inline void pcp_get(uint8_t _port, uint8_t _pin)
 		uint8_t adc_mask=adc_get_mask();
 		if (adc_mask & (1<<_pin)) {
 			uint32_t value=adc_get_result(_pin);
-			
+
 			value = 330*value; //*3.3V*100
 
 			if (adc_is_10bit()) {
@@ -211,7 +211,7 @@ static bool pin_control_parser(char c, bool reinit) {
 	static uint8_t _port=' ';
 	static uint8_t _value=' ';
 	static uint8_t _pin=' ';
-	
+
 	if (reinit) {
 		// Clear machine
 		state_cmd = PCP_GET_COMMAND;
@@ -364,7 +364,7 @@ static bool pin_control_parser(char c, bool reinit) {
 			}
 			break;
 
-		
+
 		case PCP_GET_n:
 			switch (c) {
 				case 'n':
@@ -432,7 +432,7 @@ static bool pin_control_parser(char c, bool reinit) {
 		default:
 			state_cmd = PCP_ERROR;
 			break;
-		
+
 	}
 
 	if (c != '\n')
@@ -456,7 +456,7 @@ static bool adc_config_parser(char c, bool reinit) {
 	static state_cmd_acp state_cmd;
 	static uint8_t _cmd=' ';
 	static uint8_t _value=' ';
-	
+
 	if (reinit) {
 		// Clear machine
 		state_cmd = ACP_GET_COMMAND;
@@ -472,10 +472,6 @@ static bool adc_config_parser(char c, bool reinit) {
 				case 'B':
 					_cmd = c;
 					state_cmd = ACP_GET_VALUE;
-					return false;
-
-				case 'd':
-					state_cmd = ACP_GET_c;
 					return false;
 
 				case '\n':
@@ -515,14 +511,6 @@ static bool adc_config_parser(char c, bool reinit) {
 					state_cmd = ACP_WAIT_EOL;
 					return false;
 
-				case 'e': //Ref?
-					state_cmd = ACP_GET_f;
-					return false;
-
-				case 'i': //Bits?
-					state_cmd = ACP_GET_t;
-					return false;
-
 				case '\n':
 					printf("ERR04 in A cmd - wrong value\n");
 					return true;
@@ -535,9 +523,6 @@ static bool adc_config_parser(char c, bool reinit) {
 
 		case ACP_WAIT_EOL:
 			switch (c) {
-				case ' ':
-					return false;
-
 				case '\n':
 					if (_cmd == 'R') {
 						adc_ref(_value);
@@ -548,56 +533,6 @@ static bool adc_config_parser(char c, bool reinit) {
 					return true;
 
 				default:
-					state_cmd = ACP_ERROR;
-					return false;
-			}
-			break;
-
-		
-		case ACP_GET_f:
-			switch (c) {
-				case 'f':
-					state_cmd = ACP_GET_VALUE;
-					return false;
-
-				case '\n':
-					printf("ERR06 in AdcRef cmd\n");
-					return true;
-
-				default:
-					state_cmd = ACP_ERROR;
-					return false;
-			}
-			break;
-
-		case ACP_GET_t:
-			switch (c) {
-				case 't':
-					state_cmd = ACP_GET_s;
-					return false;
-
-				case '\n':
-					printf("ERR07 in AdcBits cmd\n");
-					return true;
-
-				default:
-					state_cmd = ACP_ERROR;
-					return false;
-			}
-			break;
-
-		case ACP_GET_s:
-			switch (c) {
-				case 's':
-					state_cmd = ACP_GET_VALUE;
-					return false;
-
-				case '\n':
-					printf("ERR08 in AdcBits cmd\n");
-					return true;
-
-				default:
-					state_cmd = ACP_ERROR;
 					return false;
 			}
 			break;
@@ -605,7 +540,7 @@ static bool adc_config_parser(char c, bool reinit) {
 		default:
 			state_cmd = ACP_ERROR;
 			break;
-		
+
 	}
 
 	if (c != '\n')
