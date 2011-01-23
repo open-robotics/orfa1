@@ -46,8 +46,8 @@ static inline void md2_setspeed(int16_t left, int16_t right)
 	}
 	motor_set_direction(0, left < 0);
 	motor_set_direction(1, right < 0);
-	motor_set_pwm(0, abs(left) * 100/255);
-	motor_set_pwm(1, abs(right) * 100/255);
+	motor_set_pwm(0, abs(left) * 255/100);
+	motor_set_pwm(1, abs(right) * 255/100);
 	printf("Drv(%d,%d)\n", left, right);
 }
 
