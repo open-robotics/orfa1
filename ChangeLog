@@ -1,3 +1,7 @@
+* 2011-01-31 Anton Botov <airsoft_ekb@mail.ru>
+	* eterm/md2parsers.c: fix pwm calculation
+	- 3-rd beta release 0.9.0-B3
+
 * 2010-10-14 Vladimir Ermakov <vooon341@gmail.com>
 	* eterm/sgparsers.c: remove workaround for local i2c
 	* hal/i2c/i2c_lld.c: local request routing
