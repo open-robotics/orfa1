@@ -69,6 +69,8 @@ static inline const uint8_t pcp_adc_port(void)
 {
 #if defined(OR_AVR_M32_D)
 	return 'A';
+#elif defined(OR_AVR_M16_DS)
+	return 'C';
 #elif defined(OR_AVR_M128_S) || defined(OR_AVR_M128_DS)
 	return 'F';
 #else
@@ -81,6 +83,12 @@ static const uint8_t pcp_port_number(uint8_t _port)
 #ifdef OR_AVR_M32_D
 	switch (_port) {
 		case 'A': return 0;
+		case 'B': return 1;
+		case 'C': return 2;
+		case 'D': return 3;
+	}
+#elif defined(OR_AVR_M16_DS)
+	switch (_port) {
 		case 'B': return 1;
 		case 'C': return 2;
 		case 'D': return 3;

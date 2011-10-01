@@ -1,6 +1,5 @@
 /*
  *  ORFA -- Open Robotics Firmware Architecture
- *  Based on Joerg Wunsch's UART lib (THE BEER-WARE LICENSE)
  *
  *  Copyright (c) 2009 Vladimir Ermakov, Andrey Demenev
  *
@@ -22,56 +21,42 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  *****************************************************************************/
-/** Platform-specific serial macroses
- * @file avr/serial_lld_config.h
+/** RoboMD2 motor driver
+ * @file motor_lld.c
+ * @author Vladimir Ermakov
  *
- * @author Andrey Demenev, Anton Botov
+ * @todo use ATOMIC_BLOCK()
  */
 
-#ifndef SERIAL_LLD_CONFIG_H
-#define SERIAL_LLD_CONFIG_H
-
 #include <avr/io.h>
+#include "motor_lld.h"
 
-#ifdef OR_AVR_M32_D
-	#define SERIAL_UDR       UDR
-	#define SERIAL_UCSRA     UCSRA
-	#define SERIAL_UCSRB     UCSRB
-	#define SERIAL_UBRRL     UBRRL
-	#define SERIAL_UBRRH     UBRRH
-	#define SERIAL_RXC_vect  USART_RXC_vect
+void motor_lld_init(void)
+{
+	// init DIR i/o lines
+	DIR_PORT0 &= ~DIR_MASK0;
+	DIR_DDR0 |= DIR_MASK0;
+	DIR_PORT1 &= ~DIR_MASK1;
+	DIR_DDR1 |= DIR_MASK1;
 
-	#define SERIAL_DDR       DDRD
-	#define SERIAL_PIN       PIND
-	#define SERIAL_RXD_BIT   0
-#endif
+	// init PWM i/o lines
+	PWM_PORT &= ~PWM_MASK;
+	PWM_DDR |= PWM_MASK;
 
-#ifdef OR_AVR_M16_DS
-	#define SERIAL_UDR       UDR0
-	#define SERIAL_UCSRA     UCSR0A
-	#define SERIAL_UCSRB     UCSR0B
-	#define SERIAL_UBRRL     UBRR0L
-	#define SERIAL_UBRRH     UBRR0H
-	#define SERIAL_RXC_vect  USART0_RX_vect
+	// clear pwm registers
+	PWM_OC0 = 0;
+	PWM_OC1 = 0;
 
-	#define SERIAL_DDR       PORTD
-	#define SERIAL_PIN       PIND
-	#define SERIAL_RXD_BIT   0
-#endif
-
-#if defined(OR_AVR_M128_S) || \
-	defined(OR_AVR_M128_DS)
-	#define SERIAL_UDR       UDR1
-	#define SERIAL_UCSRA     UCSR1A
-	#define SERIAL_UCSRB     UCSR1B
-	#define SERIAL_UBRRL     UBRR1L
-	#define SERIAL_UBRRH     UBRR1H
-	#define SERIAL_RXC_vect  USART1_RX_vect
-
-	#define SERIAL_DDR       PORTD
-	#define SERIAL_PIN       PIND
-	#define SERIAL_RXD_BIT   2
-#endif
-
-#endif // SERIAL_LLD_CONFIG_H
+	// Timer/Counter-1 init
+	//
+	// COM1x1:COM1x0 = 1:0 => OC1x connected to output pin, reset on compare
+	// FOC1A:FOC1B = 0:0 => Don't force output compare event
+	// WGM13:WGM12:WGM11:WGM10 = 0:1:0:1 => Fast PWM 8-bit
+	// ICNC1 = 0 => Input Capture Noise Canceller disabled (because not needed)
+	// ICES1 = 0 => Input Capture Edge Select set to "falling" mode (no matter)
+	// CS12:CS11:CS10 = 0:1:0 => Timer "on", 1/8 prescaling (1 clock every 8 cpu tact)	// /8
+	TCNT1 = 0;
+	TCCR1A = (0<<WGM11)|(1<<WGM10);
+	TCCR1B = (0<<WGM13)|(1<<WGM12)|(0<<CS12)|(1<<CS11)|(0<<CS10);
+}
 
