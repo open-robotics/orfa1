@@ -89,9 +89,9 @@ static const uint8_t pcp_port_number(uint8_t _port)
 	}
 #elif defined(OR_AVR_M16_DS)
 	switch (_port) {
-		case 'B': return 1;
-		case 'C': return 2;
-		case 'D': return 3;
+		case 'B': return 0;
+		case 'C': return 1;
+		case 'D': return 2;
 	}
 #elif defined(OR_AVR_M128_S) || defined(OR_AVR_M128_DS)
 	switch (_port) {
