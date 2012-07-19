@@ -25,7 +25,7 @@
 #include "common.h"
 #include "scheduler.h"
 #include <stdint.h>
-#include <avr/wdt.h>
+#include "wdt_ext.h"	// Changed by Mad 12.07.2012. Original string: #include <avr/wdt.h>
 
 static GATE_TASK* tasks;
 static GATE_TASK_FUNC supertask;
@@ -52,11 +52,11 @@ GATE_RESULT gate_supertask_register(GATE_TASK_FUNC task)
 
 void gate_scheduler_loop(void)
 {
-	wdt_enable(WDTO_1S);
+	wdt_enable_ext(WDTO_1S); // Changed by Mad 12.07.2012. Original string: wdt_enable(WDTO_1S);
 
 	if (supertask) {
 		for (;;) {
-			wdt_reset();
+			wdt_reset_ext(); // Changed by Mad 12.07.2012. Original string: wdt_reset();
 			supertask();
 			
 			if (tasks) {

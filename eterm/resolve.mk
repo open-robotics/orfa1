@@ -5,7 +5,8 @@ ETERMLIB_SRC = ${ORFA}/eterm/eterm.c \
 			   ${ORFA}/eterm/eterm_main.c \
 			   ${ORFA}/eterm/sgparsers.c \
 			   ${ORFA}/eterm/orc32parsers.c \
-			   ${ORFA}/eterm/portparsers.c
+			   ${ORFA}/eterm/portparsers.c \
+			   ${ORFA}/eterm/wparser.c
 
 ifeq ($(PLATFORM),OR_AVR_M32_D)
 	ETERMLIB_SRC += ${ORFA}/eterm/md2parsers.c

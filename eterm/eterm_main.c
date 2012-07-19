@@ -39,6 +39,8 @@ void register_port(void);
 void register_md2(void);
 #endif
 
+void register_wcommand(void);
+
 void eterm_init(void) {
 	register_serialgate();
 	register_orc32();
@@ -55,6 +57,8 @@ void eterm_init(void) {
 	#endif
 
 	i2c_init();
+
+	register_wcommand();	// Added by Mad 12.07.2012
 }
 
 void eterm_supertask(void) {
