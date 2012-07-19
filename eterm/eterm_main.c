@@ -35,30 +35,28 @@
 void register_serialgate(void);
 void register_orc32(void);
 void register_port(void);
+void register_wdt(void);
 #ifdef HAVE_MOTOR
 void register_md2(void);
 #endif
-
-void register_wcommand(void);
 
 void eterm_init(void) {
 	register_serialgate();
 	register_orc32();
 	register_port();
+	register_wdt();
 	register_help();
 
-	#ifdef HAVE_MOTOR
-		register_md2();
-	#endif
+#ifdef HAVE_MOTOR
+	register_md2();
+#endif
 
-	#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
+#ifdef HAL_HAVE_SERIAL_FILE_DEVICE
 	serial_init(BAUD);
 	stdin = stdout = stderr = &serial_fdev;
-	#endif
+#endif
 
 	i2c_init();
-
-	register_wcommand();	// Added by Mad 12.07.2012
 }
 
 void eterm_supertask(void) {
@@ -66,7 +64,7 @@ void eterm_supertask(void) {
 		return;
 
 	uint8_t c = getchar();
-	
+
 	parse_command(c, false);
 }
 

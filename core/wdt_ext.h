@@ -1,7 +1,8 @@
-/*
-Extended function of WatchDog Timer. Header file
- by Mad
-*/
+/** Extended function of WatchDog Timer. Header file
+ * @file wdt_ext.h
+ *
+ * @author Mad
+ */
 
 #ifndef WDT_EXT_H
 #define WDT_EXT_H
