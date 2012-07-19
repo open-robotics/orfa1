@@ -22,6 +22,7 @@
  *  THE SOFTWARE.
  *****************************************************************************/
 /** ORFA's serial gate compatible parsers
+ *
  * Parsers list:
  *   - % -- comment
  *   - V -- version
@@ -42,7 +43,7 @@
 
 #include <core/i2cadapter.h>
 
-#define PROTOCOL_VERION_STRING "V1.2"
+#define PROTOCOL_VERSION_STRING "V1.2"
 #define is_i2c_read(addr) ((addr)&0x01)
 
 // -- common --
@@ -56,7 +57,7 @@ static cbf_t iobuff;
 static bool get_xbyte(char c, uint8_t *ret, bool reinit) {
 	static bool step;
 	int8_t xi = xtoi(c);
-	
+
 	if (reinit) {
 		step = false;
 		return false;
@@ -96,8 +97,21 @@ bool comment_parser(char c, bool reinit) {
 }
 
 bool version_parser(char c, bool reinit) {
+	static bool type = false;
+
+	if (reinit) {
+		type = false;
+		return false;
+	}
+
+	if (c == 'O')
+		type = true;
+
 	if (c == '\n') {
-		puts(PROTOCOL_VERION_STRING);
+		if (type)
+			puts("V ORFA " ORFA_VERSION_STRING);
+		else
+			puts(PROTOCOL_VERSION_STRING);
 		return true;
 	}
 	return false;

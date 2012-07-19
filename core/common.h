@@ -34,6 +34,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define ORFA_VERSION_STRING "0.9.0-b4"
+
 #define NUM_ELEMENTS(array) (sizeof(array) / sizeof(*(array)))
 
 // debug print
